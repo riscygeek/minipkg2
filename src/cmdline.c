@@ -3,6 +3,7 @@
 #include <string.h>
 #include "cmdline.h"
 #include "config.h"
+#include "utils.h"
 #include "print.h"
 #include "buf.h"
 
@@ -24,14 +25,14 @@ static struct cmdline_option info_options[] = {
 };
 
 const struct operation operations[] = {
-   { "help",            no_options,       &op_help,  false, 0, },
-   { "install",         no_options,       &op_unimp, true,  1, },
-   { "remove",          no_options,       &op_unimp, true,  1, },
-   { "purge",           no_options,       &op_unimp, true,  1, },
-   { "list",            list_options,     &op_unimp, false, 0, },
-   { "info",            info_options,     &op_unimp, false, 0, },
-   { "download-source", no_options,       &op_unimp, true,  1, },
-   { "clean-cache",     no_options,       &op_unimp, false, 0, },
+   { "help",            no_options,       &op_help,   false, 0, },
+   { "install",         no_options,       &op_unimp,  true,  1, },
+   { "remove",          no_options,       &op_unimp,  true,  1, },
+   { "purge",           no_options,       &op_unimp,  true,  1, },
+   { "list",            list_options,     &op_unimp,  false, 0, },
+   { "info",            info_options,     &op_info,   true,  1, },
+   { "download-source", no_options,       &op_unimp,  true,  1, },
+   { "clean-cache",     no_options,       &op_unimp,  false, 0, },
 };
 
 const size_t num_operations = arraylen(operations);
@@ -86,7 +87,7 @@ int parse_cmdline(int argc, char* argv[]) {
       } else if (!strcmp(argv[arg], "--version")) {
          puts(VERSION);
          return 0;
-      } else if (!strncmp(argv[arg], "--root=", 7)) {
+      } else if (starts_with(argv[arg], "--root=")) {
          root = argv[arg] + 7;
          if (!*root)
             fail("Expected argument for --root=");

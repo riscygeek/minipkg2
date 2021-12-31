@@ -1,6 +1,9 @@
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <errno.h>
 #include "print.h"
 
 static void vprint(int color, const char* fmt, va_list ap) {
@@ -30,4 +33,13 @@ bool yesno(const char* q, bool def, ...) {
    fgets(buffer, sizeof(buffer), stdin);
 
    return tolower(buffer[0]) == 'y';
+}
+void print_errno(int color, const char* fmt, ...) {
+   const int saved_errno = errno;
+   va_list ap;
+   va_start(ap, fmt);
+
+   vprint(color, fmt, ap);
+   fprintf(stderr, ": %s\n", strerror(saved_errno));
+   va_end(ap);
 }

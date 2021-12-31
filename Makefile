@@ -1,6 +1,6 @@
 
 CC ?= gcc
-CFLAGS ?= -Wall -Wextra -Og -g -Iinclude -Wno-missing-field-initializers
+CFLAGS ?= -std=gnu11 -Wall -Wextra -Og -g -Iinclude -Wno-missing-field-initializers -Wno-unused-value
 
 sources = $(wildcard src/*.c)
 objects = $(patsubst src/%.c,obj/%.o,$(sources))

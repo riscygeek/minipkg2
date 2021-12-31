@@ -1,0 +1,30 @@
+#ifndef FILE_MINIPKG2_UTILS_H
+#define FILE_MINIPKG2_UTILS_H
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <ctype.h>
+
+#define new(type) (type*)xmalloc(sizeof(type))
+#define arraylen(a) (sizeof(a) / sizeof(a[0]))
+
+#if __GNUC__
+#define likely(expr)    __builtin_expect(!!(expr), 1)
+#define unlikely(expr)  __builtin_expect(!!(expr), 0)
+#else
+#define likely(expr)
+#define unlikely(expr)
+#endif
+
+void* xmalloc(size_t);
+char* xstrdup(const char*);
+char* freadline(FILE*);
+bool  ends_with(const char*, const char*);
+
+#define isname0(ch)           (isalpha(ch) || (ch) == '_')
+#define isname(ch)            (isalnum(ch) || (ch) == '_')
+#define strcont(str, ch)      (strchr(str, ch) != NULL)
+#define starts_with(s1, s2)   (!strncmp((s1), (s2), strlen(s1)))
+
+#endif /* FILE_MINIPKG2_UTILS_H */

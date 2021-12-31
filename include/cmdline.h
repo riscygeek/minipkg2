@@ -15,7 +15,9 @@ struct cmdline_option {
 struct operation {
    const char* name;
    struct cmdline_option* options;
-   int(*run)(const struct operation*);
+   int(*run)(const struct operation*, char**, size_t);
+   bool supports_args;
+   size_t min_args;
 };
 
 
@@ -24,12 +26,16 @@ extern const size_t num_operations;
 
 int parse_cmdline(int argc, char* argv[]);
 
-int op_install(const struct operation*);
-int op_remove(const struct operation*);
-int op_purge(const struct operation*);
-int op_list(const struct operation*);
-int op_info(const struct operation*);
-int op_download_source(const struct operation*);
-int op_clean_cache(const struct operation*);
+#define defop(name) int op_##name(const struct operation* op, char** args, size_t num_args)
+
+defop(help);
+defop(unimp);
+defop(install);
+defop(remove);
+defop(purge);
+defop(list);
+defop(info);
+defop(download_source);
+defop(clean_cache);
 
 #endif /* FILE_MINIPKG2_CMDLINE_H */

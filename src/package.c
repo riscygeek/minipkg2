@@ -58,7 +58,7 @@ struct package* parse_package(const char* path) {
    check(pid = vfork(), >= 0);
 
    if (pid == 0) {
-      setenv("root", root, 1);
+      setenv("ROOT", root, 1);
       setenv("pkgfile", path, 1);
 
       // Close unused pipes.

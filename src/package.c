@@ -6,8 +6,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include "minipkg2.h"
 #include "package.h"
-#include "config.h"
 #include "print.h"
 #include "utils.h"
 #include "buf.h"
@@ -18,8 +18,10 @@ static bool is_empty(const char* s) {
 
 struct package* parse_package(const char* path) {
    // Check if `path` can be read.
-   if (access(path, O_RDONLY) != 0)
-      fail_errno("Cannot access '%s'", path);
+   if (access(path, O_RDONLY) != 0) {
+      error_errno("Cannot access '%s'", path);
+      return NULL;
+   }
 
    struct package* pkg = new(struct package);
    

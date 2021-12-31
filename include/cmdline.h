@@ -25,6 +25,8 @@ extern const struct operation operations[];
 extern const size_t num_operations;
 
 int parse_cmdline(int argc, char* argv[]);
+const struct cmdline_option* op_get_opt(const struct operation*, const char*);
+bool op_is_set(const struct operation* op, const char* opt);
 
 #define defop(name) int op_##name(const struct operation* op, char** args, size_t num_args)
 

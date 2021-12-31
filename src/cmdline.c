@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "minipkg2.h"
 #include "cmdline.h"
-#include "config.h"
 #include "utils.h"
 #include "print.h"
 #include "buf.h"
@@ -18,11 +18,8 @@ static struct cmdline_option list_options[] = {
    { NULL },
 };
 
-static struct cmdline_option info_options[] = {
-   { "--local",     false,    },
-   { "--repo",      false,    },
-   { NULL },
-};
+
+extern struct cmdline_option info_options[];
 
 const struct operation operations[] = {
    { "help",            no_options,       &op_help,   false, 0, },
@@ -88,7 +85,7 @@ int parse_cmdline(int argc, char* argv[]) {
          puts(VERSION);
          return 0;
       } else if (starts_with(argv[arg], "--root=")) {
-         root = argv[arg] + 7;
+         set_root(argv[arg] + 7);
          if (!*root)
             fail("Expected argument for --root=");
       } else {
@@ -144,10 +141,25 @@ int parse_cmdline(int argc, char* argv[]) {
             fail("Operation %s does not support arguments.", op->name);
          buf_push(args, argv[arg]);
       }
-
-      if (buf_len(args) < op->min_args)
-         fail("Operation %s needs at least %zu argument(s).", op->name, op->min_args);
    }
 
+   if (buf_len(args) < op->min_args)
+      fail("Operation %s needs at least %zu argument(s).", op->name, op->min_args);
+
    return op->run(op, args, buf_len(args));
+}
+
+const struct cmdline_option* op_get_opt(const struct operation* op, const char* name) {
+   for (size_t i = 0; op->options[i].option; ++i) {
+      const struct cmdline_option* opt = &op->options[i];
+      if (!strcmp(opt->option, name))
+         return opt;
+   }
+   return NULL;
+}
+bool op_is_set(const struct operation* op, const char* name) {
+   const struct cmdline_option* opt = op_get_opt(op, name);
+   if (!opt)
+      fail("op_is_set(): No such option: %s", name);
+   return opt->has_arg ? !!opt->arg : opt->selected;
 }

@@ -1,8 +1,8 @@
+#include "minipkg2.h"
 #include "cmdline.h"
-#include "config.h"
 
-const char* root = "/";
 
 int main(int argc, char* argv[]) {
+   set_root("/");
    return parse_cmdline(argc, argv);
 }

@@ -24,16 +24,16 @@ defop(info) {
       const char* end;
       if ((end = strrchr(args[i], '/')) == NULL) {
          if (search_local) {
-            path = xstrcatl(pkgdir, "/", args[i], ".mpkg", NULL);
+            path = xstrcatl(pkgdir, "/", args[i], "/package.info", NULL);
          } else if (search_repo) {
-            path = xstrcatl(repodir, "/", args[i], ".mpkg", NULL);
+            path = xstrcatl(repodir, "/", args[i], "/package.build", NULL);
          } else {
-            path = xstrcatl(pkgdir, "/", args[i], ".mpkg", NULL);
+            path = xstrcatl(pkgdir, "/", args[i], "/package.info", NULL);
             if (access(path, O_RDONLY) != 0)
-               path = xstrcatl(repodir, "/", args[i], ".mpkg", NULL);
+               path = xstrcatl(repodir, "/", args[i], "/package.build", NULL);
          }
          if (access(path, O_RDONLY) != 0) {
-            error("Package not found: %s", args[i]);
+            error("Package not found: %s", end + 1);
             ec = 1;
             continue;
          }
@@ -43,7 +43,7 @@ defop(info) {
             ec = 1;
             continue;
          }
-         path = args[i];
+         path = strdup(args[i]);
       }
       struct package* pkg = parse_package(path);
       if (!pkg) {
@@ -53,6 +53,7 @@ defop(info) {
       }
       print_package(pkg);
       free_package(pkg);
+      free(path);
    }
    return ec;
 }

@@ -22,6 +22,7 @@ char* xstrdup(const char*);
 char* xstrcat(const char*, const char*);
 char* xstrcatl(const char*, const char*, ...);
 char* freadline(FILE*);
+char* read_file(const char*);
 bool  ends_with(const char*, const char*);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')

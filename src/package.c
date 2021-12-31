@@ -75,9 +75,12 @@ struct package* parse_package(const char* path) {
       check0f(close(STDOUT_FILENO));
       checkf(dup(pipefd[1][1]), == STDOUT_FILENO);
 
+      // Remap stderr.
+      check0f(close(STDERR_FILENO));
+      checkf(open("/dev/null", O_RDONLY), == STDERR_FILENO);
+
       // Run the shell (by default bash).
       execlp(SHELL, SHELL, NULL);
-      error_errno("Failed to run bash");
       _exit(1);
    } else {
       // Close unused pipes

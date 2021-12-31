@@ -1,3 +1,5 @@
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdarg.h>
 #include <string.h>
 #include "utils.h"
@@ -39,7 +41,7 @@ char* xstrcatl(const char* s1, const char* s2, ...) {
 }
 char* freadline(FILE* file) {
    char* buf = NULL;
-   char ch;
+   int ch;
    if (feof(file))
       return NULL;
    while ((ch = fgetc(file)) != EOF) {
@@ -66,5 +68,20 @@ bool ends_with(const char* s1, const char* s2) {
    const size_t l1 = strlen(s1);
    const size_t l2 = strlen(s2);
    return l1 >= l2 && !memcmp(s1 + (l1 - l2), s2, l2);
+}
+
+char* read_file(const char* path) {
+   FILE* file = fopen(path, "r");
+   if (!file)
+      return NULL;
+
+   char* buf = NULL;
+   int ch;
+   while ((ch = fgetc(file)) != EOF)
+      buf_push(buf, ch);
+   buf_push(buf, '\0');
+   char* str = xstrdup(buf);
+   buf_free(buf);
+   return str;
 }
 

@@ -182,6 +182,12 @@ struct package* find_package(const char* name, enum package_source src) {
    free(path);
    return pkg;
 }
+
+int pkg_info_cmp(const void* p1, const void* p2) {
+   const struct package_info* i1 = p1;
+   const struct package_info* i2 = p2;
+   return strcmp(i1->provided_name, i2->provided_name);
+}
 bool find_packages(struct package_info** pkgs, enum package_source src) {
    const char* base_dir;
    const char* suffix;
@@ -244,5 +250,19 @@ bool find_packages(struct package_info** pkgs, enum package_source src) {
       }
    }
 
+   qsort(*pkgs, buf_len(*pkgs), sizeof(struct package_info), &pkg_info_cmp);
+
    return true;
+}
+void free_package_infos(struct package_info** infos) {
+   for (size_t i = 0; i < buf_len(*infos); ++i) {
+      struct package_info* info = &(*infos)[i];
+      free(info->provided_name);
+      if (info->is_provided) {
+         free(info->provider_name);
+      } else {
+         free_package(info->pkg);
+      }
+   }
+   buf_free(*infos);
 }

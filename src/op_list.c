@@ -69,6 +69,7 @@ defop(list) {
             printf("%s %s\n", pkg->name, pkg->version);
          }
       }
+      free_package_infos(&pkgs);
       return 0;
    }
 }

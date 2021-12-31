@@ -30,5 +30,7 @@ void free_package(struct package*);
 void print_package(const struct package*);
 struct package* find_package(const char* name, enum package_source src);
 bool find_packages(struct package_info**, enum package_source src);
+void free_package_infos(struct package_info**);
+int pkg_info_cmp(const void* p1, const void* p2);
 
 #endif /* FILE_MINIPKG2_PACKAGE_H */

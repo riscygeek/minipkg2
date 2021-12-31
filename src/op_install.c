@@ -11,6 +11,9 @@ static void find_dependencies(struct package** pkgs, const struct package* pkg) 
 }
 
 defop(install) {
+   struct package_info* all_pkgs = NULL;
+   find_packages(&all_pkgs, PKG_REPO);
+
    struct package** pkgs = NULL;
    for (size_t i = 0; i < num_args; ++i) {
 

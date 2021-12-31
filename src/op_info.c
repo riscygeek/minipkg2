@@ -18,22 +18,16 @@ defop(info) {
    if (search_local && search_repo)
       fail("Either --local or --repo must be set.");
 
+   const enum package_source src = search_repo ? PKG_REPO : PKG_LOCAL;
+
    int ec = 0;
    for (size_t i = 0; i < num_args; ++i) {
-      char* path;
       const char* end;
+      struct package* pkg;
       if ((end = strrchr(args[i], '/')) == NULL) {
-         if (search_local) {
-            path = xstrcatl(pkgdir, "/", args[i], "/package.info", NULL);
-         } else if (search_repo) {
-            path = xstrcatl(repodir, "/", args[i], "/package.build", NULL);
-         } else {
-            path = xstrcatl(pkgdir, "/", args[i], "/package.info", NULL);
-            if (access(path, O_RDONLY) != 0)
-               path = xstrcatl(repodir, "/", args[i], "/package.build", NULL);
-         }
-         if (access(path, O_RDONLY) != 0) {
-            error("Package not found: %s", end + 1);
+         pkg = find_package(args[i], src);
+         if (!pkg) {
+            error("No such package: %s", args[i]);
             ec = 1;
             continue;
          }
@@ -43,17 +37,15 @@ defop(info) {
             ec = 1;
             continue;
          }
-         path = strdup(args[i]);
-      }
-      struct package* pkg = parse_package(path);
-      if (!pkg) {
-         error("%s: failed to parse package.", end + 1);
-         ec = 1;
-         continue;
+         pkg = parse_package(args[i]);
+         if (!pkg) {
+            error("%s: failed to parse package.", end + 1);
+            ec = 1;
+            continue;
+         }
       }
       print_package(pkg);
       free_package(pkg);
-      free(path);
    }
    return ec;
 }

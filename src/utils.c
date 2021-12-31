@@ -2,6 +2,8 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
+#include <limits.h>
 #include "utils.h"
 #include "print.h"
 #include "buf.h"
@@ -69,6 +71,12 @@ bool ends_with(const char* s1, const char* s2) {
    const size_t l2 = strlen(s2);
    return l1 >= l2 && !memcmp(s1 + (l1 - l2), s2, l2);
 }
+char* xreadlink(const char* path) {
+   char* buf = xmalloc(PATH_MAX + 1);
+   if (readlink(path, buf, PATH_MAX) < 0)
+      return free(buf), NULL;
+   return buf;
+}
 
 char* read_file(const char* path) {
    FILE* file = fopen(path, "r");
@@ -84,4 +92,3 @@ char* read_file(const char* path) {
    buf_free(buf);
    return str;
 }
-

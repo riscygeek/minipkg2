@@ -1,11 +1,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <dirent.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include <errno.h>
 #include "minipkg2.h"
 #include "package.h"
 #include "print.h"
@@ -15,6 +18,7 @@
 static bool is_empty(const char* s) {
    return !s || !s[0];
 }
+
 
 struct package* parse_package(const char* path) {
    // Check if `path` can be read.
@@ -161,4 +165,84 @@ void print_package(const struct package* pkg) {
    print_line("Description",  1, &pkg->description);
    print_line("Sources",      buf_len(pkg->sources), pkg->sources);
    print_line("Dependencies", buf_len(pkg->depends), pkg->depends);
+}
+struct package* find_package(const char* name, enum package_source src) {
+   char* path;
+   switch (src) {
+   case PKG_LOCAL:
+      path = xstrcatl(pkgdir, "/", name, "/package.info", NULL);
+      break;
+   case PKG_REPO:
+      path = xstrcatl(repodir, "/", name, "/package.build", NULL);
+      break;
+   default:
+      fail("find_package(): Invalid package source %d", src);
+   }
+   struct package* pkg = (access(path, O_RDONLY) == 0) ? parse_package(path) : NULL;
+   free(path);
+   return pkg;
+}
+bool find_packages(struct package_info** pkgs, enum package_source src) {
+   const char* base_dir;
+   const char* suffix;
+   switch (src) {
+   case PKG_LOCAL:
+      base_dir = pkgdir;
+      suffix = "/package.info";
+      break;
+   case PKG_REPO:
+      base_dir = repodir;
+      suffix = "/package.build";
+      break;
+   default:
+      fail("find_packages(): Invalid package source %d", src);
+   }
+   DIR* dir = opendir(base_dir);
+   if (!dir) {
+      if (errno == ENOENT)
+         return false;
+      fail_errno("Failed to open '%s'", base_dir);
+   }
+
+   struct dirent* ent;
+   while ((ent = readdir(dir)) != NULL) {
+      if (ent->d_name[0] == '.')
+         continue;
+      struct package_info info;
+      const char* name = ent->d_name;
+      char* dirpath = xstrcatl(base_dir, "/", name, NULL);
+      char* path = xstrcat(dirpath, suffix);
+
+      struct stat st;
+      check0(lstat(dirpath, &st));
+
+      info.provided_name = xstrdup(name);
+      info.is_provided = (st.st_mode & S_IFMT) == S_IFLNK;
+      info.pkg = info.is_provided ? NULL : parse_package(path);      
+      info.provider_name = info.is_provided ? xreadlink(dirpath) : info.provided_name;
+      if (!info.provider_name)
+         fail("find_packages(): Failed to readlink('%s')", dirpath);
+
+      buf_push(*pkgs, info);
+      free(dirpath);
+      free(path);
+   }
+
+   for (size_t i = 0; i < buf_len(*pkgs); ++i) {
+      struct package_info* info = &(*pkgs)[i];
+      if (info->is_provided) {
+         for (size_t j = 0; j < buf_len(pkgs); ++j) {
+            struct package_info* info2 = &(*pkgs)[j];
+            if (info2->pkg && !strcmp(info->provider_name, info2->pkg->name)) {
+               info->pkg = info2->pkg;
+               break;
+            }
+         }
+      }
+      if (!info->pkg) {
+         warn("Failed to resolve package '%s'", info->provided_name);
+      }
+   }
+
+   return true;
 }

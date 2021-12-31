@@ -9,6 +9,7 @@
 #include "cmdline.h"
 #include "utils.h"
 #include "print.h"
+#include "buf.h"
 
 
 struct cmdline_option list_options[] = {
@@ -53,37 +54,21 @@ defop(list) {
       }
       return ec;
    } else {
-      DIR* dir = opendir(opt_repo ? repodir : pkgdir);
-      if (!dir) {
-         if (errno == ENOENT)
-            return 0;
-         fail_errno("Failed to open '%s'", pkgdir);
-      }
+      struct package_info* pkgs = NULL;
+      find_packages(&pkgs, opt_repo ? PKG_REPO : PKG_LOCAL);
 
-      struct dirent* ent;
-      while ((ent = readdir(dir)) != NULL) {
-         if (ent->d_name[0] == '.')
-            continue;
-         const char* name = ent->d_name;
-         char* path;
-         if (opt_repo) {
-            path = xstrcatl(repodir, "/", name, "/package.build", NULL);
-         } else {
-            path = xstrcatl(pkgdir, "/", name, "/package.info", NULL);
-         }
-         struct package* pkg = parse_package(path);
-         free(path);
+      for (size_t i = 0; i < buf_len(pkgs); ++i) {
+         const struct package_info* info = &pkgs[i];
+         const struct package* pkg = info->pkg;
          if (!pkg)
-            fail("Failed to parse package '%s'", name);
+            continue;
 
-         if (!strcmp(name, pkg->name)) {
-            printf("%s %s\n", name, pkg->version);
+         if (info->is_provided) {
+            printf("%s %s (provided by %s)\n", info->provided_name, pkg->version, pkg->name);
          } else {
-            printf("%s %s (provided by %s)\n", name, pkg->version, pkg->name);
+            printf("%s %s\n", pkg->name, pkg->version);
          }
-         free_package(pkg);
       }
-      closedir(dir);
       return 0;
    }
 }

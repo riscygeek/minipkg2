@@ -1,9 +1,13 @@
+#include <sys/sendfile.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <dirent.h>
+#include <fcntl.h>
 #include <errno.h>
 #include "utils.h"
 #include "print.h"
@@ -107,5 +111,123 @@ bool mkparentdirs(const char* dir, mode_t mode) {
       ++end;
    }
    free(buffer);
+   return true;
+}
+bool mkdir_p(const char* dir, mode_t mode) {
+   if (!mkparentdirs(dir, mode))
+      return false;
+   const int ec = mkdir(dir, mode);
+   return ec != 0 && ec != EEXIST;
+}
+bool rm_rf(const char* path) {
+   struct stat st;
+   if (stat(path, &st) != 0)
+      return true;
+
+   bool success = true;
+   if ((st.st_mode & S_IFMT) == S_IFDIR) {
+      DIR* dir = opendir(path);
+      if (!dir)
+         return false;
+
+      struct dirent* ent;
+      while ((ent = readdir(dir)) != NULL) {
+         // Skip '.' and '..'
+         if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+            continue;
+
+         char* new_path = xstrcatl(path, "/", ent->d_name, NULL);
+         success &= rm_rf(new_path);
+         free(new_path);
+      }
+
+      closedir(dir);
+   }
+   success &= remove(path) == 0;
+   return success;
+}
+bool copy_file(const char* source, const char* dest) {
+   const int input = open(source, O_RDONLY);
+   if (input < 0)
+      return false;
+
+   const int output = creat(dest, 0644);
+   if (output < 0) {
+      close(input);
+      return false;
+   }
+
+   struct stat st;
+   if (fstat(input, &st) != 0) {
+      close(input);
+      close(output);
+      return false;
+   }
+
+   const ssize_t res = sendfile(output, input, NULL, st.st_size);
+
+   close(input);
+   close(output);
+
+   return res >= 0;
+}
+bool create_archive(const char* file, const char* path) {
+   DIR* dir = opendir(path);
+   if (!dir)
+      return false;
+
+   pid_t pid;
+   check(pid = vfork(), >= 0);
+
+   if (pid == 0) {
+      char** args = NULL;
+
+      buf_push(args, "tar");
+      buf_push(args, "-czf");
+      buf_push(args, xstrdup(file));
+      buf_push(args, "--");
+
+      struct dirent* ent;
+      while ((ent = readdir(dir)) != NULL) {
+         if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+            continue;
+         buf_push(args, xstrdup(ent->d_name));
+      }
+      closedir(dir);
+
+      buf_push(args, NULL);
+      chdir(path);
+      execvp("tar", args);
+      _exit(1);
+   } else {
+      return waitexit(pid, 10) == 0;
+   }
+}
+int waitexit(pid_t pid, int limit) {
+   int cnt = 0;
+   int wstatus;
+   do {
+      waitpid(pid, &wstatus, 0);
+      if (++cnt == limit)
+         fail_errno("Failed to wait for sub-process");
+   } while (!WIFEXITED(wstatus));
+   return WEXITSTATUS(wstatus);
+}
+bool write_file(const char* filename, const char* data) {
+   FILE* file = fopen(filename, "w");
+   if (!file)
+      return false;
+   fputs(data, file);
+   fclose(file);
+   return true;
+}
+bool print_file(FILE* to, const char* filename) {
+   FILE* file = fopen(filename, "r");
+   if (!file)
+      return false;
+   char buffer[100];
+   while (fgets(buffer, sizeof(buffer)-1, file) != NULL)
+      fputs(buffer, to);
+   fclose(file);
    return true;
 }

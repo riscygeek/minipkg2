@@ -28,6 +28,13 @@ char* xreadlink(const char*);
 bool  ends_with(const char*, const char*);
 bool  download(const char* url, const char* dest, bool overwrite);
 bool  mkparentdirs(const char*, mode_t);
+bool  mkdir_p(const char*, mode_t);
+bool  rm_rf(const char*);
+bool  copy_file(const char* source, const char* dest);
+bool  create_archive(const char* file, const char* dir);
+int   waitexit(pid_t pid, int limit);
+bool  write_file(const char* filename, const char* data);
+bool  print_file(FILE* to, const char* filename);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')

@@ -8,6 +8,7 @@ enum package_source {
 };
 
 struct package {
+   char* pkgfile;
    char* name;
    char* version;
    char* url;
@@ -37,5 +38,6 @@ void free_package(struct package*);
 void free_package_infos(struct package_info**);
 
 bool pkg_is_installed(const char* name);
+bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose);
 
 #endif /* FILE_MINIPKG2_PACKAGE_H */

@@ -6,6 +6,7 @@
 #include "buf.h"
 
 struct cmdline_option install_options[] = {
+   { "-v", false, },
    { NULL },
 };
 
@@ -50,7 +51,7 @@ static bool pkg_download_sources(struct package* pkg) {
 }
 
 defop(install) {
-   (void)op;
+   const bool verbose = op_is_set(op, "-v");
    struct package_info* infos = NULL;
    find_packages(&infos, PKG_REPO);
 
@@ -65,6 +66,8 @@ defop(install) {
       find_dependencies(&pkgs, &infos, info->pkg);
       add_package(&pkgs, info->pkg);
    }
+
+   // TODO: handle conflicts and provides
 
    print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs));
 
@@ -102,14 +105,20 @@ defop(install) {
       log("(%zu/%zu) Building %s:%s...",
             i+1, num_pkgs,
             pkg->name, pkg->version);
-      
+      char* binpkg = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/", pkg->name, ":", pkg->version, ".tar.gz", NULL);
+
       // pkg_build
+      if (!pkg_build(pkg, binpkg, verbose)) {
+         return 1;
+      }
 
       log("(%zu/%zu) Installing %s:%s...",
             i+1, num_pkgs,
             pkg->name, pkg->version);
 
-      // pkg_install
+      // binpkg_install
+
+      free(binpkg);
    }
 
    return 0;

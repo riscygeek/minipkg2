@@ -15,9 +15,21 @@
 #include "utils.h"
 #include "buf.h"
 
+#define SHELL_SCRIPT_HEADER                                                                     \
+   "[[ -f $ROOT/etc/minipkg2.conf ]] && source \"$ROOT/etc/minipkg2.conf\"\n"                   \
+   "[[ -f $ROOT/usr/lib/minipkg2/env.bash ]] && source \"$ROOT/usr/lib/minipkg2/env.bash\"\n"   \
+   "source \"$pkgfile\"\n"
+
+
 static bool is_empty(const char* s) {
    return !s || !s[0];
 }
+
+static void remap(int fd, int newfd) {
+   check0f(close(fd));
+   checkvf(dup(newfd), fd);
+}
+
 
 static char** read_list(FILE* file) {
    char** list = NULL;
@@ -40,12 +52,11 @@ struct package* parse_package(const char* path) {
    }
 
    struct package* pkg = new(struct package);
+   pkg->pkgfile = xstrdup(path);
    
    // The shell script that will be run.
    static const char shell_script[] =
-      "[[ -f $ROOT/etc/minipkg2.conf ]] && source \"$ROOT/etc/minipkg2.conf\"\n"
-      "[[ -f $ROOT/usr/lib/minipkg2/env.bash ]] && source \"$ROOT/usr/lib/minipkg2/env.bash\"\n"
-      "source \"$pkgfile\"\n"
+      SHELL_SCRIPT_HEADER
       "echo \"$pkgname\"\n"
       "echo \"$pkgver\"\n"
       "echo \"$url\"\n"
@@ -92,17 +103,10 @@ struct package* parse_package(const char* path) {
       close(pipefd[1][0]);
       close(pipefd[0][1]);
 
-      // Remap stdin.
-      check0f(close(STDIN_FILENO));
-      checkf(dup(pipefd[0][0]), == STDIN_FILENO);
-
-      // Remap stdout.
-      check0f(close(STDOUT_FILENO));
-      checkf(dup(pipefd[1][1]), == STDOUT_FILENO);
-
-      // Remap stderr.
-      check0f(close(STDERR_FILENO));
-      checkf(open("/dev/null", O_RDONLY), == STDERR_FILENO);
+      // Remap stdin, stdout, stderr.
+      remap(STDIN_FILENO, pipefd[0][0]);
+      remap(STDOUT_FILENO, pipefd[1][1]);
+      remap(STDERR_FILENO, open("/dev/null", O_WRONLY));
 
       // Run the shell (by default bash).
       execlp(SHELL, SHELL, NULL);
@@ -114,18 +118,9 @@ struct package* parse_package(const char* path) {
       close(pipefd[1][1]);
 
       // Wait for the program to exit.
-      const int limit = 10;
-      int cnt = 0;
-      int wstatus;
-      do {
-         waitpid(pid, &wstatus, 0);
-         if (++cnt == limit)
-            fail_errno("Failed to wait for sub-process");
-      } while (!WIFEXITED(wstatus));
-
-      if (WEXITSTATUS(wstatus) != 0) {
-         fail("Sub-process exited with %d", WEXITSTATUS(wstatus));
-      }
+      int ec = waitexit(pid, 10);
+      if (ec != 0)
+         fail("Sub-process exited with %d", ec);
       
       FILE* file;
       check(file = fdopen(pipefd[1][0], "r"), != NULL);
@@ -151,6 +146,7 @@ static void free_strlist(char*** buf) {
    buf_free(*buf);
 }
 void free_package(struct package* pkg) {
+   free(pkg->pkgfile);
    free(pkg->name);
    free(pkg->version);
    free(pkg->url);
@@ -290,4 +286,125 @@ bool pkg_is_installed(const char* name) {
    const bool exists = stat(dir, &st) == 0;
    free(dir);
    return exists;
+}
+bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose) {
+   char* pkg_basedir    = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, NULL);
+   char* pkg_srcdir     = xstrcat(pkg_basedir, "/src");
+   char* pkg_builddir   = xstrcat(pkg_basedir, "/build");
+   char* pkg_pkgdir     = xstrcat(pkg_basedir, "/pkg");
+   char* path_logfile   = xstrcat(pkg_basedir, "/log");
+
+   checkv(mkdir_p(pkg_builddir, 0755), true);
+   checkv(rm_rf(pkg_pkgdir), true);
+   
+   static const char shell_script[] = {
+      SHELL_SCRIPT_HEADER
+      "cd \"$builddir\"\n"
+      "S=\"$srcdir\"\n"
+      "B=\"$builddir\"\n"
+      "echo \"prepare()\"\n"
+      "prepare || exit 1\n"
+      "echo \"build()\"\n"
+      "build || exit 1\n"
+      "D=\"$pkgdir\"\n"
+      "echo \"package()\"\n"
+      "package || exit 1\n"
+      "exit 0\n"
+   };
+
+   // pipefd[0] : minipkg2 -> bash
+   // pipefd[1] : minipkg2 <- bash (stdout & stderr)
+   int pipefd[2][2];
+
+   check0(pipe(pipefd[0]));
+   check0(pipe(pipefd[1]));
+
+   check(write(pipefd[0][1], shell_script, sizeof(shell_script) - 1), == (sizeof(shell_script) - 1));
+
+   // TODO: use posix_spawn() instead
+
+   pid_t pid;
+   check(pid = vfork(), >= 0);
+
+   if (pid == 0) {
+      // Set environment variables.
+      setenv("ROOT",       root,          1);
+      setenv("pkgfile",    pkg->pkgfile,  1);
+      setenv("srcdir",     pkg_srcdir,    1);
+      setenv("builddir",   pkg_builddir,  1);
+      setenv("pkgdir",     pkg_pkgdir,    1);
+
+      // Close unused pipes.
+      close(pipefd[0][1]);
+      close(pipefd[1][0]);
+
+      // Remap stdin, stdout, stderr.
+      remap(STDIN_FILENO, pipefd[0][0]);
+      remap(STDOUT_FILENO, pipefd[1][1]);
+      remap(STDERR_FILENO, pipefd[1][1]);
+
+      // Run the shell.
+      execlp(SHELL, SHELL, NULL);
+      _exit(1);
+   } else {
+      // Close unused pipes.
+      close(pipefd[0][0]);
+      close(pipefd[0][1]);
+      close(pipefd[1][1]);
+
+      FILE* logfile;
+      check(logfile = fopen(path_logfile, "w"), != NULL);
+
+      FILE* log;
+      check(log = fdopen(pipefd[1][0], "r"), != NULL);
+      
+      char buffer[100];
+      while (fgets(buffer, sizeof(buffer) - 1, log) != NULL) {
+         if (verbose)
+            fputs(buffer, stderr);
+         fputs(buffer, logfile);
+      }
+      fclose(logfile);
+      fclose(log);
+
+
+      int ec = waitexit(pid, 10);
+
+      if (ec != 0)
+         print_file(stderr, path_logfile);
+
+      free(pkg_basedir);
+      free(pkg_srcdir);
+      free(pkg_builddir);
+
+      if (ec != 0) {
+         error("Failed to build %s. Log file: '%s'", pkg->name, path_logfile);
+         free(pkg_pkgdir);
+         free(path_logfile);
+         return false;
+      }
+      free(path_logfile);
+   }
+
+   // Create a binary package.
+   
+   // Copy the metadata.
+   char* metadir        = xstrcat(pkg_pkgdir, "/.meta");
+   char* meta_name      = xstrcat(metadir, "/name");
+   char* meta_version   = xstrcat(metadir, "/version");
+   char* meta_pkginfo   = xstrcat(metadir, "/package.info");
+   check0(mkdir(metadir, 0755));
+   checkv(write_file(meta_name, pkg->name), true);
+   checkv(write_file(meta_version, pkg->version), true);
+   checkv(copy_file(pkg->pkgfile, meta_pkginfo), true);
+   free(meta_name);
+   free(meta_version);
+   free(meta_pkginfo);
+   free(metadir);
+
+   // Create archive
+   create_archive(bmpkg, pkg_pkgdir);
+
+   free(pkg_pkgdir);
+   return true;
 }

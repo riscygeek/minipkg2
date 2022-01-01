@@ -136,7 +136,6 @@ struct package* parse_package(const char* path) {
    return pkg;
 }
 void free_package(struct package* pkg) {
-   free(pkg->filepath);
    free(pkg->name);
    free(pkg->version);
    free(pkg->url);

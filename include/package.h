@@ -8,8 +8,6 @@ enum package_source {
 };
 
 struct package {
-   char* filepath;
-
    char* name;
    char* version;
    char* url;

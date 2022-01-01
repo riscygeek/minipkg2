@@ -6,6 +6,7 @@
 struct cmdline_option {
    const char* option;
    bool has_arg;
+   const char* description;
    union {
       const char* arg;
       bool selected;
@@ -18,6 +19,7 @@ struct operation {
    int(*run)(const struct operation*, char**, size_t);
    bool supports_args;
    size_t min_args;
+   const char* usage;
 };
 
 

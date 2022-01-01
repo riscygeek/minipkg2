@@ -17,42 +17,60 @@ extern struct cmdline_option list_options[];
 extern struct cmdline_option install_options[];
 
 const struct operation operations[] = {
-   { "help",            no_options,       &op_help,   false, 0, },
-   { "install",         install_options,  &op_install,true,  1, },
-   { "remove",          no_options,       &op_unimp,  true,  1, },
-   { "purge",           no_options,       &op_unimp,  true,  1, },
-   { "list",            list_options,     &op_list,   true,  0, },
-   { "info",            info_options,     &op_info,   true,  1, },
-   { "download-source", no_options,       &op_unimp,  true,  1, },
-   { "clean-cache",     no_options,       &op_unimp,  false, 0, },
+   { "help",            no_options,       &op_help,   true,  0, " [operation]",        },
+   { "install",         install_options,  &op_install,true,  1, " [-v] <package(s)>",  },
+   { "remove",          no_options,       &op_unimp,  true,  1, " <package(s)>",       },
+   { "purge",           no_options,       &op_unimp,  true,  1, " <package(s)>",       },
+   { "list",            list_options,     &op_list,   true,  0, " [options]",          },
+   { "info",            info_options,     &op_info,   true,  1, " [options] <package>",},
+   { "download-source", no_options,       &op_unimp,  true,  1, " <package(s)>",       },
+   { "clean-cache",     no_options,       &op_unimp,  false, 0, "",                    },
 };
 
 const size_t num_operations = arraylen(operations);
 
 static void print_help(void) {
    puts("Micro-Linux Package Manager 2\n");
-   puts("Usage: minipkg2 <operation> [...]\n");
+   puts("Usage:\n  minipkg2 <operation> [...]\n");
    puts("Operations:");
-   puts("  minipkg2 help");
-   puts("  minipkg2 install <package(s)>");
-   puts("  minipkg2 remove <package(s)>");
-   puts("  minipkg2 purge <package(s)>");
-   puts("  minipkg2 list [list-options]");
-   puts("  minipkg2 info [info-options] <package>");
-   puts("  minipkg2 download-source <package(s)>");
-   puts("  minipkg2 clean-cache");
+   for (size_t i = 0; i < num_operations; ++i) {
+      const struct operation* op = &operations[i];
+      printf("  %s%s\n", op->name, op->usage);
+   }
    puts("\nWritten by Benjamin Stürz <benni@stuerz.xyz>");
 }
 
+static const struct operation* get_op(const char* name);
 static void print_usage(void) {
    fputs("Usage: minipkg2 --help\n", stderr);
 }
 
 defop(help) {
    (void)op;
-   (void)args;
-   (void)num_args;
-   print_help();
+   if (num_args == 0) {
+      print_help();
+   } else if (num_args == 1) {
+      const struct operation* op2 = get_op(args[0]);
+      if (!op2) {
+         error("Invalid operation: %s", args[0]);
+         return 1;
+      }
+      puts("Micro-Linux Package Manager 2\n");
+      puts("Usage:");
+      printf("  minipkg2 %s%s\n", op2->name, op2->usage);
+
+      if (op2->options[0].option != NULL) {
+         puts("\nOptions:");
+         for (size_t i = 0; op2->options[i].option != NULL; ++i) {
+            const char* opt = op2->options[i].option;
+            const size_t len = strlen(opt);
+            printf("  %s%*s%s\n", opt, 30 - (int)len, "", op2->options[i].description);
+         }
+      }
+      puts("\nWritten by Benjamin Stürz <benni@stuerz.xyz>");
+   } else {
+      puts("Usage: minipkg2 help [operation]");
+   }
    return 0;
 }
 defop(unimp) {
@@ -61,6 +79,14 @@ defop(unimp) {
    (void)num_args;
    fail("This operation is currently not supported");
    return 1;
+}
+
+static const struct operation* get_op(const char* name) {
+   for (size_t i = 0; i < num_operations; ++i) {
+      if (!strcmp(name, operations[i].name))
+         return &operations[i];
+   }
+   return NULL;
 }
 
 int parse_cmdline(int argc, char* argv[]) {
@@ -93,13 +119,7 @@ int parse_cmdline(int argc, char* argv[]) {
       return 1;
    }
 
-   const struct operation* op = NULL;
-   for (size_t i = 0; i < num_operations; ++i) {
-      if (!strcmp(argv[arg], operations[i].name)) {
-         op = &operations[i];
-         break;
-      }
-   }
+   const struct operation* op = get_op(argv[arg]);
    if (!op) {
       fail("Unrecognized operation mode '%s'", argv[arg]);
    }

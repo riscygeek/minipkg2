@@ -6,7 +6,7 @@
 #include "buf.h"
 
 struct cmdline_option install_options[] = {
-   { "-v", false, },
+   { "-v", false, "More verbose output.", },
    { NULL },
 };
 

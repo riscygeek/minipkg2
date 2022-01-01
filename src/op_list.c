@@ -13,9 +13,9 @@
 
 
 struct cmdline_option list_options[] = {
-   { "--repo",       false,    },
-   { "--local",      false,    },
-   { "--files",      false,    },
+   { "--repo",       false, "List installable packages.",               },
+   { "--local",      false, "List installed packages.",                 },
+   { "--files",      false, "List the files of an installed package.",  },
    { NULL },
 };
 

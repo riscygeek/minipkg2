@@ -14,6 +14,8 @@ struct package {
    char* description;
    char** sources;
    char** depends;
+   char** provides;
+   char** conflicts;
 };
 
 struct package_info {

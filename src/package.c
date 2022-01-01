@@ -19,6 +19,18 @@ static bool is_empty(const char* s) {
    return !s || !s[0];
 }
 
+static char** read_list(FILE* file) {
+   char** list = NULL;
+   char* line;
+
+   while (!is_empty(line = freadline(file)))
+      buf_push(list, line);
+
+   // This deletes only the last (empty) line.
+   free(line);
+
+   return list;
+}
 
 struct package* parse_package(const char* path) {
    // Check if `path` can be read.
@@ -32,17 +44,26 @@ struct package* parse_package(const char* path) {
    // The shell script that will be run.
    static const char shell_script[] =
       "[[ -f $ROOT/etc/minipkg2.conf ]] && source \"$ROOT/etc/minipkg2.conf\"\n"
+      "[[ -f $ROOT/usr/lib/minipkg2/env.bash ]] && source \"$ROOT/usr/lib/minipkg2/env.bash\"\n"
       "source \"$pkgfile\"\n"
       "echo \"$pkgname\"\n"
       "echo \"$pkgver\"\n"
       "echo \"$url\"\n"
       "echo \"$description\"\n"
       "for src in \"${sources[@]}\"; do\n"
-      "  echo \"${sources[@]}\"\n"
+      "  echo \"$src\"\n"
       "done\n"
       "echo\n"
-      "for dep in \"${depends[@]}\"; do\n"
-      "  echo \"${depends[@]}\"\n"
+      "for pkg in \"${depends[@]}\"; do\n"
+      "  echo \"$pkg\"\n"
+      "done\n"
+      "echo\n"
+      "for pkg in \"${provides[@]}\"; do\n"
+      "  echo \"$pkg\"\n"
+      "done\n"
+      "echo\n"
+      "for pkg in \"${conflicts[@]}\"; do\n"
+      "  echo \"$pkg\"\n"
       "done\n"
       "echo\n"
       "exit 0\n"
@@ -109,45 +130,35 @@ struct package* parse_package(const char* path) {
       FILE* file;
       check(file = fdopen(pipefd[1][0], "r"), != NULL);
 
-      // Read the name, version, url & description.
+      // Read package parameters.
       pkg->name         = freadline(file);
       pkg->version      = freadline(file);
       pkg->url          = freadline(file);
       pkg->description  = freadline(file);
-
-      pkg->sources = NULL;
-      pkg->depends = NULL;
-
-      char* line;
-
-      // Read `sources` until an empty line is read.
-      while (!is_empty(line = freadline(file)))
-         buf_push(pkg->sources, line);
-      free(line);
-
-      // Read `depends` until an empty line is read.
-      while (!is_empty(line = freadline(file)))
-         buf_push(pkg->depends, line);
-      free(line);
+      pkg->sources   = read_list(file);
+      pkg->depends   = read_list(file);
+      pkg->provides  = read_list(file);
+      pkg->conflicts = read_list(file);
 
       fclose(file);
    }
 
    return pkg;
 }
+static void free_strlist(char*** buf) {
+   for (size_t i = 0; i < buf_len(*buf); ++i)
+      free((*buf)[i]);
+   buf_free(*buf);
+}
 void free_package(struct package* pkg) {
    free(pkg->name);
    free(pkg->version);
    free(pkg->url);
    free(pkg->description);
-   for (size_t i = 0; i < buf_len(pkg->sources); ++i) {
-      free(pkg->sources[i]);
-   }
-   buf_free(pkg->sources);
-   for (size_t i = 0; i < buf_len(pkg->depends); ++i) {
-      free(pkg->depends[i]);
-   }
-   buf_free(pkg->depends);
+   free_strlist(&pkg->sources);
+   free_strlist(&pkg->depends);
+   free_strlist(&pkg->provides);
+   free_strlist(&pkg->conflicts);
 }
 
 static void print_line(const char* first, size_t num, char* const * strs) {
@@ -164,6 +175,8 @@ void print_package(const struct package* pkg) {
    print_line("Description",  1, &pkg->description);
    print_line("Sources",      buf_len(pkg->sources), pkg->sources);
    print_line("Dependencies", buf_len(pkg->depends), pkg->depends);
+   print_line("Provides",     buf_len(pkg->provides), pkg->provides);
+   print_line("Conflicts",    buf_len(pkg->conflicts), pkg->conflicts);
 }
 struct package* find_package(const char* name, enum package_source src) {
    char* path;

@@ -183,7 +183,7 @@ struct package* find_package(const char* name, enum package_source src) {
    return pkg;
 }
 
-int pkg_info_cmp(const void* p1, const void* p2) {
+static int pkg_info_cmp(const void* p1, const void* p2) {
    const struct package_info* i1 = p1;
    const struct package_info* i2 = p2;
    return strcmp(i1->provided_name, i2->provided_name);
@@ -265,4 +265,10 @@ void free_package_infos(struct package_info** infos) {
       }
    }
    buf_free(*infos);
+}
+static int search_func(const void* key, const void* info) {
+   return strcmp((const char*)key, ((const struct package_info*)info)->pkg->name);
+}
+struct package_info* find_package_info(struct package_info* const* pkgs, const char* pkg) {
+   return bsearch(pkg, *pkgs, buf_len(*pkgs), sizeof(struct package_info), search_func);
 }

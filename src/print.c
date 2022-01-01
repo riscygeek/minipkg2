@@ -7,11 +7,20 @@
 #include "print.h"
 
 static void vprint(int color, const char* fmt, va_list ap) {
-   fprintf(stderr, "\033[%dm*\033[0m ", color);
+   if (color)
+      fprintf(stderr, "\033[%dm*\033[0m ", color);
    vfprintf(stderr, fmt, ap);
 }
 
 void print(int color, const char* fmt, ...) {
+   va_list ap;
+   va_start(ap, fmt);
+
+   vprint(color, fmt, ap);
+
+   va_end(ap);
+}
+void println(int color, const char* fmt, ...) {
    va_list ap;
    va_start(ap, fmt);
 
@@ -24,7 +33,7 @@ bool yesno(const char* q, bool def, ...) {
    va_list ap;
    va_start(ap, def);
 
-   vprint(34, q, ap);
+   vprint(COLOR_INFO, q, ap);
    fputs(def ? " [Y/n] " : " [y/N] ", stderr);
 
    va_end(ap);
@@ -32,7 +41,7 @@ bool yesno(const char* q, bool def, ...) {
    char buffer[32];
    fgets(buffer, sizeof(buffer), stdin);
 
-   return tolower(buffer[0]) == 'y';
+   return buffer[0] != '\n' ? tolower(buffer[0]) == 'y' : def;
 }
 void print_errno(int color, const char* fmt, ...) {
    const int saved_errno = errno;

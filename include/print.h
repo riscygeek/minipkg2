@@ -4,12 +4,18 @@
 #include <stdbool.h>
 
 void print(int color, const char*, ...);
+void println(int color, const char*, ...);
 bool yesno(const char* q, bool def, ...);
 void print_errno(int color, const char*, ...);
 
-#define log(...)           print(32, __VA_ARGS__)
-#define warn(...)          print(33, __VA_ARGS__)
-#define error(...)         print(31, __VA_ARGS__)
+#define COLOR_LOG          32
+#define COLOR_WARN         33
+#define COLOR_ERROR        31
+#define COLOR_INFO         34
+
+#define log(...)           println(COLOR_LOG, __VA_ARGS__)
+#define warn(...)          println(COLOR_WARN, __VA_ARGS__)
+#define error(...)         println(COLOR_ERROR, __VA_ARGS__)
 #define fail(...)          (error(__VA_ARGS__), exit(1), 0)
 #define error_errno(...)   (print_errno(31, __VA_ARGS__), 0)
 #define fail_errno(...)    (error_errno(__VA_ARGS__), exit(1), 0)

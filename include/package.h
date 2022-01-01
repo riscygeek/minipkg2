@@ -36,5 +36,6 @@ struct package_info* find_package_info(struct package_info* const*, const char* 
 void free_package(struct package*);
 void free_package_infos(struct package_info**);
 
+bool pkg_is_installed(const char* name);
 
 #endif /* FILE_MINIPKG2_PACKAGE_H */

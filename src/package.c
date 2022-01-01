@@ -34,7 +34,7 @@ static char** read_list(FILE* file) {
 
 struct package* parse_package(const char* path) {
    // Check if `path` can be read.
-   if (access(path, O_RDONLY) != 0) {
+   if (access(path, R_OK) != 0) {
       error_errno("Cannot access '%s'", path);
       return NULL;
    }
@@ -190,7 +190,7 @@ struct package* find_package(const char* name, enum package_source src) {
    default:
       fail("find_package(): Invalid package source %d", src);
    }
-   struct package* pkg = (access(path, O_RDONLY) == 0) ? parse_package(path) : NULL;
+   struct package* pkg = (access(path, R_OK) == 0) ? parse_package(path) : NULL;
    free(path);
    return pkg;
 }
@@ -283,4 +283,11 @@ static int search_func(const void* key, const void* info) {
 }
 struct package_info* find_package_info(struct package_info* const* pkgs, const char* pkg) {
    return bsearch(pkg, *pkgs, buf_len(*pkgs), sizeof(struct package_info), search_func);
+}
+bool pkg_is_installed(const char* name) {
+   char* dir = xstrcatl(pkgdir, "/", name, NULL);
+   struct stat st;
+   const bool exists = stat(dir, &st) == 0;
+   free(dir);
+   return exists;
 }

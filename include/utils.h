@@ -1,5 +1,6 @@
 #ifndef FILE_MINIPKG2_UTILS_H
 #define FILE_MINIPKG2_UTILS_H
+#include <sys/stat.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +26,8 @@ char* freadline(FILE*);
 char* read_file(const char*);
 char* xreadlink(const char*);
 bool  ends_with(const char*, const char*);
+bool  download(const char* url, const char* dest, bool overwrite);
+bool  mkparentdirs(const char*, mode_t);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')

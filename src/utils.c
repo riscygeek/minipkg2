@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <limits.h>
+#include <errno.h>
 #include "utils.h"
 #include "print.h"
 #include "buf.h"
@@ -91,4 +92,20 @@ char* read_file(const char* path) {
    char* str = xstrdup(buf);
    buf_free(buf);
    return str;
+}
+
+bool mkparentdirs(const char* dir, mode_t mode) {
+   char* buffer = xstrdup(dir);
+
+   char* end = buffer + 1;
+   while ((end = strchr(end, '/')) != NULL) {
+      *end = '\0';
+      const int ec = mkdir(buffer, mode);
+      if (ec != 0 && errno != EEXIST)
+         return free(buffer), false;
+      *end = '/';
+      ++end;
+   }
+   free(buffer);
+   return true;
 }

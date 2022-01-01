@@ -10,8 +10,8 @@ struct cmdline_option install_options[] = {
    { NULL },
 };
 
-static void add_package(struct package*** pkgs, struct package* pkg) {
-   if (pkg_is_installed(pkg->name))
+static void add_package(struct package*** pkgs, struct package* pkg, bool force) {
+   if (!force && pkg_is_installed(pkg->name))
       return;
    for (size_t i = 0; i < buf_len(*pkgs); ++i) {
       if ((*pkgs)[i] == pkg)
@@ -26,7 +26,7 @@ static void find_dependencies(struct package*** pkgs, struct package_info** info
       if (!dep || !dep->pkg)
          fail("Dependency %s not found.", pkg->depends[i]);
       find_dependencies(pkgs, infos, dep->pkg);
-      add_package(pkgs, dep->pkg);
+      add_package(pkgs, dep->pkg, false);
    }
 }
 
@@ -51,6 +51,8 @@ static bool pkg_download_sources(struct package* pkg) {
 }
 
 defop(install) {
+   // TODO: add support for non-repo packages
+
    const bool verbose = op_is_set(op, "-v");
    struct package_info* infos = NULL;
    find_packages(&infos, PKG_REPO);
@@ -64,7 +66,7 @@ defop(install) {
       if (!info || !info->pkg)
          fail("Package %s not found", args[i]);
       find_dependencies(&pkgs, &infos, info->pkg);
-      add_package(&pkgs, info->pkg);
+      add_package(&pkgs, info->pkg, true);
    }
 
    // TODO: handle conflicts and provides
@@ -107,7 +109,7 @@ defop(install) {
             pkg->name, pkg->version);
       char* binpkg = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/", pkg->name, ":", pkg->version, ".tar.gz", NULL);
 
-      // pkg_build
+      // Build the package.
       if (!pkg_build(pkg, binpkg, verbose)) {
          return 1;
       }
@@ -117,6 +119,7 @@ defop(install) {
             pkg->name, pkg->version);
 
       // binpkg_install
+      binpkg_install(binpkg);
 
       free(binpkg);
    }

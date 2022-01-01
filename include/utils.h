@@ -24,6 +24,7 @@ char* xstrcat(const char*, const char*);
 char* xstrcatl(const char*, const char*, ...);
 char* freadline(FILE*);
 char* read_file(const char*);
+char* fread_file(FILE*);
 char* xreadlink(const char*);
 bool  ends_with(const char*, const char*);
 bool  download(const char* url, const char* dest, bool overwrite);
@@ -35,6 +36,7 @@ bool  create_archive(const char* file, const char* dir);
 int   waitexit(pid_t pid, int limit);
 bool  write_file(const char* filename, const char* data);
 bool  print_file(FILE* to, const char* filename);
+void  redir_file(FILE* from, FILE* to);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')

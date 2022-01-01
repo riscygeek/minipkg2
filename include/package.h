@@ -39,5 +39,6 @@ void free_package_infos(struct package_info**);
 
 bool pkg_is_installed(const char* name);
 bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose);
+bool binpkg_install(const char* binpkg);
 
 #endif /* FILE_MINIPKG2_PACKAGE_H */

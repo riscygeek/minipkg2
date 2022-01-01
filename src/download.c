@@ -41,6 +41,7 @@ bool download(const char* url, const char* dest, bool overwrite) {
    curl_easy_setopt(curl, CURLOPT_URL, url);
    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
    curl_easy_setopt(curl, CURLOPT_WRITEDATA, file);
+   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 
    CURLcode result = curl_easy_perform(curl);
    if (result != CURLE_OK) {

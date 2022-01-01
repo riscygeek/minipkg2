@@ -83,11 +83,7 @@ char* xreadlink(const char* path) {
    return buf;
 }
 
-char* read_file(const char* path) {
-   FILE* file = fopen(path, "r");
-   if (!file)
-      return NULL;
-
+char* fread_file(FILE* file) {
    char* buf = NULL;
    int ch;
    while ((ch = fgetc(file)) != EOF)
@@ -95,6 +91,14 @@ char* read_file(const char* path) {
    buf_push(buf, '\0');
    char* str = xstrdup(buf);
    buf_free(buf);
+   return str;
+}
+char* read_file(const char* path) {
+   FILE* file = fopen(path, "r");
+   if (!file)
+      return NULL;
+   char* str = fread_file(file);
+   fclose(file);
    return str;
 }
 
@@ -230,4 +234,9 @@ bool print_file(FILE* to, const char* filename) {
       fputs(buffer, to);
    fclose(file);
    return true;
+}
+void redir_file(FILE* from, FILE* to) {
+   char buf[100];
+   while (fgets(buf, sizeof(buf)-1, from) != NULL)
+      fputs(buf, to);
 }

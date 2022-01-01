@@ -294,7 +294,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose) {
    char* pkg_pkgdir     = xstrcat(pkg_basedir, "/pkg");
    char* path_logfile   = xstrcat(pkg_basedir, "/log");
 
-   checkv(mkdir_p(pkg_builddir, 0755), true);
+   mkdir_p(pkg_builddir, 0755);
    checkv(rm_rf(pkg_pkgdir), true);
    
    static const char shell_script[] = {
@@ -406,5 +406,85 @@ bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose) {
    create_archive(bmpkg, pkg_pkgdir);
 
    free(pkg_pkgdir);
+   return true;
+}
+bool binpkg_install(const char* binpkg) {
+   // Read package name.
+   char* cmd = xstrcatl("tar -xf '", binpkg, "' .meta/name -O", NULL);
+   FILE* file;
+   check(file = popen(cmd, "r"), != NULL);
+   char* pkgname = fread_file(file);
+   if (pclose(file) != 0) {
+      error("Failed to read package name.");
+      return false;
+   }
+   free(cmd);
+
+   // Read package version.
+   /*
+   cmd = xstrcatl("tar -xf '", binpkg, "' .meta/version -O", NULL);
+   check(file = popen(cmd, "r"), != NULL);
+   char* pkgver = fread_file(file);
+   if (pclose(file) != 0) {
+      error("Failed to read package version.");
+      return false;
+   }
+   free(cmd);
+   */
+
+
+   if (pkg_is_installed(pkgname)) {
+      // TODO: remove old package
+   }
+
+   char* pkg_pkgdir = xstrcatl(pkgdir, "/", pkgname, NULL);
+   mkdir_p(root, 0755);
+   mkdir_p(pkg_pkgdir, 0755);
+
+   // Create `$pkg_pkgdir/files` file
+   char* path = xstrcat(pkg_pkgdir, "/files");
+   FILE* files;
+   check(files = fopen(path, "w"), != NULL);
+   free(path);
+
+   cmd = xstrcatl("tar -tf '", binpkg, "' --exclude='.meta' | awk '{printf \"/%s\\n\", $0}'", NULL);
+   check(file = popen(cmd, "r"), != NULL);
+   free(cmd);
+
+   redir_file(file, files);
+   fclose(files);
+
+   if (pclose(file) != 0) {
+      error("Failed to list package files.");
+      return false;
+   }
+
+   // Copy `.meta/package.build` to `$pkg_pkgdir/package.info`
+   path = xstrcat(pkg_pkgdir, "/package.info");
+   FILE* pinfo;
+   check(pinfo = fopen(path, "w"), != NULL);
+   free(path);
+
+   cmd = xstrcatl("tar -xf '", binpkg, "' .meta/package.info -O", NULL);
+   check(file = popen(cmd, "r"), != NULL);
+   free(cmd);
+
+   redir_file(file, pinfo);
+   fclose(pinfo);
+
+   if (pclose(file) != 0) {
+      error("Failed to create package.info");
+      return false;
+   }
+
+   // Actually install the package
+   cmd = xstrcatl("tar -C '", root, "' -xf '", binpkg, "' --exclude='.meta'", NULL);
+   const int ec = system(cmd);
+   free(cmd);
+
+   if (ec != 0) {
+      error("Failed to install package");
+      return false;
+   }
    return true;
 }

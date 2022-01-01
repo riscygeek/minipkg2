@@ -45,7 +45,7 @@ defop(list) {
          char* path = xstrcatl(pkgdir, "/", name, "/files", NULL);
          char* files = read_file(path);
          if (files) {
-            puts(files);
+            printf("%s", files);
          } else {
             error("Package not found: %s", name);
          }

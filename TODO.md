@@ -10,29 +10,29 @@
 - [ ] Generate package.info files instead of copying package.build
 - [ ] Add post-install script support
 - [ ] Merge code for parsing global and per-operation options
+- [ ] bash-completion
+- [ ] zsh-completion
 
 
 ## Operations
 
-### Finish
+### New
 - [ ] download-sources
 - [ ] clean-cache
-
-### New
 - [ ] build (needs bdepends)
 - [x] repo
-- [ ] upgrade (needs update)
-
-
-## New Options
+- [ ] upgrade
 
 ### install
 - [x] --clean-build
 - [ ] --builddir=
+- [ ] Replacing of packages/Proper removal of reinstalled packages.
 
 ### download-source
 - [ ] --no-deps       (Don't download the dependencies)
 
+### list
+- [ ] --outdated or --upgradable
 
 ## package.build
 - [ ] Support for provides & conflicts

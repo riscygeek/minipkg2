@@ -3,7 +3,7 @@
 ## Description
 This is a package manager for my own [Micro-Linux](https://github.com/riscygeek/micro-linux) source-based distribution.
 The command-line interface was inspired by Debian's [apt](https://en.wikipedia.org/wiki/APT_(software)) package manager
-and the [package.build](#package.build-layout) file format was inspired by the [PKGBUILD](https://wiki.archlinux.org/title/PKGBUILD) format used by Arch Linux.
+and the [package.build](#packagebuild-layout) file format was inspired by the [PKGBUILD](https://wiki.archlinux.org/title/PKGBUILD) format used by Arch Linux.
 This is actually the second "version".
 The [first version](https://github.com/riscygeek/micro-linux/tree/e5e44de4fb51311958726bf58a0148af3f2b28dc/minipkg) was written in bash
 and after many hours of frustration I decided to rewrite it in C.
@@ -30,11 +30,11 @@ make [DESTDIR=...] install
 Each installed package has its own directory in `/var/db/minipkg2/packages/$pkgname`.
 In this directory there are the following files:
 - `files`: A list of installed files.
-- `package.info`: See the [package.info Layout](#package.info-layout) section.
+- `package.info`: See the [package.info Layout](#packageinfo-layout) section.
 
 ### /var/db/minipkg2/repo
 Each installable package has its own directory in `/var/db/minipkg2/repo/$pkgname`.
-In this directory there is currently only one file: [`package.build`](#package.build-layout).
+In this directory there is currently only one file: [`package.build`](#packagebuild-layout).
 
 ### /var/tmp/minipkg2
 When building a package these directories are created:

@@ -20,6 +20,9 @@
    "[[ -f $ROOT/usr/lib/minipkg2/env.bash ]] && source \"$ROOT/usr/lib/minipkg2/env.bash\"\n"   \
    "source \"$pkgfile\"\n"
 
+static bool pkg_path_is_valid(const char* path) {
+   return path[0] != '.' && is_dir(path);
+}
 
 static bool is_empty(const char* s) {
    return !s || !s[0];
@@ -176,6 +179,8 @@ void print_package(const struct package* pkg) {
 }
 struct package* find_package(const char* name, enum package_source src) {
    char* path;
+   if (!pkg_path_is_valid(name))
+      return NULL;
    switch (src) {
    case PKG_LOCAL:
       path = xstrcatl(pkgdir, "/", name, "/package.info");
@@ -225,6 +230,10 @@ bool find_packages(struct package_info** pkgs, enum package_source src) {
       struct package_info info;
       const char* name = ent->d_name;
       char* dirpath = xstrcatl(base_dir, "/", name);
+      if (!pkg_path_is_valid(dirpath)) {
+         free(dirpath);
+         continue;
+      }
       char* path = xstrcat(dirpath, suffix);
 
       struct stat st;

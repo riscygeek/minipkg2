@@ -272,7 +272,7 @@ void format_size(size_t* sz, const char** unit_out) {
 }
 bool is_symlink(const char* path) {
    struct stat st;
-   return lstat(path, &st) && ((st.st_mode & S_IFMT) == S_IFLNK);
+   return lstat(path, &st) == 0 && ((st.st_mode & S_IFMT) == S_IFLNK);
 }
 bool dir_is_empty(const char* path) {
    DIR* dir;
@@ -303,4 +303,8 @@ bool xstreql_impl(const char* s1, ...) {
    }
    va_end(ap);
    return found;
+}
+bool is_dir(const char* path) {
+   struct stat st;
+   return stat(path, &st) == 0 && ((st.st_mode & S_IFMT) == S_IFDIR);
 }

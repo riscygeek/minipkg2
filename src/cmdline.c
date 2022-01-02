@@ -28,7 +28,7 @@ const struct operation operations[] = {
    { "info",            info_options,     &op_info,   true,  1, " [options] <package>","Show information about a package.", },
    { "download-source", no_options,       &op_unimp,  true,  1, " <package(s)>",       "Download the source files of a package.", },
    { "clean-cache",     no_options,       &op_unimp,  false, 0, "",                    "Remove build files.", },
-   { "repo",            repo_options,     &op_repo,   false, 0, "",                    "Manage the repository." },
+   { "repo",            repo_options,     &op_repo,   false, 0, "[options]",           "Manage the repository." },
 };
 
 const size_t num_operations = arraylen(operations);

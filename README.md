@@ -7,6 +7,7 @@ and the [package.build](#packagebuild-layout) file format was inspired by the [P
 This is actually the second "version".
 The [first version](https://github.com/riscygeek/micro-linux/tree/e5e44de4fb51311958726bf58a0148af3f2b28dc/minipkg) was written in bash
 and after many hours of frustration I decided to rewrite it in C.
+Planned features can be seen in the [TODO.md](TODO.md) file.
 
 ## Installation
 This project supports 2 installation methods: traditional make, meson.

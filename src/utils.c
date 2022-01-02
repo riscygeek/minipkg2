@@ -144,7 +144,7 @@ bool rm_rf(const char* path) {
       struct dirent* ent;
       while ((ent = readdir(dir)) != NULL) {
          // Skip '.' and '..'
-         if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+         if (xstreql(ent->d_name, ".", ".."))
             continue;
 
          char* new_path = xstrcatl(path, "/", ent->d_name);
@@ -200,7 +200,7 @@ bool create_archive(const char* file, const char* path) {
 
       struct dirent* ent;
       while ((ent = readdir(dir)) != NULL) {
-         if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+         if (xstreql(ent->d_name, ".", ".."))
             continue;
          buf_push(args, xstrdup(ent->d_name));
       }
@@ -281,11 +281,26 @@ bool dir_is_empty(const char* path) {
    struct dirent* ent;
    bool empty = true;
    while ((ent = readdir(dir)) != NULL) {
-      if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+      if (xstreql(ent->d_name, ".", ".."))
          continue;
       empty = false;
       break;
    }
    closedir(dir);
    return empty;
+}
+bool xstreql_impl(const char* s1, ...) {
+   va_list ap;
+   va_start(ap, s1);
+
+   const char* sx;
+   bool found = false;
+   while ((sx = va_arg(ap, const char*)) != NULL) {
+      if (!strcmp(s1, sx)) {
+         found = true;
+         break;
+      }
+   }
+   va_end(ap);
+   return found;
 }

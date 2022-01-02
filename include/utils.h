@@ -41,11 +41,13 @@ void  redir_file(FILE* from, FILE* to);
 void  format_size(size_t* sz, const char** unit);
 bool  is_symlink(const char*);
 bool  dir_is_empty(const char*);
+bool  xstreql_impl(const char*, ...);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')
 #define strcont(str, ch)      (strchr(str, ch) != NULL)
 #define starts_with(s1, s2)   (!strncmp((s1), (s2), strlen(s2)))
 #define xstrcatl(...)         xstrcatl_impl(__VA_ARGS__, NULL)
+#define xstreql(...)          xstreql_impl(__VA_ARGS__, NULL)
 
 #endif /* FILE_MINIPKG2_UTILS_H */

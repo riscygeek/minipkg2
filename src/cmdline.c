@@ -101,7 +101,7 @@ int parse_cmdline(int argc, char* argv[]) {
          stop_opts = true;
          ++arg;
          break;
-      } else if (!strcmp(argv[arg], "--help")) {
+      } else if (xstreql(argv[arg], "-h", "--help")) {
          print_help();
          return 0;
       } else if (!strcmp(argv[arg], "--version")) {

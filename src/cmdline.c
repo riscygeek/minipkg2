@@ -104,7 +104,13 @@ int parse_cmdline(int argc, char* argv[]) {
          print_help();
          return 0;
       } else if (!strcmp(argv[arg], "--version")) {
+#ifdef HAS_LIBCURL
+         const bool has_libcurl = HAS_LIBCURL;
+#else
+         const bool has_libcurl = false;
+#endif
          puts(VERSION);
+         printf("Has libcurl: %s\n", has_libcurl ? "true" : "false");
          return 0;
       } else if (starts_with(argv[arg], "--root=")) {
          set_root(argv[arg] + 7);

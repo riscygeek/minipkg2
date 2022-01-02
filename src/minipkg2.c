@@ -5,6 +5,7 @@ char* root        = NULL; // /
 char* pkgdir      = NULL; // $root/var/db/minipkg2/packages
 char* repodir     = NULL; // $root/var/db/minipkg2/repo
 char* builddir    = NULL; // $root/var/tmp/minipkg2
+int   verbosity   = 1   ; // 0=quiet 1=normal 2=verbose 3=extra_verbose
 
 void set_root(const char* dir) {
    free(root);

@@ -287,7 +287,7 @@ bool pkg_is_installed(const char* name) {
    free(dir);
    return exists;
 }
-bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose) {
+bool pkg_build(struct package* pkg, const char* bmpkg) {
    char* pkg_basedir    = xstrcatl(builddir, "/", pkg->name, "-", pkg->version);
    char* pkg_srcdir     = xstrcat(pkg_basedir, "/src");
    char* pkg_builddir   = xstrcat(pkg_basedir, "/build");
@@ -360,7 +360,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose) {
       
       char buffer[100];
       while (fgets(buffer, sizeof(buffer) - 1, log) != NULL) {
-         if (verbose)
+         if (verbosity >= 1)
             fputs(buffer, stderr);
          fputs(buffer, logfile);
       }

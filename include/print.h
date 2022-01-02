@@ -3,6 +3,8 @@
 #include <stdnoreturn.h>
 #include <stdbool.h>
 
+extern int verbosity;
+
 void print(int color, const char*, ...);
 void println(int color, const char*, ...);
 bool yesno(const char* q, bool def, ...);
@@ -13,7 +15,7 @@ void print_errno(int color, const char*, ...);
 #define COLOR_ERROR        31
 #define COLOR_INFO         34
 
-#define log(...)           println(COLOR_LOG, __VA_ARGS__)
+#define log(...)           (verbosity >= 1 ? (println(COLOR_LOG, __VA_ARGS__), 0) : 0)
 #define warn(...)          println(COLOR_WARN, __VA_ARGS__)
 #define error(...)         println(COLOR_ERROR, __VA_ARGS__)
 #define fail(...)          (error(__VA_ARGS__), exit(1))

@@ -6,7 +6,7 @@
 #include "buf.h"
 
 struct cmdline_option install_options[] = {
-   { "-v", false, "More verbose output.", {NULL}, },
+   { "-y", false, "Don't ask for confirmation.", {NULL}, },
    { NULL },
 };
 
@@ -53,7 +53,6 @@ static bool pkg_download_sources(struct package* pkg) {
 defop(install) {
    // TODO: add support for non-repo packages
 
-   const bool verbose = op_is_set(op, "-v");
    struct package_info* infos = NULL;
    find_packages(&infos, PKG_REPO);
 
@@ -71,16 +70,17 @@ defop(install) {
 
    // TODO: handle conflicts and provides
 
-   print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs));
+   if (verbosity >= 1) {
+      print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs));
 
-   for (size_t i = 0; i < buf_len(pkgs); ++i) {
-      print(0, " %s", pkgs[i]->name);
+      for (size_t i = 0; i < buf_len(pkgs); ++i) {
+         print(0, " %s", pkgs[i]->name);
+      }
+      println(0, "");
+      log("");
    }
-   println(0, "");
 
-   log("");
-
-   if (!yesno("Proceed with installation?", true))
+   if (!op_is_set(op, "-y") && !yesno("Proceed with installation?", true))
       return 1;
 
    log("");
@@ -110,7 +110,7 @@ defop(install) {
       char* binpkg = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/", pkg->name, ":", pkg->version, ".tar.gz");
 
       // Build the package.
-      if (!pkg_build(pkg, binpkg, verbose)) {
+      if (!pkg_build(pkg, binpkg)) {
          return 1;
       }
 

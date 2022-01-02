@@ -6,10 +6,12 @@
 #include "buf.h"
 
 struct cmdline_option purge_options[] = {
+   { "-y",        false, "Don't ask for confirmation.",  {NULL}, },
    {NULL},
 };
 struct cmdline_option remove_options[] = {
-   { "--purge", false, "Purge the package.", {NULL}, },
+   { "-y",        false, "Don't ask for confirmation.",  {NULL}, },
+   { "--purge",   false, "Purge the package.",           {NULL}, },
    {NULL},
 };
 
@@ -20,17 +22,16 @@ static void add_package(struct package_info*** infos, struct package_info* info)
    }
    buf_push(*infos, info);
 }
-static int perform(char** args, size_t num_args, bool purge);
+static int perform(const struct operation*, char**, size_t, bool);
 defop(remove) {
-   return perform(args, num_args, op_is_set(op, "--purge"));
+   return perform(op, args, num_args, op_is_set(op, "--purge"));
 }
 
 defop(purge) {
-   (void)op;
-   return perform(args, num_args, true);
+   return perform(op, args, num_args, true);
 }
 
-static int perform(char** args, size_t num_args, bool purge) {
+static int perform(const struct operation* op, char** args, size_t num_args, bool purge) {
    // Find all installed packages.
    struct package_info* infos = NULL;
    find_packages(&infos, PKG_LOCAL);
@@ -85,17 +86,19 @@ static int perform(char** args, size_t num_args, bool purge) {
       }
    }
 
-   print(COLOR_LOG, "Packages (%zu)", buf_len(selected));
-   for (size_t i = 0; i < buf_len(selected); ++i) {
-      fprintf(stderr, " %s", selected[i]->provider_name);
+   if (verbosity >= 1) {
+      print(COLOR_LOG, "Packages (%zu)", buf_len(selected));
+      for (size_t i = 0; i < buf_len(selected); ++i) {
+         fprintf(stderr, " %s", selected[i]->provider_name);
+      }
+      fputc('\n', stderr);
    }
-   fputc('\n', stderr);
    log("");
    const char* unit;
    format_size(&total_size, &unit);
    log("Total Removal Size: %zu%s", total_size, unit);
    log("");
-   if (!yesno("Do you want to %s these packages?", true, purge ? "purge" : "remove"))
+   if (!op_is_set(op, "-y") && !yesno("Do you want to %s these packages?", true, purge ? "purge" : "remove"))
       return 1;
 
    for (size_t i = 0; i < buf_len(selected); ++i) {

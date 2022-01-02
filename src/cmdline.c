@@ -20,7 +20,7 @@ extern struct cmdline_option remove_options[];
 
 const struct operation operations[] = {
    { "help",            no_options,       &op_help,   true,  0, " [operation]",        "Show some help.", },
-   { "install",         install_options,  &op_install,true,  1, " [-v] <package(s)>",  "Build and install packages.", },
+   { "install",         install_options,  &op_install,true,  1, " <package(s)>",       "Build and install packages.", },
    { "remove",          remove_options,   &op_remove, true,  1, " <package(s)>",       "Remove packages.", },
    { "purge",           purge_options,    &op_purge,  true,  1, " <package(s)>",       "Remove packages without checking for reverse-dependencies.", },
    { "list",            list_options,     &op_list,   true,  0, " [options]",          "List packages or files of packages.", },
@@ -31,14 +31,27 @@ const struct operation operations[] = {
 
 const size_t num_operations = arraylen(operations);
 
+static void print_opt(const char* opt, const char* descr) {
+   const size_t len = strlen(opt);
+   printf("  %s%*s%s\n", opt, 30 - (int)len, "", descr);
+}
+
 static void print_help(void) {
-   puts("Micro-Linux Package Manager 2\n");
-   puts("Usage:\n  minipkg2 <operation> [...]\n");
-   puts("Operations:");
+   puts("Micro-Linux Package Manager 2");
+   puts("\nUsage:\n  minipkg2 [global-options] <operation> [...]");
+   puts("\nOperations:");
    for (size_t i = 0; i < num_operations; ++i) {
       const struct operation* op = &operations[i];
       printf("  %s%s\n", op->name, op->usage);
    }
+   puts("\nGlobal options:");
+   print_opt("--root=ROOT", "Set the path to the root. (default: '/')");
+   print_opt("-h,--help", "Print this page.");
+   print_opt("--version", "Print the version.");
+   print_opt("-v,--verbose", "Verbose output.");
+   print_opt("-vv", "More verbose output.");
+   print_opt("-q,--quiet", "Suppress output.");
+   puts("Note: global options must precede the operation.");
    puts("\nWritten by Benjamin Stürz <benni@stuerz.xyz>");
 }
 
@@ -65,9 +78,7 @@ defop(help) {
       if (op2->options[0].option != NULL) {
          puts("\nOptions:");
          for (size_t i = 0; op2->options[i].option != NULL; ++i) {
-            const char* opt = op2->options[i].option;
-            const size_t len = strlen(opt);
-            printf("  %s%*s%s\n", opt, 30 - (int)len, "", op2->options[i].description);
+            print_opt(op2->options[i].option, op2->options[i].description);
          }
       }
       puts("\nWritten by Benjamin Stürz <benni@stuerz.xyz>");
@@ -118,6 +129,13 @@ int parse_cmdline(int argc, char* argv[]) {
          set_root(argv[arg] + 7);
          if (!*root)
             fail("Expected argument for --root=");
+      } else if (!strcmp(argv[arg], "--verbose")) {
+         verbosity = 2;
+      } else if (xstreql(argv[arg], "-q", "--quiet")) {
+         verbosity = 0;
+      } else if (starts_with(argv[arg], "-v")) {
+         for (size_t i = 1; argv[arg][i] == 'v'; ++i)
+            ++verbosity;
       } else {
          fail("Unrecognized command-line option '%s'", argv[arg]);
       }

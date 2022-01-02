@@ -30,11 +30,11 @@ make [DESTDIR=...] install
 Each installed package has its own directory in `/var/db/minipkg2/packages/$pkgname`.
 In this directory there are the following files:
 - `files`: A list of installed files.
-- `package.info`: See the (package.info Layout)[#package.info-layout] section.
+- `package.info`: See the [package.info Layout](#package.info-layout) section.
 
 ### /var/db/minipkg2/repo
 Each installable package has its own directory in `/var/db/minipkg2/repo/$pkgname`.
-In this directory there is currently only one file: (`package.build`)[#package.build-layout].
+In this directory there is currently only one file: [`package.build`](#package.build-layout).
 
 ### /var/tmp/minipkg2
 When building a package these directories are created:

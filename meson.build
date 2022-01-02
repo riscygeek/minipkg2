@@ -1,4 +1,12 @@
-project('minipkg2', 'c')
+project(
+  'minipkg2',
+  'c',
+  version: '0.1',
+  default_options: [
+    'c_std=gnu11',
+    'warning_level=3',
+    ]
+  )
 
 sources = [
   'src/cmdline.c',
@@ -13,16 +21,18 @@ sources = [
   'src/utils.c',
 ]
 
-depends = [dependency('libcurl')]
-c_args = ['-Wno-unused-value']
-cpp_args = ['-DHAS_LIBCURL=1']
+c_args = []
+
+# Check for optional libcurl dependency.
+libcurl = dependency('libcurl', required: false)
+if libcurl.found()
+  c_args += '-DHAS_LIBCURL=1'
+endif
 
 executable('minipkg2',
   sources: sources,
-  dependencies: depends,
+  dependencies: [libcurl],
   include_directories: 'include',
   c_args: c_args,
-  c_std: 'gnu11',
-  cpp_args: cpp_args,
   install: true
-  )
+)

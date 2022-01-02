@@ -16,15 +16,15 @@ void print_errno(int color, const char*, ...);
 #define log(...)           println(COLOR_LOG, __VA_ARGS__)
 #define warn(...)          println(COLOR_WARN, __VA_ARGS__)
 #define error(...)         println(COLOR_ERROR, __VA_ARGS__)
-#define fail(...)          (error(__VA_ARGS__), exit(1), 0)
-#define error_errno(...)   (print_errno(31, __VA_ARGS__), 0)
-#define fail_errno(...)    (error_errno(__VA_ARGS__), exit(1), 0)
+#define fail(...)          (error(__VA_ARGS__), exit(1))
+#define error_errno(...)   (print_errno(31, __VA_ARGS__))
+#define fail_errno(...)    (error_errno(__VA_ARGS__), exit(1))
 
 // Check if ((`code` `cmp`) == 1); else fail.
 // Notes:
 // - `code` will be executed once.
 // - Use check*f in fork() contexts.
-#define check(code, cmp)   (((code) cmp) || fail_errno("%s: %d: Failed to execute: %s", __func__, __LINE__, #code))
+#define check(code, cmp)   (((code) cmp) || (fail_errno("%s: %d: Failed to execute: %s", __func__, __LINE__, #code),0))
 
 // Check if (`code` == `val`); else fail
 #define checkv(code, val)  check(code, == (val))

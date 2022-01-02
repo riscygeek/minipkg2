@@ -7,8 +7,8 @@
 #include "print.h"
 
 struct cmdline_option info_options[] = {
-   { "--local",     false, "Select a localy-installed package.",  },
-   { "--repo",      false, "Select a repo-package.",              },
+   { "--local",     false, "Select a localy-installed package.",  {NULL},  },
+   { "--repo",      false, "Select a repo-package.",              {NULL},  },
    { NULL },
 };
 

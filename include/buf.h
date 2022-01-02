@@ -31,7 +31,7 @@
 
 struct BufHdr {
 	size_t cap, len;
-	char buf[0];
+	char buf[];
 };
 
 #define buf__hdr(b) ((struct BufHdr*)((char*)(b) - offsetof(struct BufHdr, buf)))

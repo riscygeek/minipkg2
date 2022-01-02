@@ -305,6 +305,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg) {
 
    mkdir_p(pkg_builddir, 0755);
    checkv(rm_rf(pkg_pkgdir), true);
+
    
    static const char shell_script[] = {
       SHELL_SCRIPT_HEADER
@@ -369,7 +370,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg) {
       
       char buffer[100];
       while (fgets(buffer, sizeof(buffer) - 1, log) != NULL) {
-         if (verbosity >= 1)
+         if (verbosity >= 2)
             fputs(buffer, stderr);
          fputs(buffer, logfile);
       }

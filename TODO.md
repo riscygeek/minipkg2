@@ -27,7 +27,7 @@
 ## New Options
 
 ### install
-- [ ] --clean-build   (Delete old build files before building)
+- [x] --clean-build   (Delete old build files before building)
 
 ### download-source
 - [ ] --no-deps       (Don't download the dependencies)

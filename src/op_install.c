@@ -6,7 +6,8 @@
 #include "buf.h"
 
 struct cmdline_option install_options[] = {
-   { "-y", false, "Don't ask for confirmation.", {NULL}, },
+   { "-y",              false, "Don't ask for confirmation.",  {NULL}, },
+   { "--clean-build",   false, "Perform a clean build.",       {NULL}, },
    { NULL },
 };
 
@@ -57,7 +58,6 @@ defop(install) {
    find_packages(&infos, PKG_REPO);
 
    log("Resolving dependencies...");
-   log("");
 
    struct package** pkgs = NULL;
    for (size_t i = 0; i < num_args; ++i) {
@@ -70,6 +70,7 @@ defop(install) {
 
    // TODO: handle conflicts and provides
 
+   log("");
    if (verbosity >= 1) {
       print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs));
 
@@ -82,8 +83,18 @@ defop(install) {
 
    if (!op_is_set(op, "-y") && !yesno("Proceed with installation?", true))
       return 1;
-
    log("");
+
+   if (op_is_set(op, "--clean-build")) {
+      log("Cleanig the build directories...");
+      for (size_t i = 0; i < buf_len(pkgs); ++i) {
+         struct package* p = pkgs[i];
+         char* dir = xstrcatl(builddir, "/", p->name, "-", p->version);
+         rm_rf(dir);
+         free(dir);
+      }
+   }
+
    log("Downloading sources...");
 
    const size_t num_pkgs = buf_len(pkgs);

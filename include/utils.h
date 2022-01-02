@@ -23,6 +23,7 @@ char* xstrdup(const char*);
 char* xstrcat(const char*, const char*);
 char* xstrcatl(const char*, const char*, ...);
 char* freadline(FILE*);
+char** freadlines(FILE*);
 char* read_file(const char*);
 char* fread_file(FILE*);
 char* xreadlink(const char*);
@@ -37,6 +38,9 @@ int   waitexit(pid_t pid, int limit);
 bool  write_file(const char* filename, const char* data);
 bool  print_file(FILE* to, const char* filename);
 void  redir_file(FILE* from, FILE* to);
+void  format_size(size_t* sz, const char** unit);
+bool  is_symlink(const char*);
+bool  dir_is_empty(const char*);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')

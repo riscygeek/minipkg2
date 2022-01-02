@@ -15,12 +15,13 @@ static struct cmdline_option no_options[] = {
 extern struct cmdline_option info_options[];
 extern struct cmdline_option list_options[];
 extern struct cmdline_option install_options[];
+extern struct cmdline_option purge_options[];
 
 const struct operation operations[] = {
    { "help",            no_options,       &op_help,   true,  0, " [operation]",        },
    { "install",         install_options,  &op_install,true,  1, " [-v] <package(s)>",  },
    { "remove",          no_options,       &op_unimp,  true,  1, " <package(s)>",       },
-   { "purge",           no_options,       &op_unimp,  true,  1, " <package(s)>",       },
+   { "purge",           purge_options,    &op_purge,  true,  1, " <package(s)>",       },
    { "list",            list_options,     &op_list,   true,  0, " [options]",          },
    { "info",            info_options,     &op_info,   true,  1, " [options] <package>",},
    { "download-source", no_options,       &op_unimp,  true,  1, " <package(s)>",       },

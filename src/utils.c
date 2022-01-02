@@ -70,6 +70,13 @@ char* freadline(FILE* file) {
    buf_free(buf);
    return str;
 }
+char** freadlines(FILE* file) {
+   char** lines = NULL;
+   char* line;
+   while ((line = freadline(file)) != NULL)
+      buf_push(lines, line);
+   return lines;
+}
 
 bool ends_with(const char* s1, const char* s2) {
    const size_t l1 = strlen(s1);
@@ -239,4 +246,46 @@ void redir_file(FILE* from, FILE* to) {
    char buf[100];
    while (fgets(buf, sizeof(buf)-1, from) != NULL)
       fputs(buf, to);
+}
+void format_size(size_t* sz, const char** unit_out) {
+   static const struct unit {
+      const char* name;
+      size_t base;
+   } units[] = {
+#if SIZE_MAX >= (1ull << 40)
+      {"TiB", (size_t)1 << 40},
+#endif
+      {"GiB", 1 << 30},
+      {"MiB", 1 << 20},
+      {"KiB", 1 << 10},
+      {"B",         0},
+      {NULL},
+   };
+   for (size_t i = 0; units[i].name; ++i) {
+      if (*sz >= units[i].base) {
+         *sz = *sz / units[i].base;
+         *unit_out = units[i].name;
+         return;
+      }
+   }
+   fail("format_size(): unreachable reached.");
+}
+bool is_symlink(const char* path) {
+   struct stat st;
+   return lstat(path, &st) && ((st.st_mode & S_IFMT) == S_IFLNK);
+}
+bool dir_is_empty(const char* path) {
+   DIR* dir;
+   check(dir = opendir(path), != NULL);
+
+   struct dirent* ent;
+   bool empty = true;
+   while ((ent = readdir(dir)) != NULL) {
+      if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+         continue;
+      empty = false;
+      break;
+   }
+   closedir(dir);
+   return empty;
 }

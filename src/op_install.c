@@ -121,6 +121,8 @@ defop(install) {
       // binpkg_install
       binpkg_install(binpkg);
 
+      // TODO: copy the binpkg to /var/cache/minipkg2/binpkgs/
+
       free(binpkg);
    }
 

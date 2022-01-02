@@ -488,3 +488,93 @@ bool binpkg_install(const char* binpkg) {
    }
    return true;
 }
+bool pkg_estimate_size(const char* name, size_t* size_out) {
+   // Check if it is a symlink, if yes report a size of 0.
+   char* dir = xstrcatl(pkgdir, "/", name, NULL);
+   if (is_symlink(dir)) {
+      free(dir);
+      *size_out = 0;
+      return true;
+   }
+
+   // Otherwise read the files file and add the filesize of each installed file.
+   char* path_files = xstrcat(dir, "/files");
+   free(dir);
+   FILE* files = fopen(path_files, "r");
+   if (!files) {
+      error_errno("Failed to open '%s'", path_files);
+      free(path_files);
+      return false;
+   }
+   free(path_files);
+
+   size_t sz = 0;
+   char* line;
+   while ((line = freadline(files)) != NULL) {
+      struct stat st;
+      if (lstat(line, &st) != 0)
+         sz += st.st_size;
+      free(line);
+   }
+   fclose(files);
+   *size_out = sz;
+   return true;
+}
+bool purge_package(const char* name) {
+   char* dir = xstrcatl(pkgdir, "/", name, NULL);
+   if (is_symlink(dir)) {
+      const int ec = unlink(dir);
+      if (ec != 0)
+         error_errno("Failed to unlink '%s'", dir);
+      free(dir);
+      return ec != 0;
+   }
+   char* path_files = xstrcat(dir, "/files");
+   FILE* files_file = fopen(path_files, "r");
+   if (!files_file) {
+      error_errno("Failed to open '%s'", path_files);
+      free(path_files);
+      return false;
+   }
+   char** files = NULL;
+   char* line;
+   while ((line = freadline(files_file)) != NULL) {
+      if (line[0] != '\0') {
+         char* path = xstrcatl(root, "/", line, NULL);
+         buf_push(files, path);
+      }
+      free(line);
+   }
+   fclose(files_file);
+
+   size_t num_removed;
+   do {
+      num_removed = 0;
+   
+      for (size_t i = 0; i < buf_len(files); ++i) {
+         if (remove(files[i]) == 0) {
+            free(files[i]);
+            buf_remove(files, i, 1);
+            ++num_removed;
+         }
+      }
+   } while (num_removed != 0 && buf_len(files) != 0);
+   bool success = true;
+   for (size_t i = 0; i < buf_len(files); ++i) {
+      struct stat st;
+      // Check if file even exists.
+      if (stat(files[i], &st) != 0)
+         continue;
+      
+      if ((st.st_mode & S_IFMT) == S_IFDIR && !is_empty(files[i]))
+         continue;
+
+      error("Failed to delete file '%s'", files[i]);
+      success = false;
+   }
+   if (!success)
+      return free(dir), false;
+
+   rm_rf(dir);
+   return true;
+}

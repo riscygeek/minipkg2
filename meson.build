@@ -16,6 +16,7 @@ sources = [
   'src/op_info.c',
   'src/op_install.c',
   'src/op_list.c',
+  'src/op_purge.c',
   'src/package.c',
   'src/print.c',
   'src/utils.c',

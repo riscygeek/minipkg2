@@ -1,6 +1,7 @@
 #ifndef FILE_MINIPKG2_PACKAGE_H
 #define FILE_MINIPKG2_PACKAGE_H
 #include <stdbool.h>
+#include <stddef.h>
 
 enum package_source {
    PKG_LOCAL,
@@ -40,5 +41,10 @@ void free_package_infos(struct package_info**);
 bool pkg_is_installed(const char* name);
 bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose);
 bool binpkg_install(const char* binpkg);
+
+// Estimate the size of an installed package.
+bool pkg_estimate_size(const char* name, size_t* size_out);
+
+bool purge_package(const char* name);
 
 #endif /* FILE_MINIPKG2_PACKAGE_H */

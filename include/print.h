@@ -17,7 +17,8 @@ void print_errno(int color, const char*, ...);
 #define warn(...)          println(COLOR_WARN, __VA_ARGS__)
 #define error(...)         println(COLOR_ERROR, __VA_ARGS__)
 #define fail(...)          (error(__VA_ARGS__), exit(1))
-#define error_errno(...)   (print_errno(31, __VA_ARGS__))
+#define warn_errno(...)    (print_errno(COLOR_WARN, __VA_ARGS__))
+#define error_errno(...)   (print_errno(COLOR_ERROR, __VA_ARGS__))
 #define fail_errno(...)    (error_errno(__VA_ARGS__), exit(1))
 
 // Check if ((`code` `cmp`) == 1); else fail.

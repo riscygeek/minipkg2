@@ -1,8 +1,16 @@
+# Compiler definitions.
+CC 		?= gcc
+CFLAGS 	+= -std=gnu11 -Wall -Wextra -Og -g -Iinclude
 
-CC ?= gcc
-CFLAGS ?= -std=gnu11 -Wall -Wextra -Og -g -Iinclude -Wno-missing-field-initializers -Wno-unused-value
-CPPFLAGS ?= -DHAS_LIBCURL=1
-LIBS = -lcurl
+# Install directories.
+prefix	?= /usr/local
+bindir	?= bin
+
+# Enable/disable support for downloading packaes with libcurl.
+ifeq ($(HAS_LIBCURL),1)
+CPPFLAGS += -DHAS_LIBCURL=1
+LIBS 		+= -lcurl
+endif
 
 sources = $(wildcard src/*.c)
 objects = $(patsubst src/%.c,obj/%.o,$(sources))
@@ -16,8 +24,11 @@ obj/%.o: src/%.c include Makefile
 	@mkdir -p obj
 	$(CC) -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
 
+install:
+	install -vDm755 minipkg2 $(DESTDIR)$(prefix)/$(bindir)/minipkg2
+
 clean:
 	rm -rf obj
 	rm -f minipkg2
 
-.PHONY: all clean
+.PHONY: all install clean

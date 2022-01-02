@@ -44,7 +44,7 @@ When building a package these directories are created:
 
 ## package.build Layout
 The `package.build` file format is inspired by Arch Linux's PKGBUILD format. \
-Here's an example [hello-world](https://github.com/riscygeek/hello-world) package.
+Here's an example [hello-world](https://github.com/riscygeek/hello-world) package:
 ```
 # Declare some self-explaining package details.
 pkgname=hello-world

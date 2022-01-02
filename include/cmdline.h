@@ -3,12 +3,19 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+enum cmdline_option_type {
+   OPT_BASIC,     // eg. -y
+   OPT_ARG,       // eg. --branch=BRANCH
+   OPT_ALIAS,     // eg. --yes
+};
+
 struct cmdline_option {
    const char* option;
-   bool has_arg;
+   enum cmdline_option_type type;
    const char* description;
    union {
       const char* arg;
+      const char* alias;
       bool selected;
    };
 };
@@ -28,7 +35,7 @@ extern const struct operation operations[];
 extern const size_t num_operations;
 
 int parse_cmdline(int argc, char* argv[]);
-const struct cmdline_option* op_get_opt(const struct operation*, const char*);
+struct cmdline_option* op_get_opt(const struct operation*, const char*);
 bool op_is_set(const struct operation* op, const char* opt);
 
 #define op_get_arg(op, name)  (op_get_opt(op, name)->arg)

@@ -6,12 +6,14 @@
 #include "buf.h"
 
 struct cmdline_option purge_options[] = {
-   { "-y",        false, "Don't ask for confirmation.",  {NULL}, },
+   { "-y",        OPT_BASIC, "Don't ask for confirmation.",    {NULL}, },
+   { "--yes",     OPT_ALIAS, NULL,                             {"-y"}, },
    {NULL},
 };
 struct cmdline_option remove_options[] = {
-   { "-y",        false, "Don't ask for confirmation.",  {NULL}, },
-   { "--purge",   false, "Purge the package.",           {NULL}, },
+   { "-y",        OPT_BASIC, "Don't ask for confirmation.",  {NULL}, },
+   { "--yes",     OPT_ALIAS, NULL,                             {"-y"}, },
+   { "--purge",   OPT_BASIC, "Purge the package.",           {NULL}, },
    {NULL},
 };
 
@@ -98,8 +100,11 @@ static int perform(const struct operation* op, char** args, size_t num_args, boo
    format_size(&total_size, &unit);
    log("Total Removal Size: %zu%s", total_size, unit);
    log("");
-   if (!op_is_set(op, "-y") && !yesno("Do you want to %s these packages?", true, purge ? "purge" : "remove"))
+   if (!op_is_set(op, "-y")) {
+      if (!yesno("Do you want to %s these packages?", true, purge ? "purge" : "remove"))
       return 1;
+      log("");
+   }
 
    for (size_t i = 0; i < buf_len(selected); ++i) {
       const struct package_info* pi = selected[i];

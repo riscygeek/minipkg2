@@ -6,9 +6,9 @@
 #include "git.h"
 
 struct cmdline_option repo_options[] = {
-   { "--init",    true,  "Initialize the repository.",      {NULL},  },
-   { "--sync",    false, "Synchronize the repository.",     {NULL},  },
-   { "--branch",  true,  "Change to a different branch..",  {NULL},  },
+   { "--init",    OPT_ARG,    "Initialize the repository.",      {NULL},  },
+   { "--sync",    OPT_BASIC,  "Synchronize the repository.",     {NULL},  },
+   { "--branch",  OPT_ARG,    "Change to a different branch..",  {NULL},  },
    { NULL },
 };
 

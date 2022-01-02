@@ -62,6 +62,16 @@ static void print_usage(void) {
    fputs("Usage: minipkg2 --help\n", stderr);
 }
 
+static struct cmdline_option* resolve_opt(const struct operation* op, const struct cmdline_option* opt) {
+   while (opt->type == OPT_ALIAS) {
+      struct cmdline_option* new_opt = op_get_opt(op, opt->alias);
+      if (!opt)
+         fail("Option '%s' is alias of non-existent option '%s'", opt->option, opt->alias);
+      opt = new_opt;
+   }
+   return (struct cmdline_option*)opt;
+}
+
 defop(help) {
    (void)op;
    if (num_args == 0) {
@@ -80,7 +90,18 @@ defop(help) {
       if (op2->options[0].option != NULL) {
          puts("\nOptions:");
          for (size_t i = 0; op2->options[i].option != NULL; ++i) {
-            print_opt(op2->options[i].option, op2->options[i].description);
+            const struct cmdline_option* opt = &op2->options[i];
+            if (opt->type == OPT_ALIAS) {
+               char* msg = xstrcatl("Alias for ", opt->alias, ".");
+               print_opt(opt->option, msg);
+               free(msg);
+            } else if (opt->type == OPT_ARG) {
+               char* option = xstrcat(opt->option, " <ARG>");
+               print_opt(option, opt->description);
+               free(option);
+            } else {
+               print_opt(opt->option, opt->description);
+            }
          }
       }
       puts("\nWritten by Benjamin Stürz <benni@stuerz.xyz>");
@@ -163,17 +184,18 @@ int parse_cmdline(int argc, char* argv[]) {
          }
          for (size_t i = 0; op->options[i].option; ++i) {
             struct cmdline_option* opt = &op->options[i];
-            if (opt->has_arg) {
+            struct cmdline_option* real_opt = resolve_opt(op, opt);
+            if (real_opt->type == OPT_ARG) {
                const size_t len = strlen(opt->option);
                if (!strncmp(argv[arg], opt->option, len)) {
                   found_opt = true;
                   if (argv[arg][len] == '=') {
-                     opt->arg = argv[arg] + len + 1;
+                     real_opt->arg = argv[arg] + len + 1;
                   } else {
                      const char* next = argv[arg + 1];
                      if (!next || next[0] == '-')
                         fail("Option '%s' expects an argument.", argv[arg]);
-                     opt->arg = next;
+                     real_opt->arg = next;
                      ++arg;
                   }
                   break;
@@ -181,7 +203,7 @@ int parse_cmdline(int argc, char* argv[]) {
             } else {
                if (!strcmp(argv[arg], opt->option)) {
                   found_opt = true;
-                  opt->selected = true;
+                  real_opt->selected = true;
                   break;
                }
             }
@@ -201,11 +223,14 @@ int parse_cmdline(int argc, char* argv[]) {
    return op->run(op, args, buf_len(args));
 }
 
-const struct cmdline_option* op_get_opt(const struct operation* op, const char* name) {
+struct cmdline_option* op_get_opt(const struct operation* op, const char* name) {
    for (size_t i = 0; op->options[i].option; ++i) {
-      const struct cmdline_option* opt = &op->options[i];
-      if (!strcmp(opt->option, name))
+      struct cmdline_option* opt = &op->options[i];
+      if (!strcmp(opt->option, name)) {
+         if (opt->type == OPT_ARG)
+            return op_get_opt(op, opt->alias);
          return opt;
+      }
    }
    return NULL;
 }
@@ -213,5 +238,5 @@ bool op_is_set(const struct operation* op, const char* name) {
    const struct cmdline_option* opt = op_get_opt(op, name);
    if (!opt)
       fail("op_is_set(): No such option: %s", name);
-   return opt->has_arg ? !!opt->arg : opt->selected;
+   return opt->type == OPT_ARG ? !!opt->arg : opt->selected;
 }

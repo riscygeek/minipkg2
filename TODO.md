@@ -6,7 +6,7 @@
 - [ ] Copy Man page from [original minipkg](https://github.com/riscygeek/micro-linux/blob/e5e44de4fb51311958726bf58a0148af3f2b28dc/minipkg/minipkg.8)
 - [ ] /etc/minipkg2.conf
 - [ ] /usr/lib/minipkg2/env.bash
-- [ ] Support for option aliases (e.g. --yes for -y)
+- [x] Support for option aliases (e.g. --yes for -y)
 - [ ] Generate package.info files instead of copying package.build
 - [ ] Add post-install script support
 - [ ] Merge code for parsing global and per-operation options
@@ -27,7 +27,8 @@
 ## New Options
 
 ### install
-- [x] --clean-build   (Delete old build files before building)
+- [x] --clean-build
+- [ ] --builddir=
 
 ### download-source
 - [ ] --no-deps       (Don't download the dependencies)

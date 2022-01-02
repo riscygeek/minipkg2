@@ -6,8 +6,9 @@
 #include "buf.h"
 
 struct cmdline_option install_options[] = {
-   { "-y",              false, "Don't ask for confirmation.",  {NULL}, },
-   { "--clean-build",   false, "Perform a clean build.",       {NULL}, },
+   { "-y",              OPT_BASIC, "Don't ask for confirmation.",    {NULL}, },
+   { "--yes",           OPT_ALIAS, NULL,                             {"-y"}, },
+   { "--clean-build",   OPT_BASIC, "Perform a clean build.",         {NULL}, },
    { NULL },
 };
 
@@ -81,9 +82,11 @@ defop(install) {
       log("");
    }
 
-   if (!op_is_set(op, "-y") && !yesno("Proceed with installation?", true))
-      return 1;
-   log("");
+   if (!op_is_set(op, "-y")) {
+      if (!yesno("Proceed with installation?", true))
+         return 1;
+      log("");
+   }
 
    if (op_is_set(op, "--clean-build")) {
       log("Cleanig the build directories...");

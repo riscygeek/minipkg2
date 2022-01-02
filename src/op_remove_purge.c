@@ -101,8 +101,9 @@ static int perform(char** args, size_t num_args, bool purge) {
    for (size_t i = 0; i < buf_len(selected); ++i) {
       const struct package_info* pi = selected[i];
       const struct package* pkg = pi->pkg;
-      log("(%zu/%zu) Purging %s:%s...",
+      log("(%zu/%zu) %s %s:%s...",
             i+1, buf_len(selected),
+            purge ? "Purging" : "Removing",
             pkg->name, pkg->version);
       if (!purge_package(pkg->name)) {
          error("Failed to purge %s.", pkg->name);

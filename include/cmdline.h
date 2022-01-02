@@ -20,6 +20,7 @@ struct operation {
    bool supports_args;
    size_t min_args;
    const char* usage;
+   const char* description;
 };
 
 

@@ -19,14 +19,14 @@ extern struct cmdline_option purge_options[];
 extern struct cmdline_option remove_options[];
 
 const struct operation operations[] = {
-   { "help",            no_options,       &op_help,   true,  0, " [operation]",        },
-   { "install",         install_options,  &op_install,true,  1, " [-v] <package(s)>",  },
-   { "remove",          remove_options,   &op_remove, true,  1, " <package(s)>",       },
-   { "purge",           purge_options,    &op_purge,  true,  1, " <package(s)>",       },
-   { "list",            list_options,     &op_list,   true,  0, " [options]",          },
-   { "info",            info_options,     &op_info,   true,  1, " [options] <package>",},
-   { "download-source", no_options,       &op_unimp,  true,  1, " <package(s)>",       },
-   { "clean-cache",     no_options,       &op_unimp,  false, 0, "",                    },
+   { "help",            no_options,       &op_help,   true,  0, " [operation]",        "Show some help.", },
+   { "install",         install_options,  &op_install,true,  1, " [-v] <package(s)>",  "Build and install packages.", },
+   { "remove",          remove_options,   &op_remove, true,  1, " <package(s)>",       "Remove packages.", },
+   { "purge",           purge_options,    &op_purge,  true,  1, " <package(s)>",       "Remove packages without checking for reverse-dependencies.", },
+   { "list",            list_options,     &op_list,   true,  0, " [options]",          "List packages or files of packages.", },
+   { "info",            info_options,     &op_info,   true,  1, " [options] <package>","Show information about a package.", },
+   { "download-source", no_options,       &op_unimp,  true,  1, " <package(s)>",       "Download the source files of a package.", },
+   { "clean-cache",     no_options,       &op_unimp,  false, 0, "",                    "Remove build files.", },
 };
 
 const size_t num_operations = arraylen(operations);
@@ -57,9 +57,10 @@ defop(help) {
          error("Invalid operation: %s", args[0]);
          return 1;
       }
-      puts("Micro-Linux Package Manager 2\n");
-      puts("Usage:");
+      puts("Micro-Linux Package Manager 2");
+      puts("\nUsage:");
       printf("  minipkg2 %s%s\n", op2->name, op2->usage);
+      printf("\nDescription:\n  %s\n", op2->description);
 
       if (op2->options[0].option != NULL) {
          puts("\nOptions:");

@@ -16,6 +16,7 @@ void print_errno(int color, const char*, ...);
 #define COLOR_INFO         34
 
 #define log(...)           (verbosity >= 1 ? (println(COLOR_LOG, __VA_ARGS__), 0) : 0)
+#define info(...)          println(COLOR_INFO, __VA_ARGS__)
 #define warn(...)          println(COLOR_WARN, __VA_ARGS__)
 #define error(...)         println(COLOR_ERROR, __VA_ARGS__)
 #define fail(...)          (error(__VA_ARGS__), exit(1))

@@ -31,6 +31,8 @@ int parse_cmdline(int argc, char* argv[]);
 const struct cmdline_option* op_get_opt(const struct operation*, const char*);
 bool op_is_set(const struct operation* op, const char* opt);
 
+#define op_get_arg(op, name)  (op_get_opt(op, name)->arg)
+
 #define defop(name) int op_##name(const struct operation* op, char** args, size_t num_args)
 
 defop(help);
@@ -42,5 +44,6 @@ defop(list);
 defop(info);
 defop(download_source);
 defop(clean_cache);
+defop(repo);
 
 #endif /* FILE_MINIPKG2_CMDLINE_H */

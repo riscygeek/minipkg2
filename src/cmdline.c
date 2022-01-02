@@ -17,6 +17,7 @@ extern struct cmdline_option list_options[];
 extern struct cmdline_option install_options[];
 extern struct cmdline_option purge_options[];
 extern struct cmdline_option remove_options[];
+extern struct cmdline_option repo_options[];
 
 const struct operation operations[] = {
    { "help",            no_options,       &op_help,   true,  0, " [operation]",        "Show some help.", },
@@ -27,6 +28,7 @@ const struct operation operations[] = {
    { "info",            info_options,     &op_info,   true,  1, " [options] <package>","Show information about a package.", },
    { "download-source", no_options,       &op_unimp,  true,  1, " <package(s)>",       "Download the source files of a package.", },
    { "clean-cache",     no_options,       &op_unimp,  false, 0, "",                    "Remove build files.", },
+   { "repo",            repo_options,     &op_repo,   false, 0, "",                    "Manage the repository." },
 };
 
 const size_t num_operations = arraylen(operations);
@@ -165,7 +167,15 @@ int parse_cmdline(int argc, char* argv[]) {
                const size_t len = strlen(opt->option);
                if (!strncmp(argv[arg], opt->option, len)) {
                   found_opt = true;
-                  opt->arg = argv[arg] + len;
+                  if (argv[arg][len] == '=') {
+                     opt->arg = argv[arg] + len + 1;
+                  } else {
+                     const char* next = argv[arg + 1];
+                     if (!next || next[0] == '-')
+                        fail("Option '%s' expects an argument.", argv[arg]);
+                     opt->arg = next;
+                     ++arg;
+                  }
                   break;
                }
             } else {

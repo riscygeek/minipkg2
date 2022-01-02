@@ -43,6 +43,7 @@ bool  is_symlink(const char*);
 bool  dir_is_empty(const char*);
 bool  xstreql_impl(const char*, ...);
 bool  is_dir(const char*);
+char* xpread(const char*);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')

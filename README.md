@@ -13,6 +13,10 @@ Planned features can be seen in the [TODO.md](TODO.md) file.
 ## Installation
 This project supports 2 installation methods: traditional make, meson.
 
+### Dependencies
+- libcurl (optional, required to download packages)
+- git (runtime, optional, required for managing the repo)
+
 ### Meson (recommended)
 ```
 meson setup build

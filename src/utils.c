@@ -308,3 +308,20 @@ bool is_dir(const char* path) {
    struct stat st;
    return stat(path, &st) == 0 && ((st.st_mode & S_IFMT) == S_IFDIR);
 }
+char* xpread(const char* cmd) {
+   FILE* file = popen(cmd, "r");
+   if (!file)
+      return NULL;
+
+   char* reply = fread_file(file);
+
+   const int ec = pclose(file);
+   if (ec != 0)
+      return free(reply), NULL;
+
+   const size_t len = strlen(reply);
+   if (len >= 1 && reply[len-1] == '\n')
+      reply[len-1] = '\0';
+
+   return reply;
+}

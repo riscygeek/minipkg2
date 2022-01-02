@@ -9,6 +9,7 @@
 - [ ] Support for option aliases (e.g. --yes for -y)
 - [ ] Generate package.info files instead of copying package.build
 - [ ] Add post-install script support
+- [ ] Merge code for parsing global and per-operation options
 
 
 ## Operations
@@ -19,7 +20,7 @@
 
 ### New
 - [ ] build (needs bdepends)
-- [ ] update or sync-repo
+- [x] repo
 - [ ] upgrade (needs update)
 
 

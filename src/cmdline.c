@@ -227,7 +227,7 @@ struct cmdline_option* op_get_opt(const struct operation* op, const char* name) 
    for (size_t i = 0; op->options[i].option; ++i) {
       struct cmdline_option* opt = &op->options[i];
       if (!strcmp(opt->option, name)) {
-         if (opt->type == OPT_ARG)
+         if (opt->type == OPT_ALIAS)
             return op_get_opt(op, opt->alias);
          return opt;
       }

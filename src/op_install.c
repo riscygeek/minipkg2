@@ -38,7 +38,7 @@ static bool pkg_download_sources(struct package* pkg) {
       if (!filename)
          fail("Invalid URL: %s", url);
       ++filename;
-      char* path = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/src/", filename, NULL);
+      char* path = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/src/", filename);
 
       if (!download(url, path, false)) {
          //error("Failed to download '%s'", url);
@@ -107,7 +107,7 @@ defop(install) {
       log("(%zu/%zu) Building %s:%s...",
             i+1, num_pkgs,
             pkg->name, pkg->version);
-      char* binpkg = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/", pkg->name, ":", pkg->version, ".tar.gz", NULL);
+      char* binpkg = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/", pkg->name, ":", pkg->version, ".tar.gz");
 
       // Build the package.
       if (!pkg_build(pkg, binpkg, verbose)) {

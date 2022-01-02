@@ -21,7 +21,7 @@
 void* xmalloc(size_t);
 char* xstrdup(const char*);
 char* xstrcat(const char*, const char*);
-char* xstrcatl(const char*, const char*, ...);
+char* xstrcatl_impl(const char*, const char*, ...);
 char* freadline(FILE*);
 char** freadlines(FILE*);
 char* read_file(const char*);
@@ -46,5 +46,6 @@ bool  dir_is_empty(const char*);
 #define isname(ch)            (isalnum(ch) || (ch) == '_')
 #define strcont(str, ch)      (strchr(str, ch) != NULL)
 #define starts_with(s1, s2)   (!strncmp((s1), (s2), strlen(s2)))
+#define xstrcatl(...)         xstrcatl_impl(__VA_ARGS__, NULL)
 
 #endif /* FILE_MINIPKG2_UTILS_H */

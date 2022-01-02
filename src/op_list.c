@@ -42,7 +42,7 @@ defop(list) {
             ec = 1;
             continue;
          }
-         char* path = xstrcatl(pkgdir, "/", name, "/files", NULL);
+         char* path = xstrcatl(pkgdir, "/", name, "/files");
          char* files = read_file(path);
          if (files) {
             printf("%s", files);

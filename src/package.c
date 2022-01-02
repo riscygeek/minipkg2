@@ -178,10 +178,10 @@ struct package* find_package(const char* name, enum package_source src) {
    char* path;
    switch (src) {
    case PKG_LOCAL:
-      path = xstrcatl(pkgdir, "/", name, "/package.info", NULL);
+      path = xstrcatl(pkgdir, "/", name, "/package.info");
       break;
    case PKG_REPO:
-      path = xstrcatl(repodir, "/", name, "/package.build", NULL);
+      path = xstrcatl(repodir, "/", name, "/package.build");
       break;
    default:
       fail("find_package(): Invalid package source %d", src);
@@ -224,7 +224,7 @@ bool find_packages(struct package_info** pkgs, enum package_source src) {
          continue;
       struct package_info info;
       const char* name = ent->d_name;
-      char* dirpath = xstrcatl(base_dir, "/", name, NULL);
+      char* dirpath = xstrcatl(base_dir, "/", name);
       char* path = xstrcat(dirpath, suffix);
 
       struct stat st;
@@ -281,14 +281,14 @@ struct package_info* find_package_info(struct package_info* const* pkgs, const c
    return bsearch(pkg, *pkgs, buf_len(*pkgs), sizeof(struct package_info), search_func);
 }
 bool pkg_is_installed(const char* name) {
-   char* dir = xstrcatl(pkgdir, "/", name, NULL);
+   char* dir = xstrcatl(pkgdir, "/", name);
    struct stat st;
    const bool exists = stat(dir, &st) == 0;
    free(dir);
    return exists;
 }
 bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose) {
-   char* pkg_basedir    = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, NULL);
+   char* pkg_basedir    = xstrcatl(builddir, "/", pkg->name, "-", pkg->version);
    char* pkg_srcdir     = xstrcat(pkg_basedir, "/src");
    char* pkg_builddir   = xstrcat(pkg_basedir, "/build");
    char* pkg_pkgdir     = xstrcat(pkg_basedir, "/pkg");
@@ -410,7 +410,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, bool verbose) {
 }
 bool binpkg_install(const char* binpkg) {
    // Read package name.
-   char* cmd = xstrcatl("tar -xf '", binpkg, "' .meta/name -O", NULL);
+   char* cmd = xstrcatl("tar -xf '", binpkg, "' .meta/name -O");
    FILE* file;
    check(file = popen(cmd, "r"), != NULL);
    char* pkgname = fread_file(file);
@@ -422,7 +422,7 @@ bool binpkg_install(const char* binpkg) {
 
    // Read package version.
    /*
-   cmd = xstrcatl("tar -xf '", binpkg, "' .meta/version -O", NULL);
+   cmd = xstrcatl("tar -xf '", binpkg, "' .meta/version -O");
    check(file = popen(cmd, "r"), != NULL);
    char* pkgver = fread_file(file);
    if (pclose(file) != 0) {
@@ -437,7 +437,7 @@ bool binpkg_install(const char* binpkg) {
       // TODO: remove old package
    }
 
-   char* pkg_pkgdir = xstrcatl(pkgdir, "/", pkgname, NULL);
+   char* pkg_pkgdir = xstrcatl(pkgdir, "/", pkgname);
    mkdir_p(root, 0755);
    mkdir_p(pkg_pkgdir, 0755);
 
@@ -447,7 +447,7 @@ bool binpkg_install(const char* binpkg) {
    check(files = fopen(path, "w"), != NULL);
    free(path);
 
-   cmd = xstrcatl("tar -tf '", binpkg, "' --exclude='.meta' | awk '{printf \"/%s\\n\", $0}'", NULL);
+   cmd = xstrcatl("tar -tf '", binpkg, "' --exclude='.meta' | awk '{printf \"/%s\\n\", $0}'");
    check(file = popen(cmd, "r"), != NULL);
    free(cmd);
 
@@ -465,7 +465,7 @@ bool binpkg_install(const char* binpkg) {
    check(pinfo = fopen(path, "w"), != NULL);
    free(path);
 
-   cmd = xstrcatl("tar -xf '", binpkg, "' .meta/package.info -O", NULL);
+   cmd = xstrcatl("tar -xf '", binpkg, "' .meta/package.info -O");
    check(file = popen(cmd, "r"), != NULL);
    free(cmd);
 
@@ -478,7 +478,7 @@ bool binpkg_install(const char* binpkg) {
    }
 
    // Actually install the package
-   cmd = xstrcatl("tar -C '", root, "' -xf '", binpkg, "' --exclude='.meta'", NULL);
+   cmd = xstrcatl("tar -C '", root, "' -xf '", binpkg, "' --exclude='.meta'");
    const int ec = system(cmd);
    free(cmd);
 
@@ -490,7 +490,7 @@ bool binpkg_install(const char* binpkg) {
 }
 bool pkg_estimate_size(const char* name, size_t* size_out) {
    // Check if it is a symlink, if yes report a size of 0.
-   char* dir = xstrcatl(pkgdir, "/", name, NULL);
+   char* dir = xstrcatl(pkgdir, "/", name);
    if (is_symlink(dir)) {
       free(dir);
       *size_out = 0;
@@ -521,7 +521,7 @@ bool pkg_estimate_size(const char* name, size_t* size_out) {
    return true;
 }
 bool purge_package(const char* name) {
-   char* dir = xstrcatl(pkgdir, "/", name, NULL);
+   char* dir = xstrcatl(pkgdir, "/", name);
    if (is_symlink(dir)) {
       const int ec = unlink(dir);
       if (ec != 0)
@@ -540,7 +540,7 @@ bool purge_package(const char* name) {
    char* line;
    while ((line = freadline(files_file)) != NULL) {
       if (line[0] != '\0') {
-         char* path = xstrcatl(root, "/", line, NULL);
+         char* path = xstrcatl(root, "/", line);
          buf_push(files, path);
       }
       free(line);

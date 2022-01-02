@@ -34,7 +34,7 @@ char* xstrcat(const char* s1, const char* s2) {
    new_str[l1 + l2] = '\0';
    return new_str;
 }
-char* xstrcatl(const char* s1, const char* s2, ...) {
+char* xstrcatl_impl(const char* s1, const char* s2, ...) {
    va_list ap;
    va_start(ap, s2);
    char* new_str = xstrcat(s1, s2);
@@ -147,7 +147,7 @@ bool rm_rf(const char* path) {
          if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
             continue;
 
-         char* new_path = xstrcatl(path, "/", ent->d_name, NULL);
+         char* new_path = xstrcatl(path, "/", ent->d_name);
          success &= rm_rf(new_path);
          free(new_path);
       }

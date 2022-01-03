@@ -39,7 +39,7 @@ void free_package(struct package*);
 void free_package_infos(struct package_info**);
 
 bool pkg_is_installed(const char* name);
-bool pkg_build(struct package* pkg, const char* bmpkg);
+bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir);
 bool binpkg_install(const char* binpkg);
 
 // Estimate the size of an installed package.

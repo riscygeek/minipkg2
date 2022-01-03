@@ -16,7 +16,6 @@
 #include "buf.h"
 
 #define SHELL_SCRIPT_HEADER                                                                     \
-   "[[ -f $ROOT/etc/minipkg2.conf ]] && source \"$ROOT/etc/minipkg2.conf\"\n"                   \
    "[[ -f $ROOT/usr/lib/minipkg2/env.bash ]] && source \"$ROOT/usr/lib/minipkg2/env.bash\"\n"   \
    "source \"$pkgfile\"\n"
 
@@ -296,7 +295,7 @@ bool pkg_is_installed(const char* name) {
    free(dir);
    return exists;
 }
-bool pkg_build(struct package* pkg, const char* bmpkg) {
+bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
    char* pkg_basedir    = xstrcatl(builddir, "/", pkg->name, "-", pkg->version);
    char* pkg_srcdir     = xstrcat(pkg_basedir, "/src");
    char* pkg_builddir   = xstrcat(pkg_basedir, "/build");
@@ -312,6 +311,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg) {
       "cd \"$builddir\"\n"
       "S=\"$srcdir\"\n"
       "B=\"$builddir\"\n"
+      "F=\"$filesdir\"\n"
       "echo \"prepare()\"\n"
       "prepare || exit 1\n"
       "echo \"build()\"\n"
@@ -343,6 +343,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg) {
       setenv("srcdir",     pkg_srcdir,    1);
       setenv("builddir",   pkg_builddir,  1);
       setenv("pkgdir",     pkg_pkgdir,    1);
+      setenv("filesdir",   filesdir,      1);
 
       // Close unused pipes.
       close(pipefd[0][1]);
@@ -496,6 +497,8 @@ bool binpkg_install(const char* binpkg) {
       error("Failed to install package");
       return false;
    }
+   // TODO: copy the binpkg to /var/cache/minipkg2/binpkgs/
+   // TODO: handling of package replacement.
    return true;
 }
 bool pkg_estimate_size(const char* name, size_t* size_out) {

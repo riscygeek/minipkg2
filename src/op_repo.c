@@ -30,7 +30,7 @@ defop(repo) {
    check_git();
    if (op_is_set(op, "--init")) {
       rm_rf(repodir);
-      if (!git_clone(op_get_arg(op, "--init"), op_get_arg(op, "--branch"), repodir))
+      if (!git_clone(op_get_arg(op, "--init"), repodir, op_get_arg(op, "--branch")))
          fail("Failed to initialize repo.");
       return 0;
    }

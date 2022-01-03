@@ -122,11 +122,15 @@ defop(install) {
             i+1, num_pkgs,
             pkg->name, pkg->version);
       char* binpkg = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/", pkg->name, ":", pkg->version, ".tar.gz");
+      char* filesdir = xstrcatl(repodir, "/", pkg->name, "/files");
 
       // Build the package.
-      if (!pkg_build(pkg, binpkg)) {
-         return 1;
-      }
+      success = pkg_build(pkg, binpkg, filesdir);
+
+      free(filesdir);
+
+      if (!success)
+         return free(binpkg), 1;
 
       log("(%zu/%zu) Installing %s:%s...",
             i+1, num_pkgs,
@@ -134,10 +138,8 @@ defop(install) {
 
       // binpkg_install
       binpkg_install(binpkg);
-
-      // TODO: copy the binpkg to /var/cache/minipkg2/binpkgs/
-
       free(binpkg);
+
    }
 
    return 0;

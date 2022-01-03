@@ -404,7 +404,8 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
    char* meta_name      = xstrcat(metadir, "/name");
    char* meta_version   = xstrcat(metadir, "/version");
    char* meta_pkginfo   = xstrcat(metadir, "/package.info");
-   check0(mkdir(metadir, 0755));
+   if (!is_dir(metadir))
+      check0(mkdir(metadir, 0755));
    checkv(write_file(meta_name, pkg->name), true);
    checkv(write_file(meta_version, pkg->version), true);
    checkv(copy_file(pkg->pkgfile, meta_pkginfo), true);

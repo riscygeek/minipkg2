@@ -12,6 +12,7 @@
 - [ ] Merge code for parsing global and per-operation options
 - [ ] bash-completion
 - [ ] zsh-completion
+- [ ] Cross-compilation with $HOST variable (requires build operation).
 
 
 ## Operations

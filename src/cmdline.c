@@ -18,6 +18,7 @@ extern struct cmdline_option install_options[];
 extern struct cmdline_option purge_options[];
 extern struct cmdline_option remove_options[];
 extern struct cmdline_option repo_options[];
+extern struct cmdline_option clean_options[];
 
 const struct operation operations[] = {
    { "help",            no_options,       &op_help,   true,  0, " [operation]",        "Show some help.", },
@@ -27,7 +28,7 @@ const struct operation operations[] = {
    { "list",            list_options,     &op_list,   true,  0, " [options]",          "List packages or files of packages.", },
    { "info",            info_options,     &op_info,   true,  1, " [options] <package>","Show information about a package.", },
    { "download-source", no_options,       &op_unimp,  true,  1, " <package(s)>",       "Download the source files of a package.", },
-   { "clean-cache",     no_options,       &op_unimp,  false, 0, "",                    "Remove build files.", },
+   { "clean",           no_options,       &op_clean,  false, 0, "",                    "Remove build files.", },
    { "repo",            repo_options,     &op_repo,   false, 0, "[options]",           "Manage the repository." },
 };
 

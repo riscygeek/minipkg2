@@ -50,7 +50,7 @@ defop(purge);
 defop(list);
 defop(info);
 defop(download_source);
-defop(clean_cache);
+defop(clean);
 defop(repo);
 
 #endif /* FILE_MINIPKG2_CMDLINE_H */

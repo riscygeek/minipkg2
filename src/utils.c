@@ -154,6 +154,9 @@ bool rm_rf(const char* path) {
 
       closedir(dir);
    }
+   if (verbosity >= 3) {
+      log("Removing %s...", path);
+   }
    success &= remove(path) == 0;
    return success;
 }

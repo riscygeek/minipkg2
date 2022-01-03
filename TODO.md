@@ -18,7 +18,7 @@
 
 ### New
 - [ ] download-sources
-- [ ] clean-cache
+- [x] clean
 - [ ] build (needs bdepends)
 - [x] repo
 - [ ] upgrade

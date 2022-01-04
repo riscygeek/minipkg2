@@ -31,12 +31,14 @@ struct operation {
 };
 
 
+extern struct cmdline_option global_options[];
 extern const struct operation operations[];
 extern const size_t num_operations;
 
 int parse_cmdline(int argc, char* argv[]);
 struct cmdline_option* op_get_opt(const struct operation*, const char*);
 bool op_is_set(const struct operation* op, const char* opt);
+const struct operation* get_op(const char* name);
 
 #define op_get_arg(op, name)  (op_get_opt(op, name)->arg)
 

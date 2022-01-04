@@ -31,7 +31,7 @@
 - [x] --clean-build
 - [ ] --builddir=
 - [ ] --no-deps
-- [ ] Replacing of packages/Proper removal of reinstalled packages.
+- [x] Replacing of packages/Proper removal of reinstalled packages.
 
 ### download-source
 - [ ] --no-deps       (Don't download the dependencies)

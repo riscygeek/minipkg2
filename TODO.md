@@ -20,7 +20,7 @@
 ## Operations
 
 ### New
-- [ ] download-sources
+- [x] download
 - [x] clean
 - [ ] build (needs bdepends)
 - [x] repo
@@ -33,8 +33,9 @@
 - [x] --no-deps
 - [x] Replacing of packages/Proper removal of reinstalled packages.
 
-### download-source
+### download
 - [ ] --deps (Also download sources of dependencies)
+- [ ] --dest (Put downloaded files into ...)
 
 ### list
 - [x] --upgradable

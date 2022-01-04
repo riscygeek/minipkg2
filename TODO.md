@@ -12,7 +12,7 @@
 - [x] Merge code for parsing global and per-operation options
 - [ ] bash-completion
 - [ ] zsh-completion
-- [ ] Cross-compilation with $HOST variable (requires build operation).
+- [ ] Cross-compilation with $HOST variable (requires build operation & /etc/minipkg2.conf).
 - [ ] Add support for multiple repos (eg. localrepo)
 - [x] verbose versions of: remove()
 
@@ -25,7 +25,7 @@
 - [ ] build (needs bdepends)
 - [x] repo
 - [ ] upgrade
-- [ ] search (with glob(), options: -E (extended regex))
+- [ ] search
 
 ### install
 - [x] --clean-build
@@ -42,7 +42,14 @@
 - [x] --upgradable
 - [ ] Improve output of --upgradable
 
+### search
+- [ ] -R,--regex
+- [ ] -E,--extended-regex
+- [ ] -f,--full (Search by name, version, description, url)
+
+
 ## package.build
 - [ ] Support for provides & conflicts
 - [ ] Split depends into {b,r,}depends
 - [ ] arch
+- [ ] features=(cross-compile)

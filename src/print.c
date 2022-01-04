@@ -6,6 +6,8 @@
 #include <errno.h>
 #include "print.h"
 
+enum verbosity_level verbosity = V_NORMAL;
+
 static void vprint(int color, const char* fmt, va_list ap) {
    if (color)
       fprintf(stderr, "\033[%dm*\033[0m ", color);

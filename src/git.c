@@ -19,11 +19,11 @@ char* git_version(void) {
    return str;
 }
 static const char* verbosity_option(void) {
-   if (verbosity <= 1) {
+   if (verbosity <= V_NORMAL) {
       return "--quiet";
-   } else if (verbosity == 2) {
+   } else if (verbosity == V_VERBOSE) {
       return "";
-   } else {
+   } else /* verbosity >= V_EXTRA_VERBOSE */ {
       return "--verbose";
    }
 }

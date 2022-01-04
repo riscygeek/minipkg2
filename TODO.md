@@ -14,8 +14,7 @@
 - [ ] zsh-completion
 - [ ] Cross-compilation with $HOST variable (requires build operation).
 - [ ] Add support for multiple repos (eg. localrepo)
-- [ ] vlog(vlevel, fmt, ...) instead of if (verbosity >= N) log(...); 
-- [ ] verbose versions of: remove()
+- [x] verbose versions of: remove()
 
 
 ## Operations

@@ -154,10 +154,7 @@ bool rm_rf(const char* path) {
 
       closedir(dir);
    }
-   if (verbosity >= 3) {
-      log("Deleting %s...", path);
-   }
-   success &= remove(path) == 0;
+   success &= rm(path) == 0;
    return success;
 }
 bool copy_file(const char* source, const char* dest) {

@@ -52,7 +52,7 @@ static void print_help(void) {
    print_opt("-h,--help", "Print this page.");
    print_opt("--version", "Print the version.");
    print_opt("-v,--verbose", "Verbose output.");
-   print_opt("-vv", "More verbose output.");
+   print_opt("-vv", "Extra verbose output.");
    print_opt("-q,--quiet", "Suppress output.");
    puts("Note: global options must precede the operation.");
    puts("\nWritten by Benjamin Stürz <benni@stuerz.xyz>");
@@ -154,12 +154,13 @@ int parse_cmdline(int argc, char* argv[]) {
          if (!*root)
             fail("Expected argument for --root=");
       } else if (!strcmp(argv[arg], "--verbose")) {
-         verbosity = 2;
+         verbosity = V_VERBOSE;
       } else if (xstreql(argv[arg], "-q", "--quiet")) {
-         verbosity = 0;
-      } else if (starts_with(argv[arg], "-v")) {
-         for (size_t i = 1; argv[arg][i] == 'v'; ++i)
-            ++verbosity;
+         verbosity = V_QUIET;
+      } else if (!strcmp(argv[arg], "-v")) {
+         verbosity = V_VERBOSE;
+      } else if (!strcmp(argv[arg], "-vv")) {
+         verbosity = V_EXTRA_VERBOSE;
       } else {
          fail("Unrecognized command-line option '%s'", argv[arg]);
       }

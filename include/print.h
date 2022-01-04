@@ -3,7 +3,14 @@
 #include <stdnoreturn.h>
 #include <stdbool.h>
 
-extern int verbosity;
+enum verbosity_level {
+   V_QUIET,
+   V_NORMAL,
+   V_VERBOSE,
+   V_EXTRA_VERBOSE,
+};
+
+extern enum verbosity_level verbosity;
 
 void print(int color, const char*, ...);
 void println(int color, const char*, ...);

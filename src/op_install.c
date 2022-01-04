@@ -72,7 +72,7 @@ defop(install) {
    // TODO: handle conflicts and provides
 
    log("");
-   if (verbosity >= 1) {
+   if (verbosity >= V_NORMAL) {
       print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs));
 
       for (size_t i = 0; i < buf_len(pkgs); ++i) {

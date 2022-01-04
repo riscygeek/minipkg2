@@ -92,7 +92,7 @@ static int perform(const struct operation* op, char** args, size_t num_args, boo
       }
    }
 
-   if (verbosity >= 1) {
+   if (verbosity >= V_NORMAL) {
       print(COLOR_LOG, "Packages (%zu)", buf_len(selected));
       for (size_t i = 0; i < buf_len(selected); ++i) {
          fprintf(stderr, " %s", selected[i]->provider_name);

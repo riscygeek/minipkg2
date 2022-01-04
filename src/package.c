@@ -366,7 +366,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
       
       char buffer[100];
       while (fgets(buffer, sizeof(buffer) - 1, log) != NULL) {
-         if (verbosity >= 2)
+         if (verbosity >= V_VERBOSE)
             fputs(buffer, stderr);
          fputs(buffer, logfile);
       }
@@ -495,9 +495,7 @@ bool binpkg_install(const char* binpkg) {
 
    // ... and delete them.
    for (size_t i = 0; i < buf_len(old_files); ++i) {
-      if (verbosity >= 2)
-         log("Deleting %s...", old_files[i]);
-      remove(old_files[i]);
+      rm(old_files[i]);
    }
 
 
@@ -572,7 +570,7 @@ bool purge_package(const char* name) {
       num_removed = 0;
    
       for (size_t i = 0; i < buf_len(files); ++i) {
-         if (remove(files[i]) == 0) {
+         if (rm(files[i]) == 0) {
             free(files[i]);
             buf_remove(files, i, 1);
             ++num_removed;

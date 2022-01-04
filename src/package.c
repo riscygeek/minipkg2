@@ -303,6 +303,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
    
    static const char shell_script[] = {
       SHELL_SCRIPT_HEADER
+      "set -e -v\n"
       "cd \"$builddir\"\n"
       "S=\"$srcdir\"\n"
       "B=\"$builddir\"\n"

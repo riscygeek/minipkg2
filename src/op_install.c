@@ -47,12 +47,26 @@ defop(install) {
 
    struct package** pkgs = NULL;
    for (size_t i = 0; i < num_args; ++i) {
-      struct package_info* info = find_package_info(&infos, args[i]);
-      if (!info || !info->pkg)
-         fail("Package %s not found", args[i]);
-      if (!opt_no_deps)
-         find_dependencies(&pkgs, &infos, info->pkg);
-      add_package(&pkgs, info->pkg, true);
+      if (strcont(args[i], '/') || strcont(args[i], '.')) {
+         // If this is a file
+         if (ends_with(args[i], ".mpkg")) {
+            struct package* pkg = parse_package(args[i]);
+            if (!pkg)
+               fail("Failed to parse '%s'", args[i]);
+            add_package(&pkgs, pkg, true);
+         } else if (ends_with(args[i], ".bmpkg.tar.gz")) {
+            fail("Installing binary packages is currently not supported.");
+         } else {
+            fail("Invalid file format of '%s'.", args[i]);
+         }
+      } else {
+         struct package_info* info = find_package_info(&infos, args[i]);
+         if (!info || !info->pkg)
+            fail("Package %s not found", args[i]);
+         if (!opt_no_deps)
+            find_dependencies(&pkgs, &infos, info->pkg);
+         add_package(&pkgs, info->pkg, true);
+      }
    }
 
    // TODO: handle conflicts and provides
@@ -127,6 +141,8 @@ defop(install) {
       free(binpkg);
 
    }
+
+   free_package_infos(&infos);
 
    return 0;
 }

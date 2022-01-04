@@ -34,7 +34,7 @@
 - [x] Replacing of packages/Proper removal of reinstalled packages.
 
 ### download-source
-- [ ] --no-deps       (Don't download the dependencies)
+- [ ] --deps (Also download sources of dependencies)
 
 ### list
 - [x] --upgradable

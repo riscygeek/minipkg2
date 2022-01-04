@@ -155,7 +155,7 @@ bool rm_rf(const char* path) {
       closedir(dir);
    }
    if (verbosity >= 3) {
-      log("Removing %s...", path);
+      log("Deleting %s...", path);
    }
    success &= remove(path) == 0;
    return success;
@@ -327,4 +327,19 @@ char* xpread(const char* cmd) {
       reply[len-1] = '\0';
 
    return reply;
+}
+void free_strlist(char*** list) {
+   for (size_t i = 0; i < buf_len(*list); ++i) {
+      free((*list)[i]);
+   }
+   buf_free(*list);
+}
+void strlist_remove(char*** list, const char* str) {
+   for (size_t i = 0; i < buf_len(*list); ) {
+      if (!strcmp((*list)[i], str)) {
+         buf_remove(*list, i, 1);
+      } else {
+         ++i;
+      }
+   }
 }

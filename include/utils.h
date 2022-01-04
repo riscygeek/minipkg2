@@ -44,6 +44,8 @@ bool  dir_is_empty(const char*);
 bool  xstreql_impl(const char*, ...);
 bool  is_dir(const char*);
 char* xpread(const char*);
+void  free_strlist(char*** list);
+void  strlist_remove(char*** list, const char* str);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')

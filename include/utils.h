@@ -53,6 +53,6 @@ void  strlist_remove(char*** list, const char* str);
 #define starts_with(s1, s2)   (!strncmp((s1), (s2), strlen(s2)))
 #define xstrcatl(...)         xstrcatl_impl(__VA_ARGS__, NULL)
 #define xstreql(...)          xstreql_impl(__VA_ARGS__, NULL)
-#define rm(file)              (log("Deleting %s...", (file)), remove(file))
+#define rm(file)              (logv(V_VERBOSE, "Deleting %s...", (file)), remove(file))
 
 #endif /* FILE_MINIPKG2_UTILS_H */

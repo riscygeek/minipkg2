@@ -33,25 +33,6 @@ static void find_dependencies(struct package*** pkgs, struct package_info** info
    }
 }
 
-static bool pkg_download_sources(struct package* pkg) {
-   bool success = true;
-   for (size_t i = 0; i < buf_len(pkg->sources); ++i) {
-      const char* url = pkg->sources[i];
-      const char* filename = strrchr(url, '/');
-      if (!filename)
-         fail("Invalid URL: %s", url);
-      ++filename;
-      char* path = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/src/", filename);
-
-      if (!download(url, path, false)) {
-         //error("Failed to download '%s'", url);
-         success = false;
-      }
-
-      free(path);
-   }
-   return success;
-}
 
 defop(install) {
    // TODO: add support for non-repo packages

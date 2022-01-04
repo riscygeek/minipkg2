@@ -43,13 +43,12 @@ bool op_is_set(const struct operation* op, const char* opt);
 #define defop(name) int op_##name(const struct operation* op, char** args, size_t num_args)
 
 defop(help);
-defop(unimp);
 defop(install);
 defop(remove);
 defop(purge);
 defop(list);
 defop(info);
-defop(download_source);
+defop(download);
 defop(clean);
 defop(repo);
 

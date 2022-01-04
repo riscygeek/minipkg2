@@ -22,7 +22,8 @@ void print_errno(int color, const char*, ...);
 #define COLOR_ERROR        31
 #define COLOR_INFO         34
 
-#define log(...)           (verbosity >= 1 ? (println(COLOR_LOG, __VA_ARGS__), 0) : 0)
+#define logv(vl, ...)      (verbosity >= (vl) ? (println(COLOR_LOG, __VA_ARGS__), 0) : 0)
+#define log(...)           logv(V_NORMAL, __VA_ARGS__)
 #define info(...)          println(COLOR_INFO, __VA_ARGS__)
 #define warn(...)          println(COLOR_WARN, __VA_ARGS__)
 #define error(...)         println(COLOR_ERROR, __VA_ARGS__)
@@ -30,6 +31,7 @@ void print_errno(int color, const char*, ...);
 #define warn_errno(...)    (print_errno(COLOR_WARN, __VA_ARGS__))
 #define error_errno(...)   (print_errno(COLOR_ERROR, __VA_ARGS__))
 #define fail_errno(...)    (error_errno(__VA_ARGS__), exit(1))
+
 
 // Check if ((`code` `cmp`) == 1); else fail.
 // Notes:

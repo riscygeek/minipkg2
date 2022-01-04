@@ -415,6 +415,25 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
    free(pkg_pkgdir);
    return true;
 }
+bool pkg_download_sources(struct package* pkg) {
+   bool success = true;
+   for (size_t i = 0; i < buf_len(pkg->sources); ++i) {
+      const char* url = pkg->sources[i];
+      const char* filename = strrchr(url, '/');
+      if (!filename)
+         fail("Invalid URL: %s", url);
+      ++filename;
+      char* path = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/src/", filename);
+
+      if (!download(url, path, false)) {
+         //error("Failed to download '%s'", url);
+         success = false;
+      }
+
+      free(path);
+   }
+   return success;
+}
 bool binpkg_install(const char* binpkg) {
    // Read package name.
    char* cmd = xstrcatl("tar -xf '", binpkg, "' .meta/name -O");

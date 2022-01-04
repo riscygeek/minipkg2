@@ -1,3 +1,6 @@
+VERSION = 0.1
+
+
 # Compiler definitions.
 CC 		?= gcc
 CFLAGS 	+= -std=gnu11 -Wall -Wextra -Og -g -Iinclude
@@ -5,6 +8,8 @@ CFLAGS 	+= -std=gnu11 -Wall -Wextra -Og -g -Iinclude
 # Install directories.
 prefix	?= /usr/local
 bindir	?= bin
+
+CPPFLAGS += -DVERSION=\"$(VERSION)\"
 
 # Enable/disable support for downloading packaes with libcurl.
 ifeq ($(HAS_LIBCURL),1)

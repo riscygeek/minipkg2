@@ -62,24 +62,22 @@ int parse_cmdline(int argc, char* argv[]) {
    for (arg = 1; arg < argc && argv[arg][0] == '-'; ++arg) {
       parse_opt(NULL, &arg, argv, NULL, &stop_opts);
    }
-
-   if (arg == argc) {
-      print_usage();
-      return 1;
-   }
-
-   const struct operation* op = get_op(argv[arg]);
-   if (!op) {
-      fail("Unrecognized operation mode '%s'", argv[arg]);
-   }
-
+   
+   const struct operation* op = NULL;
    char** args = NULL;
-   for (++arg; arg < argc; ++arg) {
-      parse_opt(op, &arg, argv, &args, &stop_opts);
-   }
+   if (arg != argc) {
+      op = get_op(argv[arg]);
+      if (!op) {
+         fail("Unrecognized operation mode '%s'", argv[arg]);
+      }
 
-   if (buf_len(args) < op->min_args)
-      fail("Operation %s needs at least %zu argument(s).", op->name, op->min_args);
+      for (++arg; arg < argc; ++arg) {
+         parse_opt(op, &arg, argv, &args, &stop_opts);
+      }
+
+      if (buf_len(args) < op->min_args)
+         fail("Operation %s needs at least %zu argument(s).", op->name, op->min_args);
+   }
 
    // Handle global options.
    if (op_is_set(NULL, "-h")) {
@@ -105,6 +103,11 @@ int parse_cmdline(int argc, char* argv[]) {
    }
    if (op_is_set(NULL, "--root")) {
       set_root(op_get_arg(NULL, "--root"));
+   }
+
+   if (!op) {
+      print_usage();
+      return 1;
    }
 
    return op->run(op, args, buf_len(args));

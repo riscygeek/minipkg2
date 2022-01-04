@@ -1,7 +1,10 @@
 #ifndef FILE_MINIPKG2_MINIPKG2_H
 #define FILE_MINIPKG2_MINIPKG2_H
 
-#define VERSION "0.1"
+#ifndef VERSION
+#error "VERSION is not defined"
+#endif
+
 #define SHELL  "bash"
 
 extern char* root;

@@ -29,6 +29,8 @@ sources = [
 
 c_args = []
 
+c_args += '-DVERSION="' + meson.project_version() + '"'
+
 # Check for optional libcurl dependency.
 libcurl = dependency('libcurl', required: false)
 if libcurl.found()

@@ -9,6 +9,7 @@ struct cmdline_option install_options[] = {
    { "-y",              OPT_BASIC, "Don't ask for confirmation.",    {NULL}, },
    { "--yes",           OPT_ALIAS, NULL,                             {"-y"}, },
    { "--clean-build",   OPT_BASIC, "Perform a clean build.",         {NULL}, },
+   { "--no-deps",       OPT_BASIC, "Don't check for dependencies.",  {NULL}, },
    { NULL },
 };
 
@@ -57,15 +58,19 @@ defop(install) {
 
    struct package_info* infos = NULL;
    find_packages(&infos, PKG_REPO);
+   const bool opt_no_deps = op_is_set(op, "--no-deps");
 
-   log("Resolving dependencies...");
+   if (!opt_no_deps)
+      log("Resolving dependencies...");
+
 
    struct package** pkgs = NULL;
    for (size_t i = 0; i < num_args; ++i) {
       struct package_info* info = find_package_info(&infos, args[i]);
       if (!info || !info->pkg)
          fail("Package %s not found", args[i]);
-      find_dependencies(&pkgs, &infos, info->pkg);
+      if (!opt_no_deps)
+         find_dependencies(&pkgs, &infos, info->pkg);
       add_package(&pkgs, info->pkg, true);
    }
 

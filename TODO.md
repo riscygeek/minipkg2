@@ -29,8 +29,8 @@
 
 ### install
 - [x] --clean-build
-- [ ] --builddir=
-- [ ] --no-deps
+- [ ] --builddir
+- [x] --no-deps
 - [x] Replacing of packages/Proper removal of reinstalled packages.
 
 ### download-source

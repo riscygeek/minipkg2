@@ -16,24 +16,26 @@ struct cmdline_option list_options[] = {
    { "--repo",       OPT_BASIC, "List installable packages.",               {NULL}, },
    { "--local",      OPT_BASIC, "List installed packages.",                 {NULL}, },
    { "--files",      OPT_BASIC, "List the files of an installed package.",  {NULL}, },
+   { "--upgradable", OPT_BASIC, "List upgradable packages.",                {NULL}, },
    { NULL },
 };
 
 defop(list) {
-   const bool opt_repo  = op_is_set(op, "--repo");
-   const bool opt_local = op_is_set(op, "--local");
-   const bool opt_files = op_is_set(op, "--files");
+   int num_optset = 0;
+   for (size_t i = 0; list_options[i].option; ++i) {
+      if (list_options[i].selected)
+         ++num_optset;
+   }
 
-   if (opt_repo && opt_local)
-      fail("Either --local or --repo must be set.");
-   if (opt_repo && opt_files)
-      fail("Option --files is incompatible with option --repo.");
-   if (opt_files && num_args == 0)
-      fail("Option --files requires at least one argument.");
-   if (!opt_files && num_args != 0)
-      fail("No arguments for operation info expected.");
+   // By default assume --local
+   if (num_optset == 0) {
+      op_get_opt(op, "--local")->selected = true;
+   } else if (num_optset > 1) {
+      error("Only one list options is allowed.");
+      return 1;
+   }
 
-   if (opt_files) {
+   if (op_is_set(op, "--files")) {
       int ec = 0;
       for (size_t i = 0; i < num_args; ++i) {
          const char* name = args[i];
@@ -53,9 +55,9 @@ defop(list) {
          free(files);
       }
       return ec;
-   } else {
+   } else if (op_is_set(op, "--local") || op_is_set(op, "--repo")) {
       struct package_info* pkgs = NULL;
-      find_packages(&pkgs, opt_repo ? PKG_REPO : PKG_LOCAL);
+      find_packages(&pkgs, op_is_set(op, "--repo") ? PKG_REPO : PKG_LOCAL);
 
       for (size_t i = 0; i < buf_len(pkgs); ++i) {
          const struct package_info* info = &pkgs[i];
@@ -70,6 +72,27 @@ defop(list) {
          }
       }
       free_package_infos(&pkgs);
-      return 0;
+   } else if (op_is_set(op, "--upgradable")) {
+      struct package_info* pkgs_repo = NULL;
+      struct package_info* pkgs_local = NULL;
+
+      find_packages(&pkgs_repo, PKG_REPO);
+      find_packages(&pkgs_local, PKG_LOCAL);
+
+      for (size_t i = 0; i < buf_len(pkgs_local); ++i) {
+         struct package* lp = pkgs_local[i].pkg;
+         for (size_t j = 0; j < buf_len(pkgs_repo); ++j) {
+            struct package* rp = pkgs_repo[j].pkg;
+            if (!strcmp(lp->name, rp->name)) {
+               if (strcmp(lp->version, rp->version) != 0) {
+                  printf("%s local=%s repo=%s\n", lp->name, lp->version, rp->version);
+               }
+               break;
+            }
+         }
+      }
+      free_package_infos(&pkgs_repo);
+      free_package_infos(&pkgs_local);
    }
+   return 0;
 }

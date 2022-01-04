@@ -37,7 +37,8 @@
 - [ ] --no-deps       (Don't download the dependencies)
 
 ### list
-- [ ] --outdated or --upgradable
+- [x] --upgradable
+- [ ] Improve output of --upgradable
 
 ## package.build
 - [ ] Support for provides & conflicts

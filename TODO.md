@@ -4,7 +4,7 @@
 ## General
 - [ ] Support for binary packages (binpkgs)
 - [ ] Copy Man page from [original minipkg](https://github.com/riscygeek/micro-linux/blob/e5e44de4fb51311958726bf58a0148af3f2b28dc/minipkg/minipkg.8)
-- [ ] /etc/minipkg2.conf (INI or TOML)
+- [ ] /etc/minipkg2.conf (util/miniconf.conf)
 - [ ] /usr/lib/minipkg2/env.bash
 - [x] Support for option aliases (e.g. --yes for -y)
 - [ ] Generate package.info files instead of copying package.build

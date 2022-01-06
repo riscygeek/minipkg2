@@ -150,7 +150,7 @@ defop(install) {
       char* filesdir = xstrcatl(repodir, "/", pkg->name, "/files");
 
       // Build the package.
-      success = pkg_build(pkg, binpkg, filesdir);
+      success = pkg_build(pkg, binpkg, filesdir, NULL);
 
       free(filesdir);
 

@@ -297,7 +297,7 @@ bool pkg_is_installed(const char* name) {
    free(dir);
    return exists;
 }
-bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
+bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir, const char* host) {
    char* pkg_basedir    = xstrcatl(builddir, "/", pkg->name, "-", pkg->version);
    char* pkg_srcdir     = xstrcat(pkg_basedir, "/src");
    char* pkg_builddir   = xstrcat(pkg_basedir, "/build");
@@ -347,6 +347,8 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
       setenv("builddir",   pkg_builddir,  1);
       setenv("pkgdir",     pkg_pkgdir,    1);
       setenv("filesdir",   filesdir,      1);
+      if (host)
+         setenv("host",    host,          1);
 
       // Close unused pipes.
       close(pipefd[0][1]);

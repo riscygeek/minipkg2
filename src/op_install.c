@@ -128,7 +128,7 @@ defop(install) {
       log("(%zu/%zu) Building %s:%s...",
             i+1, num_pkgs,
             pkg->name, pkg->version);
-      char* binpkg = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/", pkg->name, ":", pkg->version, ".tar.gz");
+      char* binpkg = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/", pkg->name, ":", pkg->version, ".bmpkg.tar.gz");
       char* filesdir = xstrcatl(repodir, "/", pkg->name, "/files");
 
       // Build the package.

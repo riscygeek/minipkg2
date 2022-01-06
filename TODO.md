@@ -22,7 +22,7 @@
 ### New
 - [x] download
 - [x] clean
-- [ ] build (needs bdepends)
+- [x] build
 - [x] repo
 - [ ] upgrade
 - [ ] search
@@ -33,6 +33,9 @@
 - [x] --no-deps
 - [x] Replacing of packages/Proper removal of reinstalled packages.
 - [ ] Installing of binary packages (.bmpkg.tar.gz)
+
+### build
+- [ ] --deps (Also build dependencies)
 
 ### download
 - [ ] --deps (Also download sources of dependencies)

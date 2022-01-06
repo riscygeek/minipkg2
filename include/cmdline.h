@@ -53,5 +53,6 @@ defop(info);
 defop(download);
 defop(clean);
 defop(repo);
+defop(build);
 
 #endif /* FILE_MINIPKG2_CMDLINE_H */

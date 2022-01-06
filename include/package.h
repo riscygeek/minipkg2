@@ -15,7 +15,8 @@ struct package {
    char* url;
    char* description;
    char** sources;
-   char** depends;
+   char** bdepends;
+   char** rdepends;
    char** provides;
    char** conflicts;
 };

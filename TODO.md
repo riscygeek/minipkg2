@@ -50,6 +50,6 @@
 
 ## package.build
 - [ ] Support for provides & conflicts
-- [ ] Split depends into {b,r,}depends
+- [x] Split depends into {b,r,}depends
 - [ ] arch
 - [ ] features=(cross-compile)

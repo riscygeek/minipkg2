@@ -24,10 +24,17 @@ static void add_package(struct package*** pkgs, struct package* pkg, bool force)
 }
 
 static void find_dependencies(struct package*** pkgs, struct package_info** infos, const struct package* pkg) {
-   for (size_t i = 0; i < buf_len(pkg->depends); ++i) {
-      struct package_info* dep = find_package_info(infos, pkg->depends[i]);
+   for (size_t i = 0; i < buf_len(pkg->bdepends); ++i) {
+      struct package_info* dep = find_package_info(infos, pkg->bdepends[i]);
       if (!dep || !dep->pkg)
-         fail("Dependency %s not found.", pkg->depends[i]);
+         fail("Build dependency %s not found.", pkg->bdepends[i]);
+      find_dependencies(pkgs, infos, dep->pkg);
+      add_package(pkgs, dep->pkg, false);
+   }
+   for (size_t i = 0; i < buf_len(pkg->rdepends); ++i) {
+      struct package_info* dep = find_package_info(infos, pkg->rdepends[i]);
+      if (!dep || !dep->pkg)
+         fail("Runtime dependency %s not found.", pkg->rdepends[i]);
       find_dependencies(pkgs, infos, dep->pkg);
       add_package(pkgs, dep->pkg, false);
    }

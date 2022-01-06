@@ -64,8 +64,8 @@ static int perform(const struct operation* op, char** args, size_t num_args, boo
                if (pkg == selected[k]->pkg)
                   goto next;
             }
-            for (size_t k = 0; k < buf_len(pkg->depends); ++k) {
-               if (!strcmp(spkg->name, pkg->depends[k])) {
+            for (size_t k = 0; k < buf_len(pkg->rdepends); ++k) {
+               if (!strcmp(spkg->name, pkg->rdepends[k])) {
                   error("Cannot remove %s:%s beacause package %s:%s depends on it.",
                        spkg->name, spkg->version,
                        pkg->name, pkg->version);

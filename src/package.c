@@ -67,7 +67,11 @@ struct package* parse_package(const char* path) {
       "  echo \"$src\"\n"
       "done\n"
       "echo\n"
-      "for pkg in \"${depends[@]}\"; do\n"
+      "for pkg in \"${depends[@]}\" \"${bdepends[@]}\"; do\n"
+      "  echo \"$pkg\"\n"
+      "done\n"
+      "echo\n"
+      "for pkg in \"${depends[@]}\" \"${rdepends[@]}\"; do\n"
       "  echo \"$pkg\"\n"
       "done\n"
       "echo\n"
@@ -132,10 +136,11 @@ struct package* parse_package(const char* path) {
       pkg->version      = freadline(file);
       pkg->url          = freadline(file);
       pkg->description  = freadline(file);
-      pkg->sources   = read_list(file);
-      pkg->depends   = read_list(file);
-      pkg->provides  = read_list(file);
-      pkg->conflicts = read_list(file);
+      pkg->sources      = read_list(file);
+      pkg->bdepends     = read_list(file);
+      pkg->rdepends     = read_list(file);
+      pkg->provides     = read_list(file);
+      pkg->conflicts    = read_list(file);
 
       fclose(file);
    }
@@ -149,7 +154,8 @@ void free_package(struct package* pkg) {
    free(pkg->url);
    free(pkg->description);
    free_strlist(&pkg->sources);
-   free_strlist(&pkg->depends);
+   free_strlist(&pkg->bdepends);
+   free_strlist(&pkg->rdepends);
    free_strlist(&pkg->provides);
    free_strlist(&pkg->conflicts);
 }
@@ -162,14 +168,15 @@ static void print_line(const char* first, size_t num, char* const * strs) {
    putchar('\n');
 }
 void print_package(const struct package* pkg) {
-   print_line("Name",         1, &pkg->name);
-   print_line("Version",      1, &pkg->version);
-   print_line("URL",          1, &pkg->url);
-   print_line("Description",  1, &pkg->description);
-   print_line("Sources",      buf_len(pkg->sources), pkg->sources);
-   print_line("Dependencies", buf_len(pkg->depends), pkg->depends);
-   print_line("Provides",     buf_len(pkg->provides), pkg->provides);
-   print_line("Conflicts",    buf_len(pkg->conflicts), pkg->conflicts);
+   print_line("Name",                  1, &pkg->name);
+   print_line("Version",               1, &pkg->version);
+   print_line("URL",                   1, &pkg->url);
+   print_line("Description",           1, &pkg->description);
+   print_line("Sources",               buf_len(pkg->sources), pkg->sources);
+   print_line("Build Dependencies",    buf_len(pkg->bdepends), pkg->bdepends);
+   print_line("Runtime Dependencies",  buf_len(pkg->rdepends), pkg->rdepends);
+   print_line("Provides",              buf_len(pkg->provides), pkg->provides);
+   print_line("Conflicts",             buf_len(pkg->conflicts), pkg->conflicts);
 }
 struct package* find_package(const char* name, enum package_source src) {
    char* path;

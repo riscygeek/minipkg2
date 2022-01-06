@@ -307,10 +307,10 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir, con
    mkdir_p(pkg_builddir, 0755);
    checkv(rm_rf(pkg_pkgdir), true);
 
-   
    static const char shell_script[] = {
       SHELL_SCRIPT_HEADER
       "set -e -v\n"
+      "[[ $HOST ]] || HOST=\"$(cc -dumpmachine)\"\n"
       "cd \"$builddir\"\n"
       "S=\"$srcdir\"\n"
       "B=\"$builddir\"\n"
@@ -348,7 +348,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir, con
       setenv("pkgdir",     pkg_pkgdir,    1);
       setenv("filesdir",   filesdir,      1);
       if (host)
-         setenv("host",    host,          1);
+         setenv("HOST",    host,          1);
 
       // Close unused pipes.
       close(pipefd[0][1]);

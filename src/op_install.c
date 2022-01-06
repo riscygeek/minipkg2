@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "minipkg2.h"
 #include "package.h"
 #include "cmdline.h"
@@ -52,6 +53,7 @@ defop(install) {
       log("Resolving dependencies...");
 
 
+   const char** binpkgs = NULL;
    struct package** pkgs = NULL;
    for (size_t i = 0; i < num_args; ++i) {
       if (strcont(args[i], '/') || strcont(args[i], '.')) {
@@ -62,7 +64,9 @@ defop(install) {
                fail("Failed to parse '%s'", args[i]);
             add_package(&pkgs, pkg, true);
          } else if (ends_with(args[i], ".bmpkg.tar.gz")) {
-            fail("Installing binary packages is currently not supported.");
+            if (access(args[i], F_OK) != 0)
+               fail("No such file '%s'", args[i]);
+            buf_push(binpkgs, args[i]);
          } else {
             fail("Invalid file format of '%s'.", args[i]);
          }
@@ -76,14 +80,20 @@ defop(install) {
       }
    }
 
+   if (buf_len(pkgs) != 0 && buf_len(binpkgs) != 0)
+      fail("Mixing the installation of binary packages and normal packages is not supported.");
+
    // TODO: handle conflicts and provides
 
    log("");
    if (verbosity >= V_NORMAL) {
-      print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs));
+      print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs) + buf_len(binpkgs));
 
       for (size_t i = 0; i < buf_len(pkgs); ++i) {
          print(0, " %s", pkgs[i]->name);
+      }
+      for (size_t i = 0; i < buf_len(binpkgs); ++i) {
+         print(0, " %s", binpkgs[i]);
       }
       println(0, "");
       log("");
@@ -122,6 +132,14 @@ defop(install) {
 
    log("");
    log("Processing packages...");
+
+   for (size_t i = 0; i < buf_len(binpkgs); ++i) {
+      log("(%zu/%zu) Installing %s...",
+            i+1, buf_len(binpkgs),
+            binpkgs[i]);
+      if (!binpkg_install(binpkgs[i]))
+         return 1;
+   }
 
    for (size_t i = 0; i < num_pkgs; ++i) {
       struct package* pkg = pkgs[i];

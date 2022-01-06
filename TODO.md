@@ -32,7 +32,7 @@
 - [ ] --builddir
 - [x] --no-deps
 - [x] Replacing of packages/Proper removal of reinstalled packages.
-- [ ] Installing of binary packages (.bmpkg.tar.gz)
+- [x] Installing of binary packages (.bmpkg.tar.gz)
 
 ### build
 - [ ] --deps (Also build dependencies)

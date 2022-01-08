@@ -445,86 +445,88 @@ bool pkg_download_sources(struct package* pkg) {
    return success;
 }
 bool binpkg_install(const char* binpkg) {
-   // Read package name.
-   char* cmd = xstrcatl("tar -xf '", binpkg, "' .meta/name -O");
-   FILE* file;
-   check(file = popen(cmd, "r"), != NULL);
-   char* pkgname = fread_file(file);
-   if (pclose(file) != 0) {
-      error("Failed to read package name.");
-      return false;
-   }
-   free(cmd);
+   struct package* pkg;
 
-   FILE* files;
+   // Extract the package name.
+   char* pkgname;
+   {
+      char* cmd = xstrcatl("tar -xf '", binpkg, "' .meta/name -O");
+      FILE* file;
+      check(file = popen(cmd, "r"), != NULL);
+      pkgname = fread_file(file);
+      
+      if (pclose(file) != 0) {
+         error("Failed to read package name.");
+         return false;
+      }
+      free(cmd);
+   }
    char* pkg_pkgdir = xstrcatl(pkgdir, "/", pkgname);
-
-   // If there is a package install with the same name
-   // find all files contained in it.
-   char* path_files = xstrcat(pkg_pkgdir, "/files");
-   files = fopen(path_files, "r");
-   char** old_files = NULL;
-   if (files) {
-      old_files = freadlines(files);
-      fclose(files);
-   }
-
-   mkdir_p(root, 0755);
    mkdir_p(pkg_pkgdir, 0755);
+   free(pkgname);
 
-   // Create `$pkg_pkgdir/files` file
-   // that contains a list of files that belog to this package.
-   check(files = fopen(path_files, "w"), != NULL);
-   cmd = xstrcatl("tar -tf '", binpkg, "' --exclude='.meta' | awk '{printf \"/%s\\n\", $0}'");
-   check(file = popen(cmd, "r"), != NULL);
-   redir_file(file, files);
-   fclose(files);
-   free(cmd);
+   // Extract the package.info file.
+   {
+      char* pkginfo_path = xstrcat(pkg_pkgdir, "/package.info");
+      if (!tar_extract_file(binpkg, ".meta/package.info", pkginfo_path)) {
+         error("Failed to extract package.info");
+         return false;
+      }
+      pkg = parse_package(pkginfo_path);
+      if (!pkg) {
+         error("Failed to parse package.info");
+         return false;
+      }
 
-   if (pclose(file) != 0) {
-      free_strlist(&old_files);
-      error("Failed to list package files.");
-      return false;
+      free(pkginfo_path);
    }
 
-   // Copy `.meta/package.build` to `$pkg_pkgdir/package.info`
-   char* path = xstrcat(pkg_pkgdir, "/package.info");
-   FILE* pinfo;
-   check(pinfo = fopen(path, "w"), != NULL);
-   free(path);
-   cmd = xstrcatl("tar -xf '", binpkg, "' .meta/package.info -O");
-   check(file = popen(cmd, "r"), != NULL);
-   free(cmd);
-   redir_file(file, pinfo);
-   fclose(pinfo);
+   // Read the list of old files.
+   char** old_files = NULL;
+   char* files_path = xstrcat(pkg_pkgdir, "/files");
+   {
+      FILE* files_file = fopen(files_path, "r");
+      if (files_file) {
+         old_files = freadlines(files_file);
+         fclose(files_file);
+      }
+   }
 
-   if (pclose(file) != 0) {
-      error("Failed to create package.info");
-      return false;
+   // Read the files in the new package.
+   char** new_files = NULL;
+   {
+      FILE* file;
+      char* cmd = xstrcatl("tar -tf '", binpkg, "' --exclude='.meta' | awk '{printf \"/%s\\n\", $0}'");
+      check(file = popen(cmd, "r"), != NULL);
+      new_files = freadlines(file);
+      free(cmd);
+      if (pclose(file) != 0) {
+         error("Failed to create a files file.");
+         return false;
+      }
+
+      write_lines(files_path, new_files);
    }
 
    // Actually install the package by extracting it's contents into $root.
-   cmd = xstrcatl("tar -C '", root, "' -xf '", binpkg, "' --exclude='.meta'");
-   const int ec = system(cmd);
-   free(cmd);
-
-   if (ec != 0) {
-      error("Failed to install package");
-      return false;
+   {
+      char* cmd = xstrcatl("tar -C '", root, "' -xf '", binpkg, "' --exclude='.meta'");
+      if (system(cmd) != 0) {
+         error("Failed to extract package.");
+         return false;
+      }
+      free(cmd);
    }
 
-
-   // Find files that are part of the old package
+   // Find and delete files that are part of the old package
    // but not in the new package...
-   check(files = fopen(path_files, "r"), != NULL);
-   char** new_files = freadlines(files);
-   for (size_t i = 0; i < buf_len(new_files); ++i) {
-      strlist_remove(&old_files, new_files[i]);
-   }
-
-   // ... and delete them.
-   for (size_t i = 0; i < buf_len(old_files); ++i) {
-      rm(old_files[i]);
+   {
+      for (size_t i = 0; i < buf_len(new_files); ++i) {
+         strlist_remove(&old_files, new_files[i]);
+      }
+      for (size_t i = 0; i< buf_len(old_files); ++i) {
+         rm(old_files[i]);
+      }
    }
 
 
@@ -532,7 +534,6 @@ bool binpkg_install(const char* binpkg) {
    free_strlist(&new_files);
 
    // TODO: copy the binpkg to /var/cache/minipkg2/binpkgs/
-   free(path_files);
    return true;
 }
 bool pkg_estimate_size(const char* name, size_t* size_out) {

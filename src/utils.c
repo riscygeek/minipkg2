@@ -75,6 +75,9 @@ char** freadlines(FILE* file) {
    char* line;
    while ((line = freadline(file)) != NULL)
       buf_push(lines, line);
+   if (buf_len(lines) > 0 && !lines[buf_len(lines)-1][0]) {
+      buf_remove(lines, buf_len(lines)-1, 1);
+   }
    return lines;
 }
 
@@ -339,4 +342,35 @@ void strlist_remove(char*** list, const char* str) {
          ++i;
       }
    }
+}
+bool tar_extract_file(const char* tar, const char* filename, const char* outfilename) {
+   FILE* outfile = fopen(outfilename, "w");
+   if (!outfile)
+      return false;
+
+   char* cmd = xstrcatl("tar -xf '", tar, "' '", filename, "' -O");
+   FILE* file = popen(cmd, "r");
+   free(cmd);
+
+   if (!file) {
+      fclose(outfile);
+      return false;
+   }
+
+   redir_file(file, outfile);
+   fclose(outfile);
+
+   return pclose(file) == 0;
+}
+bool write_lines(const char* filename, char** lines) {
+   FILE* file = fopen(filename, "w");
+   if (!file)
+      return false;
+
+   for (size_t i = 0; i < buf_len(lines); ++i) {
+      fprintf(file, "%s\n", lines[i]);
+   }
+
+   fclose(file);
+   return true;
 }

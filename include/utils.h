@@ -46,6 +46,8 @@ bool  is_dir(const char*);
 char* xpread(const char*);
 void  free_strlist(char*** list);
 void  strlist_remove(char*** list, const char* str);
+bool  tar_extract_file(const char* tar, const char* file, const char* outfile);
+bool  write_lines(const char* filename, char** lines);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')

@@ -11,6 +11,7 @@ extern char* root;
 extern char* pkgdir;
 extern char* builddir;
 extern char* repodir;
+extern const char* host;
 
 void set_root(const char*);
 void set_repodir(const char*);

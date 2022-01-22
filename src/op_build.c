@@ -12,14 +12,12 @@ struct cmdline_option build_options[] = {
    { "--yes",           OPT_ALIAS, NULL,                                      {"-y"}, },
    { "--clean-build",   OPT_BASIC, "Perform a clean build.",                  {NULL}, },
    { "--bindir",        OPT_ARG,   "Specify the binary package directory.",   {NULL}, },
-   { "--host",          OPT_ARG,   "Specify the host.",                       {NULL}, },
    {NULL},
 };
 
 defop(build) {
    struct package_info* infos = NULL;
    find_packages(&infos, PKG_REPO);
-   const char* host = op_get_arg(op, "--host");
 
    log("Resolving build dependencies...");
 
@@ -100,7 +98,7 @@ defop(build) {
       char* binpkg = xstrcatl(binpkgdir, "/", pkg->name, ":", pkg->version, ".bmpkg.tar.gz");
       char* filesdir = xstrcatl(repodir, "/", pkg->name, "/files");
 
-      success = pkg_build(pkg, binpkg, filesdir, host);
+      success = pkg_build(pkg, binpkg, filesdir);
 
       free(filesdir);
       free(binpkg);

@@ -5,6 +5,7 @@ char* root        = NULL; // /
 char* pkgdir      = NULL; // $root/var/db/minipkg2/packages
 char* repodir     = NULL; // $root/var/db/minipkg2/repo
 char* builddir    = NULL; // $root/var/tmp/minipkg2
+const char* host  = NULL; // eg. x86_64-micro-linux-gnu
 
 void set_root(const char* dir) {
    free(root);

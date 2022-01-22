@@ -297,7 +297,7 @@ bool pkg_is_installed(const char* name) {
    free(dir);
    return exists;
 }
-bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir, const char* host) {
+bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
    char* pkg_basedir    = xstrcatl(builddir, "/", pkg->name, "-", pkg->version);
    char* pkg_srcdir     = xstrcat(pkg_basedir, "/src");
    char* pkg_builddir   = xstrcat(pkg_basedir, "/build");

@@ -24,6 +24,7 @@ extern struct cmdline_option build_options[];
 
 struct cmdline_option global_options[] = {
    { "--root",    OPT_ARG,    "Set the path of the root filesystem. (default: '/')",   {NULL}, },
+   { "--host",    OPT_ARG,    "Set the host architecture.",                            {NULL}, },
    { "-h",        OPT_BASIC,  "Print this page.",                                      {NULL}, },
    { "--help",    OPT_ALIAS,  NULL,                                                    {"-h"}, },
    { "--version", OPT_BASIC,  "Print information about the version.",                  {NULL}, },
@@ -105,6 +106,9 @@ int parse_cmdline(int argc, char* argv[]) {
    }
    if (op_is_set(NULL, "--root")) {
       set_root(op_get_arg(NULL, "--root"));
+   }
+   if (op_is_set(NULL, "--host")) {
+      host = op_get_arg(NULL, "--host");
    }
 
    if (!op) {

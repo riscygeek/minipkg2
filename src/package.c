@@ -510,7 +510,7 @@ bool binpkg_install(const char* binpkg) {
 
    // Actually install the package by extracting it's contents into $root.
    {
-      char* cmd = xstrcatl("tar -C '", root, "' -xf '", binpkg, "' --exclude='.meta'");
+      char* cmd = xstrcatl("tar -C '", root, "' -xhpf '", binpkg, "' --exclude='.meta'");
       if (system(cmd) != 0) {
          error("Failed to extract package.");
          return false;

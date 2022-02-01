@@ -8,7 +8,7 @@
 - [ ] /usr/lib/minipkg2/env.bash
 - [x] Support for option aliases (e.g. --yes for -y)
 - [ ] Generate package.info files instead of copying package.build
-- [ ] Add post-install script support
+- [x] Add post-install script support
 - [x] Merge code for parsing global and per-operation options
 - [ ] bash-completion
 - [ ] zsh-completion

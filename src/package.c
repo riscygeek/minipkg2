@@ -529,12 +529,31 @@ bool binpkg_install(const char* binpkg) {
       }
    }
 
+   bool success = true;
+
+   // Run the post-install script, if available.
+   {
+      // Check if it even exists.
+      char* cmd = xstrcatl("tar -tf '", binpkg, "' .meta/post-install.sh >/dev/null 2>/dev/null");
+      int ec = system(cmd);
+      free(cmd);
+      if (ec == 0) {
+         cmd = xstrcatl("tar -xf '", binpkg, "' .meta/post-install.sh -O | bash");
+         ec = system(cmd);
+         free(cmd);
+         if (ec != 0) {
+            error("Post-install script for package '%s' failed.", pkg->name);
+            success = false;
+         }
+      }
+   }
+
 
    free_strlist(&old_files);
    free_strlist(&new_files);
 
    // TODO: copy the binpkg to /var/cache/minipkg2/binpkgs/
-   return true;
+   return success;
 }
 bool pkg_estimate_size(const char* name, size_t* size_out) {
    // Check if it is a symlink, if yes report a size of 0.

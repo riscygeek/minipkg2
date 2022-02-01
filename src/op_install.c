@@ -41,6 +41,10 @@ static void find_dependencies(struct package*** pkgs, struct package_info** info
    }
 }
 
+struct package_install_info {
+   struct package* pkg;
+   char** remove_pkgs;
+};
 
 defop(install) {
    // TODO: add support for non-repo packages
@@ -85,12 +89,67 @@ defop(install) {
 
    // TODO: handle conflicts and provides
 
+   // Check for package conflicts.
+   bool success = true;
+   struct package_info* installed_pkgs = NULL;
+   if (!find_packages(&installed_pkgs, PKG_LOCAL))
+      return 1;
+
+   struct package_install_info* install_pkgs = NULL;
+   for (size_t i = 0; i < buf_len(pkgs); ++i) {
+      struct package* pkg = pkgs[i];
+      struct package_install_info iinfo;
+      iinfo.pkg = pkg;
+      iinfo.remove_pkgs = NULL;
+      for (size_t j = 0; j < buf_len(pkg->conflicts); ++j) {
+         // Search for packages to be installed.
+         const struct package_info* conflict = find_package_info(&infos, pkg->conflicts[j]);
+         if (conflict != NULL) {
+            error("Package '%s' conflicting with package '%s'.", pkg->name, conflict->pkg->name);
+            success = false;
+         }
+
+         // Search for already installed packages.
+         conflict = find_package_info(&installed_pkgs, pkg->conflicts[j]);
+         if (conflict != NULL) {
+            if (!strlist_contains(pkg->provides, conflict->pkg->name)) {
+               error("Package '%s' conflits with installed package '%s'.", pkg->name, conflict->pkg->name);
+               success = false;
+            } else {
+               buf_push(iinfo.remove_pkgs, xstrdup(conflict->pkg->name));
+            }
+         }
+      }
+      buf_push(install_pkgs, iinfo);
+   }
+   for (size_t i = 0; i < buf_len(installed_pkgs); ++i) {
+      const struct package* ipkg = installed_pkgs[i].pkg;
+      for (size_t j = 0; j < buf_len(ipkg->conflicts); ++j) {
+         for (size_t k = 0; k < buf_len(install_pkgs); ++k) {
+            if (!strcmp(ipkg->conflicts[j], install_pkgs[k].pkg->name)) {
+               if (!strlist_contains(ipkg->provides, install_pkgs[k].pkg->name)) {
+                  error("Package '%s' conflicts with installed package '%s'.",
+                        install_pkgs[k].pkg->name, ipkg->name);
+                  success = false;
+               } else {
+                  if (!strlist_contains(install_pkgs[k].remove_pkgs, ipkg->name))
+                     buf_push(install_pkgs[k].remove_pkgs, xstrdup(ipkg->name));
+               }
+            }
+         }
+      }
+   }
+   free_package_infos(&installed_pkgs);
+
+   if (!success)
+      return 1;
+
    log("");
    if (verbosity >= V_NORMAL) {
-      print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs) + buf_len(binpkgs));
+      print(COLOR_LOG, "Packages (%zu)", buf_len(install_pkgs) + buf_len(binpkgs));
 
       for (size_t i = 0; i < buf_len(pkgs); ++i) {
-         print(0, " %s", pkgs[i]->name);
+         print(0, " %s", install_pkgs[i].pkg->name);
       }
       for (size_t i = 0; i < buf_len(binpkgs); ++i) {
          print(0, " %s", binpkgs[i]);
@@ -107,8 +166,8 @@ defop(install) {
 
    if (op_is_set(op, "--clean-build")) {
       log("Cleanig the build directories...");
-      for (size_t i = 0; i < buf_len(pkgs); ++i) {
-         struct package* p = pkgs[i];
+      for (size_t i = 0; i < buf_len(install_pkgs); ++i) {
+         struct package* p = install_pkgs[i].pkg;
          char* dir = xstrcatl(builddir, "/", p->name, "-", p->version);
          rm_rf(dir);
          free(dir);
@@ -117,13 +176,13 @@ defop(install) {
 
    log("Downloading sources...");
 
-   const size_t num_pkgs = buf_len(pkgs);
-   bool success = true;
+   const size_t num_pkgs = buf_len(install_pkgs);
+   success = true;
    for (size_t i = 0; i < num_pkgs; ++i) {
       log("(%zu/%zu) Downloading %s:%s...",
             i+1, num_pkgs,
-            pkgs[i]->name, pkgs[i]->version);
-      if (!pkg_download_sources(pkgs[i]))
+            install_pkgs[i].pkg->name, install_pkgs[i].pkg->version);
+      if (!pkg_download_sources(install_pkgs[i].pkg))
          success = false;
    }
 
@@ -142,7 +201,7 @@ defop(install) {
    }
 
    for (size_t i = 0; i < num_pkgs; ++i) {
-      struct package* pkg = pkgs[i];
+      struct package* pkg = install_pkgs[i].pkg;
       log("(%zu/%zu) Building %s:%s...",
             i+1, num_pkgs,
             pkg->name, pkg->version);
@@ -156,6 +215,13 @@ defop(install) {
 
       if (!success)
          return free(binpkg), 1;
+
+      // Remove conflicting packages.
+      for (size_t j = 0; j < buf_len(install_pkgs[i].remove_pkgs); ++j) {
+         log(" (%zu/%zu) Removing %s...", j+1, buf_len(install_pkgs[i].remove_pkgs),
+             install_pkgs[i].remove_pkgs[j]);
+         purge_package(install_pkgs[i].remove_pkgs[j]);
+      }
 
       log("(%zu/%zu) Installing %s:%s...",
             i+1, num_pkgs,

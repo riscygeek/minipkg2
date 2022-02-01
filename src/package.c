@@ -306,6 +306,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
 
    mkdir_p(pkg_builddir, 0755);
    checkv(rm_rf(pkg_pkgdir), true);
+   mkdir_p(pkg_pkgdir, 0755);
 
    static const char shell_script[] = {
       SHELL_SCRIPT_HEADER
@@ -527,6 +528,13 @@ bool binpkg_install(const char* binpkg) {
       for (size_t i = 0; i< buf_len(old_files); ++i) {
          rm(old_files[i]);
       }
+   }
+
+   // Create symlinks for provided packages.
+   for (size_t i = 0; i < buf_len(pkg->provides); ++i) {
+      char* path = xstrcatl(pkgdir, "/", pkg->provides[i]);
+      symlink(pkg->name, path);
+      free(path);
    }
 
    bool success = true;

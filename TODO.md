@@ -15,6 +15,7 @@
 - [x] Cross-compilation with $HOST variable
 - [ ] Add support for multiple repos (eg. localrepo)
 - [x] verbose versions of: remove()
+- [ ] Check provides and conflicts more in depth
 
 
 ## Operations
@@ -52,7 +53,7 @@
 
 
 ## package.build
-- [ ] Support for provides & conflicts
+- [x] Support for provides & conflicts
 - [x] Split depends into {b,r,}depends
 - [ ] arch
 - [ ] features=(cross-compile)

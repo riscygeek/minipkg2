@@ -374,3 +374,11 @@ bool write_lines(const char* filename, char** lines) {
    fclose(file);
    return true;
 }
+
+bool strlist_contains(char** list, const char* str) {
+   for (size_t i = 0; i < buf_len(list); ++i) {
+      if (!strcmp(list[i], str))
+         return true;
+   }
+   return false;
+}

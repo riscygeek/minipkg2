@@ -39,7 +39,7 @@
 - [ ] --deps (Also build dependencies)
 
 ### download
-- [ ] --deps (Also download sources of dependencies)
+- [x] --deps (Also download sources of dependencies)
 - [ ] --dest (Put downloaded files into ...)
 
 ### list

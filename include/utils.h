@@ -1,5 +1,6 @@
 #ifndef FILE_MINIPKG2_UTILS_H
 #define FILE_MINIPKG2_UTILS_H
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <stdlib.h>

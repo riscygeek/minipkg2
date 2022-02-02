@@ -8,6 +8,7 @@
 - [ ] /usr/lib/minipkg2/env.bash
 - [x] Support for option aliases (e.g. --yes for -y)
 - [ ] Generate package.info files instead of copying package.build
+  - [ ] Add a way to set the install reason (eg. essential (Forbid removal), selected (Manually installed), automatic (eg. dependency))
 - [x] Add post-install script support
 - [x] Merge code for parsing global and per-operation options
 - [ ] bash-completion
@@ -17,6 +18,7 @@
 - [x] verbose versions of: remove()
 - [ ] Check provides and conflicts more in depth
 - [ ] commandline: Support for fused options (like: -ys or -sy)
+- [ ] Parallel building with \$JOBS variable
 
 
 ## Operations
@@ -28,12 +30,14 @@
 - [x] repo
 - [ ] upgrade
 - [ ] search
+- [ ] check
 
 ### install
 - [x] --clean-build
 - [ ] --builddir
 - [x] --skip-installed, -s
 - [x] --no-deps
+- [ ] --jobs=N,-jN options for parallel building
 - [x] Replacing of packages/Proper removal of reinstalled packages.
 - [x] Installing of binary packages (.bmpkg.tar.gz)
 
@@ -41,6 +45,7 @@
 - [ ] --deps (Also build dependencies)
 
 ### download
+- [ ] --all (Download **all** available package sources from the repo)
 - [x] --deps (Also download sources of dependencies)
 - [ ] --bdeps, --rdeps (for more fine-grained control)
 - [ ] --dest (Put downloaded files into ...)
@@ -54,9 +59,18 @@
 - [ ] -E,--extended-regex
 - [ ] -f,--full (Search by name, version, description, url)
 
+### check
+- [ ] If no options are given, check the validity of specified package arguments (--files + check package.info).
+- [ ] --syntax (Check the syntax of .mpkg build files)
+- [ ] --files (Check if all files in a local package are actually installed or if they have been removed)
+- [ ] --system (Same as files, but checks all installed packages)
+- [ ] --reinstall-broken (Maybe)
+- [ ] --full (Perform a full system and repo check)
+- [ ] --werror (Error on warning)
 
 ## package.build
 - [x] Support for provides & conflicts
 - [x] Split depends into {b,r,}depends
-- [ ] arch
+- [ ] arch=(any x86_64 ...)
+- [ ] license=()
 - [ ] features=(cross-compile sysroot)

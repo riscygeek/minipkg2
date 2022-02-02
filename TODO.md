@@ -31,6 +31,7 @@
 ### install
 - [x] --clean-build
 - [ ] --builddir
+- [x] --skip-installed, -s
 - [x] --no-deps
 - [x] Replacing of packages/Proper removal of reinstalled packages.
 - [x] Installing of binary packages (.bmpkg.tar.gz)

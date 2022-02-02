@@ -11,6 +11,8 @@ struct cmdline_option install_options[] = {
    { "--yes",           OPT_ALIAS, NULL,                             {"-y"}, },
    { "--clean-build",   OPT_BASIC, "Perform a clean build.",         {NULL}, },
    { "--no-deps",       OPT_BASIC, "Don't check for dependencies.",  {NULL}, },
+   { "-s",              OPT_BASIC, "Skip installed packages.",       {NULL}, },
+   { "--skip-installed",OPT_BASIC, NULL,                             {"-s"}, },
    { NULL },
 };
 
@@ -25,6 +27,7 @@ defop(install) {
    struct package_info* infos = NULL;
    find_packages(&infos, PKG_REPO);
    const bool opt_no_deps = op_is_set(op, "--no-deps");
+   const bool opt_skip = op_is_set(op, "-s");
 
    if (!opt_no_deps)
       log("Resolving dependencies...");
@@ -39,7 +42,7 @@ defop(install) {
             struct package* pkg = parse_package(args[i]);
             if (!pkg)
                fail("Failed to parse '%s'", args[i]);
-            add_package(&pkgs, pkg, true);
+            add_package(&pkgs, pkg, !opt_skip);
          } else if (ends_with(args[i], ".bmpkg.tar.gz")) {
             if (access(args[i], F_OK) != 0)
                fail("No such file '%s'", args[i]);
@@ -53,12 +56,17 @@ defop(install) {
             fail("Package %s not found", args[i]);
          if (!opt_no_deps)
             find_dependencies(&pkgs, &infos, info->pkg, false);
-         add_package(&pkgs, info->pkg, true);
+         add_package(&pkgs, info->pkg, !opt_skip);
       }
    }
 
    if (buf_len(pkgs) != 0 && buf_len(binpkgs) != 0)
       fail("Mixing the installation of binary packages and normal packages is not supported.");
+
+   if (!buf_len(pkgs) && !buf_len(binpkgs)) {
+      warn("No packages to install.");
+      return 0;
+   }
 
    // TODO: handle conflicts and provides
 

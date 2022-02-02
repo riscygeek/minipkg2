@@ -653,3 +653,32 @@ bool purge_package(const char* name) {
    rm_rf(dir);
    return true;
 }
+
+
+bool add_package(struct package*** pkgs, struct package* pkg, bool force) {
+   if (!force && pkg_is_installed(pkg->name))
+      return false;
+   for (size_t i = 0; i < buf_len(*pkgs); ++i) {
+      if ((*pkgs)[i] == pkg)
+         return false;
+   }
+   buf_push(*pkgs, pkg);
+   return true;
+}
+
+void find_dependencies(struct package*** pkgs, struct package_info** infos, const struct package* pkg, bool force_add) {
+   for (size_t i = 0; i < buf_len(pkg->bdepends); ++i) {
+      struct package_info* dep = find_package_info(infos, pkg->bdepends[i]);
+      if (!dep || !dep->pkg)
+         fail("Build dependency '%s' for package '%s' not found.", pkg->bdepends[i], pkg->name);
+      find_dependencies(pkgs, infos, dep->pkg, force_add);
+      add_package(pkgs, dep->pkg, force_add);
+   }
+   for (size_t i = 0; i < buf_len(pkg->rdepends); ++i) {
+      struct package_info* dep = find_package_info(infos, pkg->rdepends[i]);
+      if (!dep || !dep->pkg)
+         fail("Runtime dependency '%s' for package '%s' not found.", pkg->rdepends[i], pkg->name);
+      find_dependencies(pkgs, infos, dep->pkg, force_add);
+      add_package(pkgs, dep->pkg, force_add);
+   }
+}

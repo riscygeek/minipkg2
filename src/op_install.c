@@ -14,33 +14,6 @@ struct cmdline_option install_options[] = {
    { NULL },
 };
 
-static void add_package(struct package*** pkgs, struct package* pkg, bool force) {
-   if (!force && pkg_is_installed(pkg->name))
-      return;
-   for (size_t i = 0; i < buf_len(*pkgs); ++i) {
-      if ((*pkgs)[i] == pkg)
-         return;
-   }
-   buf_push(*pkgs, pkg);
-}
-
-static void find_dependencies(struct package*** pkgs, struct package_info** infos, const struct package* pkg) {
-   for (size_t i = 0; i < buf_len(pkg->bdepends); ++i) {
-      struct package_info* dep = find_package_info(infos, pkg->bdepends[i]);
-      if (!dep || !dep->pkg)
-         fail("Build dependency %s not found.", pkg->bdepends[i]);
-      find_dependencies(pkgs, infos, dep->pkg);
-      add_package(pkgs, dep->pkg, false);
-   }
-   for (size_t i = 0; i < buf_len(pkg->rdepends); ++i) {
-      struct package_info* dep = find_package_info(infos, pkg->rdepends[i]);
-      if (!dep || !dep->pkg)
-         fail("Runtime dependency %s not found.", pkg->rdepends[i]);
-      find_dependencies(pkgs, infos, dep->pkg);
-      add_package(pkgs, dep->pkg, false);
-   }
-}
-
 struct package_install_info {
    struct package* pkg;
    char** remove_pkgs;
@@ -79,7 +52,7 @@ defop(install) {
          if (!info || !info->pkg)
             fail("Package %s not found", args[i]);
          if (!opt_no_deps)
-            find_dependencies(&pkgs, &infos, info->pkg);
+            find_dependencies(&pkgs, &infos, info->pkg, false);
          add_package(&pkgs, info->pkg, true);
       }
    }

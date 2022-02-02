@@ -17,7 +17,7 @@ struct cmdline_option remove_options[] = {
    {NULL},
 };
 
-static void add_package(struct package_info*** infos, struct package_info* info) {
+static void rm_add_package(struct package_info*** infos, struct package_info* info) {
    for (size_t i = 0; i < buf_len(*infos); ++i) {
       if ((*infos)[i] == info)
          return;
@@ -47,7 +47,7 @@ static int perform(const struct operation* op, char** args, size_t num_args, boo
          error("Package not found: %s", args[i]);
          failed = true;
       }
-      add_package(&selected, info);
+      rm_add_package(&selected, info);
       // TODO: handle provided packages
    }
    if (failed)

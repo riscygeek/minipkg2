@@ -56,4 +56,4 @@
 - [x] Support for provides & conflicts
 - [x] Split depends into {b,r,}depends
 - [ ] arch
-- [ ] features=(cross-compile)
+- [ ] features=(cross-compile sysroot)

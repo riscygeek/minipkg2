@@ -16,6 +16,7 @@
 - [ ] Add support for multiple repos (eg. localrepo)
 - [x] verbose versions of: remove()
 - [ ] Check provides and conflicts more in depth
+- [ ] commandline: Support for fused options (like: -ys or -sy)
 
 
 ## Operations

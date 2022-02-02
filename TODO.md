@@ -42,6 +42,7 @@
 
 ### download
 - [x] --deps (Also download sources of dependencies)
+- [ ] --bdeps, --rdeps (for more fine-grained control)
 - [ ] --dest (Put downloaded files into ...)
 
 ### list

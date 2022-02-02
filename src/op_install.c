@@ -73,54 +73,60 @@ defop(install) {
    // Check for package conflicts.
    bool success = true;
    struct package_info* installed_pkgs = NULL;
-   if (!find_packages(&installed_pkgs, PKG_LOCAL))
-      return 1;
-
    struct package_install_info* install_pkgs = NULL;
-   for (size_t i = 0; i < buf_len(pkgs); ++i) {
-      struct package* pkg = pkgs[i];
-      struct package_install_info iinfo;
-      iinfo.pkg = pkg;
-      iinfo.remove_pkgs = NULL;
-      for (size_t j = 0; j < buf_len(pkg->conflicts); ++j) {
-         // Search for packages to be installed.
-         const struct package_info* conflict = find_package_info(&infos, pkg->conflicts[j]);
-         if (conflict != NULL) {
-            error("Package '%s' conflicting with package '%s'.", pkg->name, conflict->pkg->name);
-            success = false;
-         }
-
-         // Search for already installed packages.
-         conflict = find_package_info(&installed_pkgs, pkg->conflicts[j]);
-         if (conflict != NULL) {
-            if (!strlist_contains(pkg->provides, conflict->pkg->name)) {
-               error("Package '%s' conflits with installed package '%s'.", pkg->name, conflict->pkg->name);
+   if (find_packages(&installed_pkgs, PKG_LOCAL)) {
+      for (size_t i = 0; i < buf_len(pkgs); ++i) {
+         struct package* pkg = pkgs[i];
+         struct package_install_info iinfo;
+         iinfo.pkg = pkg;
+         iinfo.remove_pkgs = NULL;
+         for (size_t j = 0; j < buf_len(pkg->conflicts); ++j) {
+            // Search for packages to be installed.
+            const struct package_info* conflict = find_package_info(&infos, pkg->conflicts[j]);
+            if (conflict != NULL) {
+               error("Package '%s' conflicting with package '%s'.", pkg->name, conflict->pkg->name);
                success = false;
-            } else {
-               buf_push(iinfo.remove_pkgs, xstrdup(conflict->pkg->name));
             }
-         }
-      }
-      buf_push(install_pkgs, iinfo);
-   }
-   for (size_t i = 0; i < buf_len(installed_pkgs); ++i) {
-      const struct package* ipkg = installed_pkgs[i].pkg;
-      for (size_t j = 0; j < buf_len(ipkg->conflicts); ++j) {
-         for (size_t k = 0; k < buf_len(install_pkgs); ++k) {
-            if (!strcmp(ipkg->conflicts[j], install_pkgs[k].pkg->name)) {
-               if (!strlist_contains(ipkg->provides, install_pkgs[k].pkg->name)) {
-                  error("Package '%s' conflicts with installed package '%s'.",
-                        install_pkgs[k].pkg->name, ipkg->name);
+
+            // Search for already installed packages.
+            conflict = find_package_info(&installed_pkgs, pkg->conflicts[j]);
+            if (conflict != NULL) {
+               if (!strlist_contains(pkg->provides, conflict->pkg->name)) {
+                  error("Package '%s' conflits with installed package '%s'.", pkg->name, conflict->pkg->name);
                   success = false;
                } else {
-                  if (!strlist_contains(install_pkgs[k].remove_pkgs, ipkg->name))
-                     buf_push(install_pkgs[k].remove_pkgs, xstrdup(ipkg->name));
+                  buf_push(iinfo.remove_pkgs, xstrdup(conflict->pkg->name));
+               }
+            }
+         }
+         buf_push(install_pkgs, iinfo);
+      }
+      for (size_t i = 0; i < buf_len(installed_pkgs); ++i) {
+         const struct package* ipkg = installed_pkgs[i].pkg;
+         for (size_t j = 0; j < buf_len(ipkg->conflicts); ++j) {
+            for (size_t k = 0; k < buf_len(install_pkgs); ++k) {
+               if (!strcmp(ipkg->conflicts[j], install_pkgs[k].pkg->name)) {
+                  if (!strlist_contains(ipkg->provides, install_pkgs[k].pkg->name)) {
+                     error("Package '%s' conflicts with installed package '%s'.",
+                           install_pkgs[k].pkg->name, ipkg->name);
+                     success = false;
+                  } else {
+                     if (!strlist_contains(install_pkgs[k].remove_pkgs, ipkg->name))
+                        buf_push(install_pkgs[k].remove_pkgs, xstrdup(ipkg->name));
+                  }
                }
             }
          }
       }
+      free_package_infos(&installed_pkgs);
+   } else {
+      for (size_t i = 0; i < buf_len(pkgs); ++i) {
+         struct package_install_info iinfo;
+         iinfo.pkg = pkgs[i];
+         iinfo.remove_pkgs = NULL;
+         buf_push(install_pkgs, iinfo);
+      }
    }
-   free_package_infos(&installed_pkgs);
 
    if (!success)
       return 1;

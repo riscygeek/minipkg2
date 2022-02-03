@@ -296,7 +296,7 @@ void free_package_infos(struct package_info** infos) {
    buf_free(*infos);
 }
 static int search_func(const void* key, const void* info) {
-   return strcmp((const char*)key, ((const struct package_info*)info)->pkg->name);
+   return strcmp((const char*)key, ((const struct package_info*)info)->provided_name);
 }
 struct package_info* find_package_info(struct package_info* const* pkgs, const char* pkg) {
    return bsearch(pkg, *pkgs, buf_len(*pkgs), sizeof(struct package_info), search_func);

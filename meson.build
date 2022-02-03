@@ -18,6 +18,7 @@ sources = [
   'src/op_build.c',
   'src/op_check.c',
   'src/op_clean.c',
+  'src/op_config.c',
   'src/op_download.c',
   'src/op_help.c',
   'src/op_info.c',
@@ -47,3 +48,6 @@ executable('minipkg2',
   c_args: c_args,
   install: true
 )
+
+install_data('util/env.bash', install_dir: get_option('libdir') / 'minipkg2')
+install_data('util/minipkg2.conf', install_dir: get_option('sysconfdir'))

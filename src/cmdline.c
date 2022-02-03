@@ -22,6 +22,7 @@ extern struct cmdline_option clean_options[];
 extern struct cmdline_option download_options[];
 extern struct cmdline_option build_options[];
 extern struct cmdline_option check_options[];
+extern struct cmdline_option config_options[];
 
 struct cmdline_option global_options[] = {
    { "--root",    OPT_ARG,    "Set the path of the root filesystem. (default: '/')",   {NULL}, },
@@ -51,6 +52,7 @@ const struct operation operations[] = {
    { "repo",            repo_options,     &op_repo,   false, 0, " [options]",          "Manage the repository." },
    { "build",           build_options,    &op_build,  true,  1, " <package(s)>",       "Build packages." },
    { "check",           check_options,    &op_check,  true,  0, " [options] ...",      "Perform checks.", },
+   { "config",          config_options,   &op_config, false, 0, "--dump",              "Manage the minipkg2 config.", },
 };
 
 const size_t num_operations = arraylen(operations);
@@ -118,7 +120,7 @@ int parse_cmdline(int argc, char* argv[]) {
       jobs = op_get_arg(NULL, "-j");
       char* endp = NULL;
       strtoul(jobs, &endp, 10);
-      if (endp != NULL) {
+      if (*endp != '\0') {
          error("Invalid number of jobs: '%s'", jobs);
          return 1;
       }

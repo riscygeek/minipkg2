@@ -67,6 +67,7 @@
 - [ ] --reinstall-broken (Maybe)
 - [ ] --full (Perform a full system and repo check)
 - [ ] --werror (Error on warning)
+- [ ] --toolchain
 
 ## package.build
 - [x] Support for provides & conflicts

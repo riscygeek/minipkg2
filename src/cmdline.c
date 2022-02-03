@@ -21,6 +21,7 @@ extern struct cmdline_option repo_options[];
 extern struct cmdline_option clean_options[];
 extern struct cmdline_option download_options[];
 extern struct cmdline_option build_options[];
+extern struct cmdline_option check_options[];
 
 struct cmdline_option global_options[] = {
    { "--root",    OPT_ARG,    "Set the path of the root filesystem. (default: '/')",   {NULL}, },
@@ -47,6 +48,7 @@ const struct operation operations[] = {
    { "clean",           no_options,       &op_clean,  false, 0, "",                    "Remove build files.", },
    { "repo",            repo_options,     &op_repo,   false, 0, " [options]",          "Manage the repository." },
    { "build",           build_options,    &op_build,  true,  1, " <package(s)>",       "Build packages." },
+   { "check",           check_options,    &op_check,  true,  0, " [options] ...",      "Perform checks.", },
 };
 
 const size_t num_operations = arraylen(operations);

@@ -483,15 +483,8 @@ bool binpkg_install(const char* binpkg) {
    }
 
    // Read the list of old files.
-   char** old_files = NULL;
+   char** old_files = lpkg_get_files(pkgname);
    char* files_path = xstrcat(pkg_pkgdir, "/files");
-   {
-      FILE* files_file = fopen(files_path, "r");
-      if (files_file) {
-         old_files = freadlines(files_file);
-         fclose(files_file);
-      }
-   }
 
    // Read the files in the new package.
    char** new_files = NULL;
@@ -681,4 +674,15 @@ void find_dependencies(struct package*** pkgs, struct package_info** infos, cons
       find_dependencies(pkgs, infos, dep->pkg, force_add);
       add_package(pkgs, dep->pkg, force_add);
    }
+}
+
+char** lpkg_get_files(const char* pkg) {
+   char* path = xstrcatl(pkgdir, "/", pkg, "/files");
+   FILE* file = fopen(path, "r");
+   char** files = NULL;
+   if (file) {
+      files = freadlines(file);
+      fclose(file);
+   }
+   return files;
 }

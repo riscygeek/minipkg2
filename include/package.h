@@ -52,5 +52,6 @@ bool purge_package(const char* name);
 // Utility funcitons
 bool add_package(struct package*** pkgs, struct package* pkg, bool force);
 void find_dependencies(struct package*** pkgs, struct package_info** infos, const struct package* pkg, bool force_add);
+char** lpkg_get_files(const char* pkg);
 
 #endif /* FILE_MINIPKG2_PACKAGE_H */

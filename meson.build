@@ -16,6 +16,7 @@ sources = [
   'src/minipkg2.c',
   'src/miniconf.c',
   'src/op_build.c',
+  'src/op_check.c',
   'src/op_clean.c',
   'src/op_download.c',
   'src/op_help.c',

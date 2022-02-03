@@ -12,6 +12,7 @@ extern char* pkgdir;
 extern char* builddir;
 extern char* repodir;
 extern const char* host;
+extern const char* jobs;
 
 void set_root(const char*);
 void set_repodir(const char*);

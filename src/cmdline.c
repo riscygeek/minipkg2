@@ -34,6 +34,8 @@ struct cmdline_option global_options[] = {
    { "--verbose", OPT_ALIAS,  NULL,                                                    {"-v"}, },
    { "-q",        OPT_BASIC,  "Suppress output.",                                      {NULL}, },
    { "--quiet",   OPT_ALIAS,  NULL,                                                    {"-q"}, },
+   { "-j",        OPT_ARG,    "How many concurrent per-package compile jobs to use.",  {NULL}, },
+   { "--jobs",    OPT_ALIAS,  NULL,                                                    {"-j"}, },
    {NULL},
 };
 
@@ -111,6 +113,15 @@ int parse_cmdline(int argc, char* argv[]) {
    }
    if (op_is_set(NULL, "--host")) {
       host = op_get_arg(NULL, "--host");
+   }
+   if (op_is_set(NULL, "--jobs")) {
+      jobs = op_get_arg(NULL, "-j");
+      char* endp = NULL;
+      strtoul(jobs, &endp, 10);
+      if (endp != NULL) {
+         error("Invalid number of jobs: '%s'", jobs);
+         return 1;
+      }
    }
 
    if (!op) {

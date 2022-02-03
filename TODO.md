@@ -18,7 +18,7 @@
 - [x] verbose versions of: remove()
 - [ ] Check provides and conflicts more in depth
 - [ ] commandline: Support for fused options (like: -ys or -sy)
-- [ ] Parallel building with \$JOBS variable
+- [x] Parallel building with \$JOBS variable
 
 
 ## Operations
@@ -37,7 +37,7 @@
 - [ ] --builddir
 - [x] --skip-installed, -s
 - [x] --no-deps
-- [ ] --jobs=N,-jN options for parallel building
+- [x] --jobs=N,-jN options for parallel building
 - [x] Replacing of packages/Proper removal of reinstalled packages.
 - [x] Installing of binary packages (.bmpkg.tar.gz)
 
@@ -74,4 +74,4 @@
 - [x] Split depends into {b,r,}depends
 - [ ] arch=(any x86_64 ...)
 - [ ] license=()
-- [ ] features=(cross-compile sysroot)
+- [x] features=(cross-compile sysroot)

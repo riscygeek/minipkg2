@@ -383,6 +383,8 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
       setenv("filesdir",   filesdir,      1);
       if (host)
          setenv("HOST",    host,          1);
+      if (jobs)
+         setenv("JOBS",    jobs,          1);
 
       // Close unused pipes.
       close(pipefd[0][1]);

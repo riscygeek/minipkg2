@@ -30,7 +30,7 @@
 - [x] repo
 - [ ] upgrade
 - [ ] search
-- [ ] check
+- [x] check
 
 ### install
 - [x] --clean-build
@@ -62,11 +62,11 @@
 ### check
 - [ ] If no options are given, check the validity of specified package arguments (--files + check package.info).
 - [ ] --syntax (Check the syntax of .mpkg build files)
-- [ ] --files (Check if all files in a local package are actually installed or if they have been removed)
-- [ ] --system (Same as files, but checks all installed packages)
+- [x] --files (Check if all files in a local package are actually installed or if they have been removed)
+- [x] --system (Same as files, but checks all installed packages)
 - [ ] --reinstall-broken (Maybe)
 - [ ] --full (Perform a full system and repo check)
-- [ ] --werror (Error on warning)
+- [x] --werror (Error on warning)
 - [ ] --toolchain
 
 ## package.build

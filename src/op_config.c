@@ -16,14 +16,11 @@ defop(config) {
 
 
     if (opt_dump) {
-        char* path = xstrcat(root, "/etc/minipkg2.conf");
-        FILE* file = fopen(path, "r");
+        FILE* file = fopen(CONFIG_FILE, "r");
         if (!file) {
-            error_errno("config: Cannot open '%s'", path);
-            free(path);
+            error_errno("config: Cannot open '%s'", CONFIG_FILE);
             return 1;
         }
-        free(path);
 
         char* errmsg;
         miniconf_t* config = miniconf_parse(file, &errmsg);

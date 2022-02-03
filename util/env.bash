@@ -2,7 +2,7 @@
 
 # Load the minipkg2 config.
 declare -A config
-eval "$(minipkg2 --root="$ROOT" config --dump)"
+eval "$(minipkg2 --root="$ROOT" config --dump 2>/dev/null)"
 
 
 # The $JOBS variable determines the amount of parallel workers per package.

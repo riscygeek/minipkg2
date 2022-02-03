@@ -15,8 +15,8 @@
 #include "utils.h"
 #include "buf.h"
 
-#define SHELL_SCRIPT_HEADER                                                                     \
-   "[[ -f $ROOT/usr/lib/minipkg2/env.bash ]] && source \"$ROOT/usr/lib/minipkg2/env.bash\"\n"   \
+#define SHELL_SCRIPT_HEADER                              \
+   "[[ -f " ENV_FILE " ]] && source \"" ENV_FILE "\"\n"  \
    "source \"$pkgfile\"\n"
 
 static const char* known_features[] = {

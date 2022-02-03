@@ -19,6 +19,12 @@
    "[[ -f $ROOT/usr/lib/minipkg2/env.bash ]] && source \"$ROOT/usr/lib/minipkg2/env.bash\"\n"   \
    "source \"$pkgfile\"\n"
 
+static const char* known_features[] = {
+   "cross-compile",
+   "sysroot",
+   NULL
+};
+
 static bool pkg_path_is_valid(const char* path) {
    return path[0] != '.' && is_dir(path);
 }
@@ -83,6 +89,10 @@ struct package* parse_package(const char* path) {
       "  echo \"$pkg\"\n"
       "done\n"
       "echo\n"
+      "for f in \"${features[@]}\"; do\n"
+      "  echo \"$f\"\n"
+      "done\n"
+      "echo\n"
       "exit 0\n"
       ;
 
@@ -141,6 +151,7 @@ struct package* parse_package(const char* path) {
       pkg->rdepends     = read_list(file);
       pkg->provides     = read_list(file);
       pkg->conflicts    = read_list(file);
+      pkg->features     = read_list(file);
 
       fclose(file);
    }
@@ -297,6 +308,29 @@ bool pkg_is_installed(const char* name) {
    free(dir);
    return exists;
 }
+bool pkg_prebuild_checks(const struct package* pkg) {
+   bool success = true;
+
+   for (size_t i = 0; i < buf_len(pkg->features); ++i) {
+      for (size_t j = 0; known_features[j]; ++j) {
+         if (!strcmp(pkg->features[i], known_features[j]))
+            goto skip_warn;
+      }
+      warn("%s: Unknown feature '%s'.", pkg->name, pkg->features[i]);
+   skip_warn:
+      ;
+   }
+
+   if (strcmp(root, "/") != 0 && !pkg_has_feature(pkg, "sysroot")) {
+      error("%s: No support for 'sysroot' feature.", pkg->name);
+      success = false;
+   }
+   if (host != NULL && !pkg_has_feature(pkg, "cross-compile")) {
+      error("%s: No support for 'cross-compile' feature.", pkg->name);
+      success = false;
+   }
+   return success;
+}
 bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
    char* pkg_basedir    = xstrcatl(builddir, "/", pkg->name, "-", pkg->version);
    char* pkg_srcdir     = xstrcat(pkg_basedir, "/src");
@@ -311,7 +345,6 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
    static const char shell_script[] = {
       SHELL_SCRIPT_HEADER
       "set -e -v\n"
-      "[[ $HOST ]] || HOST=\"$(cc -dumpmachine)\"\n"
       "cd \"$builddir\"\n"
       "S=\"$srcdir\"\n"
       "B=\"$builddir\"\n"
@@ -685,4 +718,8 @@ char** lpkg_get_files(const char* pkg) {
       fclose(file);
    }
    return files;
+}
+
+bool pkg_has_feature(const struct package* pkg, const char* feature) {
+   return strlist_contains(pkg->features, feature);
 }

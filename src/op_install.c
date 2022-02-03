@@ -68,8 +68,6 @@ defop(install) {
       return 0;
    }
 
-   // TODO: handle conflicts and provides
-
    // Check for package conflicts.
    bool success = true;
    struct package_info* installed_pkgs = NULL;
@@ -126,6 +124,16 @@ defop(install) {
          iinfo.remove_pkgs = NULL;
          buf_push(install_pkgs, iinfo);
       }
+   }
+
+   if (!success)
+      return 1;
+
+   // Run prebuild checks.
+   log("Running package prebuild checks...");
+   success = true;
+   for (size_t i = 0; i < buf_len(install_pkgs); ++i) {
+      success &= pkg_prebuild_checks(install_pkgs[i].pkg);
    }
 
    if (!success)

@@ -19,6 +19,7 @@ struct package {
    char** rdepends;
    char** provides;
    char** conflicts;
+   char** features;
 };
 
 struct package_info {
@@ -40,6 +41,7 @@ void free_package(struct package*);
 void free_package_infos(struct package_info**);
 
 bool pkg_is_installed(const char* name);
+bool pkg_prebuild_checks(const struct package* pkg);
 bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir);
 bool pkg_download_sources(struct package* pkg);
 bool binpkg_install(const char* binpkg);
@@ -53,5 +55,6 @@ bool purge_package(const char* name);
 bool add_package(struct package*** pkgs, struct package* pkg, bool force);
 void find_dependencies(struct package*** pkgs, struct package_info** infos, const struct package* pkg, bool force_add);
 char** lpkg_get_files(const char* pkg);
+bool pkg_has_feature(const struct package* pkg, const char* feature);
 
 #endif /* FILE_MINIPKG2_PACKAGE_H */

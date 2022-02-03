@@ -47,6 +47,17 @@ defop(build) {
       return 1;
    }
 
+   log("Running prebuild checks...");
+   for (size_t i = 0; i < buf_len(pkgs); ++i) {
+      success &= pkg_prebuild_checks(pkgs[i]);
+   }
+
+   if (!success) {
+      free_package_infos(&infos);
+      buf_free(pkgs);
+      return 1;
+   }
+
    log("");
    if (verbosity >= V_NORMAL) {
       print(COLOR_LOG, "Packages (%zu)", buf_len(pkgs));

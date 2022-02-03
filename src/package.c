@@ -350,13 +350,12 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
       "B=\"$builddir\"\n"
       "F=\"$filesdir\"\n"
       "echo \"prepare()\"\n"
-      "prepare || exit 1\n"
+      "prepare\n"
       "echo \"build()\"\n"
-      "build || exit 1\n"
+      "build\n"
       "D=\"$pkgdir\"\n"
       "echo \"package()\"\n"
-      "package || exit 1\n"
-      "exit 0\n"
+      "package\n"
    };
 
    // pipefd[0] : minipkg2 -> bash

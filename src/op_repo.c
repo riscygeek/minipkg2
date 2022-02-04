@@ -47,7 +47,7 @@ defop(repo) {
       if (!is_dir(repodir))
          return no_repo();
       const char* branch = op_get_arg(op, "--branch");
-      char* cur_branch = git_branch();
+      char* cur_branch = git_branch(repodir);
       if (strcmp(branch, cur_branch) != 0) {
          if (!git_checkout(repodir, branch))
             fail("Failed to change to branch '%s'", branch);
@@ -59,7 +59,7 @@ defop(repo) {
    }
 
    if (is_dir(repodir)) {
-      char* branch = git_branch();
+      char* branch = git_branch(repodir);
       info("Repo is on branch '%s'", branch);
       free(branch);
    } else {

@@ -52,6 +52,9 @@ bool git_checkout(const char* repo, const char* branch) {
    free(cmd);
    return ec;
 }
-char* git_branch(void) {
-   return xpread("git branch --show-current");
+char* git_branch(const char* repo) {
+   char* cmd = xstrcatl("cd '", repo, "' && git branch --show-current");
+   char* branch = xpread("git branch --show-current");
+   free(cmd);
+   return branch;
 }

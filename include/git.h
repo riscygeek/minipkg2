@@ -1,5 +1,6 @@
 #ifndef FILE_MINIPKG2_GIT_H
 #define FILE_MINIPKG2_GIT_H
+#include <stdbool.h>
 
 // Get the version of git.
 char* git_version(void);
@@ -14,6 +15,6 @@ bool git_pull(const char* repo);
 bool git_checkout(const char* repo, const char* branch);
 
 // Get the current branch.
-char* git_branch(void);
+char* git_branch(const char* repo);
 
 #endif /* FILE_MINIPKG2_GIT_H */

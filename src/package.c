@@ -384,6 +384,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
          setenv("HOST",    host,          1);
       if (jobs)
          setenv("JOBS",    jobs,          1);
+      setenv("MINIPKG2",   self,          1);
 
       // Close unused pipes.
       close(pipefd[0][1]);

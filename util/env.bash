@@ -1,8 +1,10 @@
 # This shell script will be sourced by minipkg2.
 
+[[ $MINIPKG2 ]] || { echo 'minipkg2: $MINIPKG is not set. Please check your package manager version.' >&2; exit 1; }
+
 # Load the minipkg2 config.
 declare -A config
-eval "$(minipkg2 --root="$ROOT" config --dump 2>/dev/null)"
+eval "$("$MINIPKG2" --root="$ROOT" config --dump 2>/dev/null)"
 
 
 # The $JOBS variable determines the amount of parallel workers per package.

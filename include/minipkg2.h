@@ -28,8 +28,10 @@ extern char* builddir;
 extern char* repodir;
 extern const char* host;
 extern const char* jobs;
+extern char* self;
 
 void set_root(const char*);
 void set_repodir(const char*);
+void init_self(void);
 
 #endif /* FILE_MINIPKG2_MINIPKG2_H */

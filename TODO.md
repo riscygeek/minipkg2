@@ -20,6 +20,8 @@
 - [ ] commandline: Support for fused options (like: -ys or -sy)
 - [x] Parallel building with \$JOBS variable
 
+## Known Bugs
+- [ ] removing packages without files fails with "Arithmetic exception"
 
 ## Operations
 

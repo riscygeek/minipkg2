@@ -114,6 +114,7 @@ struct package* parse_package(const char* path) {
    if (pid == 0) {
       setenv("ROOT", root, 1);
       setenv("pkgfile", path, 1);
+      setenv("MINIPKG2", self, 1);
 
       // Close unused pipes.
       close(pipefd[1][0]);

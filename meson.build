@@ -37,6 +37,7 @@ c_args += '-DVERSION="' + meson.project_version() + '"'
 c_args += '-DCONFIG_PREFIX="' + get_option('prefix') + '"'
 c_args += '-DCONFIG_SYSCONFDIR="' + get_option('sysconfdir') + '"'
 c_args += '-DCONFIG_LIBDIR="' + get_option('libdir') + '"'
+c_args += '-DBUILD_SYS="meson"'
 
 # Check for optional libcurl dependency.
 libcurl = dependency('libcurl', required: false)

@@ -94,13 +94,7 @@ int parse_cmdline(int argc, char* argv[]) {
       return 0;
    }
    if (op_is_set(NULL, "--version")) {
-#ifdef HAS_LIBCURL
-         const bool has_libcurl = HAS_LIBCURL;
-#else
-         const bool has_libcurl = false;
-#endif
-         puts(VERSION);
-         printf("Has libcurl: %s\n", has_libcurl ? "true" : "false");
+      print_version();
          return 0;
    }
    if (op_is_set(NULL, "-q")) {

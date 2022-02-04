@@ -22,6 +22,7 @@ endif
 CPPFLAGS += -DCONFIG_PREFIX=\"$(prefix)\"
 CPPFLAGS += -DCONFIG_LIBDIR=\"$(libdir)\"
 CPPFLAGS += -DCONFIG_SYSCONFDIR=\"$(sysconfdir)\"
+CPPFLAGS += -DBUILD_SYS=\"make\"
 
 sources = $(wildcard src/*.c)
 objects = $(patsubst src/%.c,obj/%.o,$(sources))

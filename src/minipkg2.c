@@ -31,3 +31,22 @@ void set_repodir(const char* dir) {
 void init_self(void) {
    self = xreadlink("/proc/self/exe");
 }
+
+#ifndef HAS_LIBCURL
+#define HAS_LIBCURL false
+#endif
+
+void print_version(void) {
+   puts("Micro-Linux Package Manager\n");
+   puts("Version: " VERSION);
+   puts("\nBuild:");
+   puts("  system:     " BUILD_SYS);
+   puts("  prefix:     " CONFIG_PREFIX);
+   puts("  libdir:     " CONFIG_PREFIX "/" CONFIG_LIBDIR);
+   puts("  sysconfdir: " CONFIG_PREFIX "/" CONFIG_SYSCONFDIR);
+   puts("  date:       " __DATE__);
+   puts("  time:       " __TIME__);
+   puts("\nFeatures:");
+   printf("  libcurl:    %s\n", HAS_LIBCURL ? "true" : "false");
+   puts("\nWritten by Benjamin Stürz <benni@stuerz.xyz>.");
+}

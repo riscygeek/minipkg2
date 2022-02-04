@@ -357,7 +357,7 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
       "echo \"package()\"\n"
       "package\n"
       "if [[ $__MINIPKG2_ENV = 1 ]]; then\n"
-      "  echo \"pkg_clean()\""
+      "  echo \"pkg_clean()\"\n"
       "  pkg_clean\n"
       "fi\n"
    };

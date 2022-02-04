@@ -3,7 +3,7 @@
 #include "utils.h"
 
 static int isvalidname(int ch) {
-   return isalnum(ch) || ch == '_';
+   return isalnum(ch) || ch == '_' || ch == '-';
 }
 static int isspacennl(int ch) {
    return isspace(ch) && ch != '\n';

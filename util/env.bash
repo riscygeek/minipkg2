@@ -31,6 +31,7 @@ pkg_clean() {
    cd "$D" || { echo "Failed to ch into '$D'"; exit 1; }
    suffixes="${config[install.remove-suffixes]}"
    for s in ${suffixes}; do
-      find . -name "*.$s" -delete
+      echo "Cleaning '.$s' files..."
+      find . -name "*.$s" -print -delete
    done
 }

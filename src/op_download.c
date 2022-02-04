@@ -42,7 +42,7 @@ defop(download) {
    }
 
    if (!op_is_set(op, "-y")) {
-      if (!yesno("Proceed with installation?", true))
+      if (!yesno("Proceed with download?", true))
          return 1;
       log("");
    }

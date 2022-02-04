@@ -261,7 +261,6 @@ void format_size(size_t* sz, const char** unit_out) {
       {"GiB", 1 << 30},
       {"MiB", 1 << 20},
       {"KiB", 1 << 10},
-      {"B",         0},
       {NULL},
    };
    for (size_t i = 0; units[i].name; ++i) {
@@ -271,7 +270,7 @@ void format_size(size_t* sz, const char** unit_out) {
          return;
       }
    }
-   fail("format_size(): unreachable reached.");
+   *unit_out = "B";
 }
 bool is_symlink(const char* path) {
    struct stat st;

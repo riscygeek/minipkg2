@@ -619,7 +619,7 @@ bool pkg_estimate_size(const char* name, size_t* size_out) {
    char* line;
    while ((line = freadline(files)) != NULL) {
       struct stat st;
-      if (lstat(line, &st) != 0)
+      if (lstat(line, &st) == 0)
          sz += st.st_size;
       free(line);
    }

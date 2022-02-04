@@ -84,7 +84,7 @@ static int perform(const struct operation* op, char** args, size_t num_args, boo
    log("");
    size_t total_size = 0;
    for (size_t i = 0; i < buf_len(selected); ++i) {
-      size_t sz;
+      size_t sz = 0;
       if (pkg_estimate_size(selected[i]->provided_name, &sz)) {
          total_size += sz;
       } else {

@@ -21,7 +21,7 @@
 - [x] Parallel building with \$JOBS variable
 
 ## Known Bugs
-- [ ] removing packages without files fails with "Arithmetic exception"
+- [x] removing packages without files fails with "Arithmetic exception"
 
 ## Operations
 

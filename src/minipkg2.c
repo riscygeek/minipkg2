@@ -29,13 +29,5 @@ void set_repodir(const char* dir) {
 }
 
 void init_self(void) {
-   if (!self) {
-      self = xmalloc(BUFSIZ);
-      const ssize_t rv = readlink("/proc/self/exe", self, BUFSIZ);
-      if (rv < 0)
-         fail_errno("Failed to readlink('/proc/self/exe')");
-
-      if (rv >= BUFSIZ)
-         fail("Failed to readlink('/proc/self/exe'): Buffer too small");
-   }
+   self = xreadlink("/proc/self/exe");
 }

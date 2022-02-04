@@ -189,11 +189,10 @@ void print_package(const struct package* pkg) {
    print_line("Runtime Dependencies",  buf_len(pkg->rdepends), pkg->rdepends);
    print_line("Provides",              buf_len(pkg->provides), pkg->provides);
    print_line("Conflicts",             buf_len(pkg->conflicts), pkg->conflicts);
+   print_line("Features",              buf_len(pkg->features), pkg->features);
 }
 struct package* find_package(const char* name, enum package_source src) {
    char* path;
-   if (!pkg_path_is_valid(name))
-      return NULL;
    switch (src) {
    case PKG_LOCAL:
       path = xstrcatl(pkgdir, "/", name, "/package.info");
@@ -254,7 +253,7 @@ bool find_packages(struct package_info** pkgs, enum package_source src) {
 
       info.provided_name = xstrdup(name);
       info.is_provided = (st.st_mode & S_IFMT) == S_IFLNK;
-      info.pkg = info.is_provided ? NULL : parse_package(path);      
+      info.pkg = info.is_provided ? NULL : parse_package(path);
       info.provider_name = info.is_provided ? xreadlink(dirpath) : info.provided_name;
       if (!info.provider_name)
          fail("find_packages(): Failed to readlink('%s')", dirpath);

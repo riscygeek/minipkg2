@@ -101,6 +101,8 @@ defop(install) {
       }
       for (size_t i = 0; i < buf_len(installed_pkgs); ++i) {
          const struct package* ipkg = installed_pkgs[i].pkg;
+         if (!ipkg)
+            continue;
          for (size_t j = 0; j < buf_len(ipkg->conflicts); ++j) {
             for (size_t k = 0; k < buf_len(install_pkgs); ++k) {
                if (!strcmp(ipkg->conflicts[j], install_pkgs[k].pkg->name)) {

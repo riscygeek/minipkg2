@@ -20,8 +20,6 @@ defop(info) {
 
    const enum package_source src = search_repo ? PKG_REPO : PKG_LOCAL;
 
-   // FIXME
-
    int ec = 0;
    for (size_t i = 0; i < num_args; ++i) {
       const char* end;

@@ -62,7 +62,7 @@ defop(check) {
                 success = false;
                 continue;
             }
-            log("Checking package '%s:%s'...", info->pkg->name, info->pkg->version);
+            logv(V_VERBOSE, "Checking package '%s:%s'...", info->pkg->name, info->pkg->version);
 
             const bool tmp = check_files(info->pkg->name, color);
             if (opt_werror)
@@ -80,7 +80,7 @@ defop(check) {
 
         for (size_t i = 0; i < buf_len(pkgs); ++i) {
             const struct package* pkg = pkgs[i].pkg;
-            log("Checking package '%s:%s'...", pkg->name, pkg->version);
+            logv(V_VERBOSE, "Checking package '%s:%s'...", pkg->name, pkg->version);
             const bool tmp = check_files(pkg->name, color);
             if (opt_werror)
                 success &= tmp;

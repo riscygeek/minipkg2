@@ -10,6 +10,7 @@ eval "$("$MINIPKG2" --root="$ROOT" config --dump 2>/dev/null)"
 # The $JOBS variable determines the amount of parallel workers per package.
 if [[ -z $JOBS ]]; then
    JOBS="${config[build.jobs]}"
+   [[ $JOBS = max ]] && JOBS="$(nproc)"
    JOBS="${JOBS:-1}"
 fi
 

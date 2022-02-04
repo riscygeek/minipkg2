@@ -1,4 +1,4 @@
-VERSION = 0.2.4.1
+VERSION = 0.2.5
 
 
 # Compiler definitions.

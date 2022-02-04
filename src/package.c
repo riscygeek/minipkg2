@@ -356,6 +356,10 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
       "D=\"$pkgdir\"\n"
       "echo \"package()\"\n"
       "package\n"
+      "if [[ $__MINIPKG2_ENV = 1 ]]; then\n"
+      "  echo \"pkg_clean()\""
+      "  pkg_clean\n"
+      "fi\n"
    };
 
    // pipefd[0] : minipkg2 -> bash

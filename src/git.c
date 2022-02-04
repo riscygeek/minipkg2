@@ -7,7 +7,10 @@
 #include "git.h"
 
 char* git_version(void) {
-   char* reply = xpread("git --version");
+   char* reply = xpread("git --version 2>/dev/null");
+
+   if (!reply)
+      return NULL;
 
    static const char prefix[] = "git version ";
    if (!starts_with(reply, prefix))

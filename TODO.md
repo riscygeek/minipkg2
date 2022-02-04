@@ -19,6 +19,7 @@
 - [ ] Check provides and conflicts more in depth
 - [ ] commandline: Support for fused options (like: -ys or -sy)
 - [x] Parallel building with \$JOBS variable
+- [ ] Package-specific options (Like USE flags on Gentoo).
 
 ## Known Bugs
 - [x] removing packages without files fails with "Arithmetic exception"
@@ -47,6 +48,7 @@
 - [ ] --deps (Also build dependencies)
 
 ### download
+- [ ] Make it more fancy
 - [ ] --all (Download **all** available package sources from the repo)
 - [x] --deps (Also download sources of dependencies)
 - [ ] --bdeps, --rdeps (for more fine-grained control)

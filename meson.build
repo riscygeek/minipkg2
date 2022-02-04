@@ -1,7 +1,7 @@
 project(
   'minipkg2',
   'c',
-  version: '0.2.3',
+  version: '0.2.4',
   default_options: [
     'c_std=gnu11',
     'warning_level=3',

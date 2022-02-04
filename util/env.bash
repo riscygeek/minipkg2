@@ -17,9 +17,8 @@ fi
 
 # Define some useful functions.
 
-# Parallel make.
-pmake() {
-   make -j "${JOBS}"
-}
+shopt -s expand_aliases
+
+alias pmake="make -j '$JOBS'"
 
 

@@ -88,7 +88,7 @@ defop(install) {
             }
 
             // Search for already installed packages.
-            conflict = find_package_info(&installed_pkgs, pkg->conflicts[j]);
+            struct package_info* conflict = find_package_info(&installed_pkgs, pkg->conflicts[j]);
             if (conflict != NULL) {
                if (!strlist_contains(pkg->provides, conflict->pkg->name)) {
                   error("Package '%s' conflits with installed package '%s'.", pkg->name, conflict->pkg->name);

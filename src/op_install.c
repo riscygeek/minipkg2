@@ -75,12 +75,16 @@ defop(install) {
    if (find_packages(&installed_pkgs, PKG_LOCAL)) {
       for (size_t i = 0; i < buf_len(pkgs); ++i) {
          struct package* pkg = pkgs[i];
+         if (!pkg)
+            continue;
          struct package_install_info iinfo;
          iinfo.pkg = pkg;
          iinfo.remove_pkgs = NULL;
          for (size_t j = 0; j < buf_len(pkg->conflicts); ++j) {
             // Search for packages to be installed.
             for (size_t k = 0; j < buf_len(pkgs); ++k) {
+               if (!pkgs[k])
+                  continue;
                if (!strcmp(pkg->conflicts[j], pkgs[k]->name)) {
                   error("Package '%s' conflicts with package '%s'.", pkg->name, pkgs[k]->name);
                   success = false;

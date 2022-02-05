@@ -1,9 +1,9 @@
-VERSION = 0.2.8
+VERSION = 0.2.8.1
 
 
 # Compiler definitions.
 CC 		?= gcc
-CFLAGS 	+= -std=gnu11 -Wall -Wextra -O2 -Iinclude
+CFLAGS 	+= -std=gnu11 -Wall -Wextra -Og -g -Iinclude
 
 # Install directories.
 prefix		?= /usr/local

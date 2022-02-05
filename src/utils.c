@@ -388,7 +388,7 @@ int symlink_v(const char* path1, const char* path2) {
    if (ec == 0) {
       debug("'%s' -> '%s'", path2, path1);
    } else {
-      warn("Failed to create symbolic link '%s' to '%s'", path2, path1);
+      debug("Failed to create symbolic link '%s' to '%s'", path2, path1);
    }
 
    return ec;

@@ -649,6 +649,16 @@ bool purge_package(const char* name) {
       free(dir);
       return ec != 0;
    }
+   struct package* pkg;
+   {
+      char* path_pkginfo = xstrcat(dir, "/package.info");
+
+      pkg = parse_package(path_pkginfo);
+
+      free(path_pkginfo);
+   }
+
+
    char* path_files = xstrcat(dir, "/files");
    FILE* files_file = fopen(path_files, "r");
    if (!files_file) {
@@ -692,10 +702,18 @@ bool purge_package(const char* name) {
       error("Failed to delete file '%s'", files[i]);
       success = false;
    }
+
    if (!success)
-      return free(dir), false;
+      return free_package(pkg), free(dir), false;
 
    rm_rf(dir);
+
+   for (size_t i = 0; i < buf_len(pkg->provides); ++i) {
+      char* path_link = xstrcatl(pkgdir, "/", pkg->provides[i]);
+      rm(path_link);
+      free(path_link);
+   }
+   free_package(pkg);
    return true;
 }
 

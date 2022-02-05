@@ -55,6 +55,7 @@ static char** read_list(FILE* file) {
 
 struct package* parse_package(const char* path) {
    // Check if `path` can be read.
+   lprint("Parsing package '%s'...", path);
    if (access(path, R_OK) != 0) {
       error_errno("Cannot access '%s'", path);
       return NULL;
@@ -499,6 +500,8 @@ bool pkg_download_sources(struct package* pkg) {
 bool binpkg_install(const char* binpkg) {
    struct package* pkg;
 
+   lprint("Installing binary package '%s'...", binpkg);
+
    // Extract the package name.
    char* pkgname;
    {
@@ -641,6 +644,7 @@ bool pkg_estimate_size(const char* name, size_t* size_out) {
    return true;
 }
 bool purge_package(const char* name) {
+   lprint("Purging package '%s'...", name);
    char* dir = xstrcatl(pkgdir, "/", name);
    if (is_symlink(dir)) {
       const int ec = unlink(dir);
@@ -682,7 +686,7 @@ bool purge_package(const char* name) {
       num_removed = 0;
    
       for (size_t i = 0; i < buf_len(files); ++i) {
-         if (rm(files[i]) == 0) {
+         if (rm(files[i])) {
             free(files[i]);
             buf_remove(files, i, 1);
             ++num_removed;

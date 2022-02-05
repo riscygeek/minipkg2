@@ -38,9 +38,9 @@ void init_log(void) {
    free(path);
 }
 
-static void vlprint(const char* fmt, va_list ap) {
-   if (!logfile)
-      return;
+void lprint(const char* fmt, ...) {
+   va_list ap;
+   va_start(ap, fmt);
 
    const time_t timer = time(NULL);
    struct tm* tm = localtime(&timer);
@@ -50,24 +50,7 @@ static void vlprint(const char* fmt, va_list ap) {
       fprintf(logfile, "[%s] ", buffer);
    }
    vfprintf(logfile, fmt, ap);
-}
-
-void lprint(const char* msg, ...) {
-   va_list ap;
-   va_start(ap, msg);
-
-   vlprint(msg, ap);
-
-   va_end(ap);
-}
-void lprintln(const char* msg, ...) {
-   va_list ap;
-   va_start(ap, msg);
-
-   vlprint(msg, ap);
-
-   if (logfile)
-      fputc('\n', logfile);
+   fputc('\n', logfile);
 
    va_end(ap);
 }

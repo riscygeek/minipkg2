@@ -20,7 +20,6 @@ void print_errno(int color, const char*, ...);
 // Print to log file.
 void init_log(void);
 void lprint(const char* msg, ...);
-void lprintln(const char* msg, ...);
 
 #define COLOR_LOG          32
 #define COLOR_WARN         33

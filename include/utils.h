@@ -51,6 +51,7 @@ bool  strlist_contains(char** list, const char* str);
 bool  tar_extract_file(const char* tar, const char* file, const char* outfile);
 bool  write_lines(const char* filename, char** lines);
 int   symlink_v(const char* path1, const char* path2);
+bool  rm(const char* fileame);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')
@@ -58,6 +59,5 @@ int   symlink_v(const char* path1, const char* path2);
 #define starts_with(s1, s2)   (!strncmp((s1), (s2), strlen(s2)))
 #define xstrcatl(...)         xstrcatl_impl(__VA_ARGS__, NULL)
 #define xstreql(...)          xstreql_impl(__VA_ARGS__, NULL)
-#define rm(file)              (logv(V_VERBOSE, "Deleting %s...", (file)), remove(file))
 
 #endif /* FILE_MINIPKG2_UTILS_H */

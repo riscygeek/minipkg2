@@ -128,12 +128,14 @@ bool mkparentdirs(const char* dir, mode_t mode) {
    return true;
 }
 bool mkdir_p(const char* dir, mode_t mode) {
+   lprint("mkdir -m %#o -p '%s'", mode, dir);
    if (!mkparentdirs(dir, mode))
       return false;
    const int ec = mkdir(dir, mode);
    return ec != 0 && ec != EEXIST;
 }
 bool rm_rf(const char* path) {
+   lprint("rm -rf '%s'", path);
    struct stat st;
    if (lstat(path, &st) != 0)
       return true;
@@ -157,7 +159,18 @@ bool rm_rf(const char* path) {
 
       closedir(dir);
    }
-   success &= rm(path) == 0;
+   success &= rm(path);
+   return success;
+}
+bool rm(const char* path) {
+   logv(V_VERBOSE, "Deleting '%s'...", path);
+   lprint("rm %s'", path);
+   const bool success = remove(path);
+   const int saved_errno = errno;
+   if (!success) {
+      lprint("Failed to remove '%s': %s", path, strerror(saved_errno));
+   }
+   errno = saved_errno;
    return success;
 }
 bool copy_file(const char* source, const char* dest) {
@@ -343,6 +356,7 @@ void strlist_remove(char*** list, const char* str) {
    }
 }
 bool tar_extract_file(const char* tar, const char* filename, const char* outfilename) {
+   lprint("Extracting file '%s' from '%s' to '%s'...", filename, tar, outfilename);
    FILE* outfile = fopen(outfilename, "w");
    if (!outfile)
       return false;
@@ -390,6 +404,8 @@ int symlink_v(const char* path1, const char* path2) {
    } else {
       debug("Failed to create symbolic link '%s' to '%s'", path2, path1);
    }
+
+   lprint("Creating symlink '%s' to '%s'", path2, path1);
 
    return ec;
 }

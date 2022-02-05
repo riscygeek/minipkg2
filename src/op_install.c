@@ -80,10 +80,11 @@ defop(install) {
          iinfo.remove_pkgs = NULL;
          for (size_t j = 0; j < buf_len(pkg->conflicts); ++j) {
             // Search for packages to be installed.
-            const struct package_info* conflict = find_package_info(&infos, pkg->conflicts[j]);
-            if (conflict != NULL) {
-               error("Package '%s' conflicting with package '%s'.", pkg->name, conflict->pkg->name);
-               success = false;
+            for (size_t k = 0; j < buf_len(pkgs); ++k) {
+               if (!strcmp(pkg->conflicts[j], pkgs[k]->name)) {
+                  error("Package '%s' conflicts with package '%s'.", pkg->name, pkgs[k]->name);
+                  success = false;
+               }
             }
 
             // Search for already installed packages.

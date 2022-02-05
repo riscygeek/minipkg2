@@ -17,4 +17,7 @@ bool git_checkout(const char* repo, const char* branch);
 // Get the current branch.
 char* git_branch(const char* repo);
 
+// If the repo already exists, git_pull(dest), otherwise git_clone(url, dest, NULL);
+bool git_get(const char* url, const char* dest);
+
 #endif /* FILE_MINIPKG2_GIT_H */

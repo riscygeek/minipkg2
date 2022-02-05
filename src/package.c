@@ -483,7 +483,7 @@ bool pkg_download_sources(struct package* pkg) {
          if (ends_with(dest, ".git"))
             dest[strlen(dest) - 4] = '\0';
 
-         success &= git_clone(url, dest, NULL);
+         success &= git_get(url, dest);
       } else {
          success &= download(url, dest, false);
       }

@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include <stdlib.h>
 #include <limits.h>
 #include <stdio.h>
@@ -60,4 +61,12 @@ char* git_branch(const char* repo) {
    char* branch = xpread("git branch --show-current");
    free(cmd);
    return branch;
+}
+
+bool git_get(const char* url, const char* dest) {
+   if (access(dest, F_OK) == 0) {
+      return git_pull(dest);
+   } else {
+      return git_clone(url, dest, NULL);
+   }
 }

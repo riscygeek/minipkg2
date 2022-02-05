@@ -20,6 +20,7 @@
 - [ ] commandline: Support for fused options (like: -ys or -sy)
 - [x] Parallel building with \$JOBS variable
 - [ ] Package-specific options (Like USE flags on Gentoo).
+- [x] Add support for -git packages
 
 ## Known Bugs
 - [x] removing packages without files fails with "Arithmetic exception"

@@ -13,6 +13,7 @@
 #include "package.h"
 #include "print.h"
 #include "utils.h"
+#include "git.h"
 #include "buf.h"
 
 #define SHELL_SCRIPT_HEADER                              \
@@ -469,18 +470,25 @@ bool pkg_download_sources(struct package* pkg) {
    bool success = true;
    for (size_t i = 0; i < buf_len(pkg->sources); ++i) {
       const char* url = pkg->sources[i];
+
       const char* filename = strrchr(url, '/');
       if (!filename)
          fail("Invalid URL: %s", url);
       ++filename;
-      char* path = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/src/", filename);
 
-      if (!download(url, path, false)) {
-         //error("Failed to download '%s'", url);
-         success = false;
+      char* dest = xstrcatl(builddir, "/", pkg->name, "-", pkg->version, "/src/", filename);
+
+      if (starts_with(url, "git://")) {
+         // Remove trailing '.git'.
+         if (ends_with(dest, ".git"))
+            dest[strlen(dest) - 4] = '\0';
+
+         success &= git_clone(url, dest, NULL);
+      } else {
+         success &= download(url, dest, false);
       }
 
-      free(path);
+      free(dest);
    }
    return success;
 }

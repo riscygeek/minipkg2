@@ -12,7 +12,7 @@ struct cmdline_option install_options[] = {
    { "--clean-build",   OPT_BASIC, "Perform a clean build.",         {NULL}, },
    { "--no-deps",       OPT_BASIC, "Don't check for dependencies.",  {NULL}, },
    { "-s",              OPT_BASIC, "Skip installed packages.",       {NULL}, },
-   { "--skip-installed",OPT_BASIC, NULL,                             {"-s"}, },
+   { "--skip-installed",OPT_ALIAS, NULL,                             {"-s"}, },
    { "--force",         OPT_BASIC, "Do not check for conflicts.",    {NULL}, },
    { NULL },
 };

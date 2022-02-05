@@ -259,6 +259,8 @@ bool find_packages(struct package_info** pkgs, enum package_source src) {
       if (!info.provider_name)
          fail("find_packages(): Failed to readlink('%s')", dirpath);
 
+      debug("Found package '%s', is_provided: %s, provider_name: '%s'", info.provided_name, info.is_provided ? "true" : "false", info.provider_name);
+
       buf_push(*pkgs, info);
       free(dirpath);
       free(path);
@@ -267,8 +269,10 @@ bool find_packages(struct package_info** pkgs, enum package_source src) {
    for (size_t i = 0; i < buf_len(*pkgs); ++i) {
       struct package_info* info = &(*pkgs)[i];
       if (info->is_provided) {
+         debug("Resolving package '%s', provider: '%s'...", info->provided_name, info->provider_name);
          for (size_t j = 0; j < buf_len(pkgs); ++j) {
             struct package_info* info2 = &(*pkgs)[j];
+            debug("  Trying '%s'...", info2->pkg->name);
             if (info2->pkg && !strcmp(info->provider_name, info2->pkg->name)) {
                info->pkg = info2->pkg;
                break;

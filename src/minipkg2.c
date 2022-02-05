@@ -21,6 +21,7 @@ void set_root(const char* dir) {
    pkgdir      = xstrcat(root, "/var/db/minipkg2/packages");
    repodir     = xstrcat(root, "/var/db/minipkg2/repo");
    builddir    = xstrcat(root, "/var/tmp/minipkg2");
+   init_log();
 }
 
 void set_repodir(const char* dir) {

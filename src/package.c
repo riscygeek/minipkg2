@@ -272,7 +272,7 @@ bool find_packages(struct package_info** pkgs, enum package_source src) {
          debug("Resolving package '%s', provider: '%s'...", info->provided_name, info->provider_name);
          for (size_t j = 0; j < buf_len(pkgs); ++j) {
             struct package_info* info2 = &(*pkgs)[j];
-            debug("  Trying '%s'...", info2->pkg->name);
+            debug("  Trying '%s'...", info2->provided_name);
             if (info2->pkg && !strcmp(info->provider_name, info2->pkg->name)) {
                info->pkg = info2->pkg;
                break;

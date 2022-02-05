@@ -13,6 +13,7 @@ struct cmdline_option install_options[] = {
    { "--no-deps",       OPT_BASIC, "Don't check for dependencies.",  {NULL}, },
    { "-s",              OPT_BASIC, "Skip installed packages.",       {NULL}, },
    { "--skip-installed",OPT_BASIC, NULL,                             {"-s"}, },
+   { "--force",         OPT_BASIC, "Do not check for conflicts.",    {NULL}, },
    { NULL },
 };
 
@@ -28,6 +29,7 @@ defop(install) {
    find_packages(&infos, PKG_REPO);
    const bool opt_no_deps = op_is_set(op, "--no-deps");
    const bool opt_skip = op_is_set(op, "-s");
+   const bool opt_force = op_is_set(op, "--force");
 
    if (!opt_no_deps)
       log("Resolving dependencies...");
@@ -72,7 +74,7 @@ defop(install) {
    bool success = true;
    struct package_info* installed_pkgs = NULL;
    struct package_install_info* install_pkgs = NULL;
-   if (find_packages(&installed_pkgs, PKG_LOCAL)) {
+   if (find_packages(&installed_pkgs, PKG_LOCAL) && !opt_force) {
       for (size_t i = 0; i < buf_len(pkgs); ++i) {
          struct package* pkg = pkgs[i];
          if (!pkg)
@@ -93,7 +95,7 @@ defop(install) {
 
             // Search for already installed packages.
             struct package_info* conflict = find_package_info(&installed_pkgs, pkg->conflicts[j]);
-            if (conflict != NULL) {
+            if (conflict != NULL && strcmp(conflict->pkg->name, pkg->name) != 0) {
                if (!strlist_contains(pkg->provides, conflict->pkg->name)) {
                   error("Package '%s' conflits with installed package '%s'.", pkg->name, conflict->pkg->name);
                   success = false;

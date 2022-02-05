@@ -82,7 +82,7 @@ defop(install) {
          iinfo.remove_pkgs = NULL;
          for (size_t j = 0; j < buf_len(pkg->conflicts); ++j) {
             // Search for packages to be installed.
-            for (size_t k = 0; j < buf_len(pkgs); ++k) {
+            for (size_t k = 0; k < buf_len(pkgs); ++k) {
                if (!pkgs[k])
                   continue;
                if (!strcmp(pkg->conflicts[j], pkgs[k]->name)) {

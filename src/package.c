@@ -555,7 +555,8 @@ bool binpkg_install(const char* binpkg) {
 
    // Actually install the package by extracting it's contents into $root.
    {
-      char* cmd = xstrcatl("tar -C '", root, "' -xhpf '", binpkg, "' --exclude='.meta'");
+      const char* opts = verbosity >= V_EXTRA_VERBOSE ? "-xhpvf" : "-xhpf";
+      char* cmd = xstrcatl("tar -C '", root, "' ", opts, " '", binpkg, "' --exclude='.meta'");
       if (system(cmd) != 0) {
          error("Failed to extract package.");
          return false;
@@ -577,7 +578,7 @@ bool binpkg_install(const char* binpkg) {
    // Create symlinks for provided packages.
    for (size_t i = 0; i < buf_len(pkg->provides); ++i) {
       char* path = xstrcatl(pkgdir, "/", pkg->provides[i]);
-      symlink(pkg->name, path);
+      symlink_v(pkg->name, path);
       free(path);
    }
 

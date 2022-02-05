@@ -50,6 +50,7 @@ void  strlist_remove(char*** list, const char* str);
 bool  strlist_contains(char** list, const char* str);
 bool  tar_extract_file(const char* tar, const char* file, const char* outfile);
 bool  write_lines(const char* filename, char** lines);
+int   symlink_v(const char* path1, const char* path2);
 
 #define isname0(ch)           (isalpha(ch) || (ch) == '_')
 #define isname(ch)            (isalnum(ch) || (ch) == '_')

@@ -344,6 +344,8 @@ bool pkg_build(struct package* pkg, const char* bmpkg, const char* filesdir) {
    char* pkg_pkgdir     = xstrcat(pkg_basedir, "/pkg");
    char* path_logfile   = xstrcat(pkg_basedir, "/log");
 
+   lprint("Building package '%s'\n", pkg->name);
+
    mkdir_p(pkg_builddir, 0755);
    checkv(rm_rf(pkg_pkgdir), true);
    mkdir_p(pkg_pkgdir, 0755);
@@ -558,6 +560,7 @@ bool binpkg_install(const char* binpkg) {
 
    // Actually install the package by extracting it's contents into $root.
    {
+      lprint("Extracting '%s'...\n", binpkg);
       const char* opts = verbosity >= V_EXTRA_VERBOSE ? "-xhpvf" : "-xhpf";
       char* cmd = xstrcatl("tar -C '", root, "' ", opts, " '", binpkg, "' --exclude='.meta'");
       if (system(cmd) != 0) {

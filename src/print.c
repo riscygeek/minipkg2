@@ -28,17 +28,14 @@ void init_log(void) {
 
    setlocale(LC_TIME, "C.UTF-8");
 
-   char* logdir = xstrcat(root, "/log");
-   char* path = xstrcat(logdir, "/minipkg2.log");
+   mkdir_p(CONFIG_LOG_DIR, 0755);
 
-   mkdir_p(logdir, 0755);
-   free(logdir);
-
-   logfile = fopen(path, "a");
-   free(path);
+   logfile = fopen(CONFIG_LOG_FILE, "a");
 }
 
 void lprint(const char* fmt, ...) {
+   if (!logfile)
+      return;
    va_list ap;
    va_start(ap, fmt);
 

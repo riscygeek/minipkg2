@@ -738,6 +738,8 @@ bool add_package(struct package*** pkgs, struct package* pkg, bool force) {
 
 void find_dependencies(struct package*** pkgs, struct package_info** infos, const struct package* pkg, bool force_add) {
    for (size_t i = 0; i < buf_len(pkg->bdepends); ++i) {
+      if (pkg_is_installed(pkg->bdepends[i]))
+         continue;
       struct package_info* dep = find_package_info(infos, pkg->bdepends[i]);
       if (!dep || !dep->pkg)
          fail("Build dependency '%s' for package '%s' not found.", pkg->bdepends[i], pkg->name);
@@ -745,6 +747,8 @@ void find_dependencies(struct package*** pkgs, struct package_info** infos, cons
       add_package(pkgs, dep->pkg, force_add);
    }
    for (size_t i = 0; i < buf_len(pkg->rdepends); ++i) {
+      if (pkg_is_installed(pkg->bdepends[i]))
+         continue;
       struct package_info* dep = find_package_info(infos, pkg->rdepends[i]);
       if (!dep || !dep->pkg)
          fail("Runtime dependency '%s' for package '%s' not found.", pkg->rdepends[i], pkg->name);

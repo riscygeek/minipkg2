@@ -31,6 +31,10 @@ void init_log(void) {
    mkdir_p(CONFIG_LOG_DIR, 0755);
 
    logfile = fopen(CONFIG_LOG_FILE, "a");
+
+   // Configure line-buffering
+   if (logfile)
+      setvbuf(logfile, NULL, _IOLBF, BUFSIZ);
 }
 
 void lprint(const char* fmt, ...) {

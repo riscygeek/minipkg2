@@ -9,7 +9,11 @@ project(
   )
 
 sources = [
+  'src/cmdline.cpp',
   'src/main.cpp',
+  'src/minipkg2.cpp',
+  'src/op_help.cpp',
+  'src/utils.cpp',
 ]
 
 cpp_args = []

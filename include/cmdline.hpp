@@ -54,7 +54,7 @@ namespace minipkg2::cmdline {
         option& get_option(std::string_view name);
 
         static std::vector<operation*> operations;
-        static operation* get_op(std::string_view name);
+        static operation& get_op(std::string_view name);
     };
 
     // XXX: Please also look into cmdline.cpp when adding new operations.

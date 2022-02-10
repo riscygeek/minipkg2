@@ -37,7 +37,7 @@ namespace minipkg2::cmdline {
         throw std::invalid_argument("Option not found: '"s + std::string{name} + '\'');
     }
     bool option::global_is_set(std::string_view name) {
-        option& opt = get_global(name);
+        option& opt = option::resolve(nullptr, get_global(name));
         return opt.selected;
     }
     option& option::get_global(std::string_view name) {
@@ -47,10 +47,10 @@ namespace minipkg2::cmdline {
         }
         throw std::invalid_argument("Invalid option: " + std::string{name});
     }
-    operation* operation::get_op(std::string_view name) {
+    operation& operation::get_op(std::string_view name) {
         for (auto* op : operations) {
             if (op->name == name)
-                return op;
+                return *op;
         }
         throw std::invalid_argument("Invalid operation: " + std::string{name});
     }
@@ -81,6 +81,7 @@ namespace minipkg2::cmdline {
             const std::string_view arg = argv[idx];
             if (real_opt.type == option::ARG) {
                 if (opt.name == arg.substr(0, opt.name.length())) {
+                    real_opt.selected = true;
                     if (arg[opt.name.length()] == '=') {
                         real_opt.value = arg.substr(opt.name.length() + 1);
                     } else {
@@ -139,7 +140,7 @@ namespace minipkg2::cmdline {
             parse_opt();
 
         if (idx != argc) {
-            op = operation::get_op(argv[idx]);
+            op = &operation::get_op(argv[idx]);
 
             for (++idx; idx < argc; ++idx) {
                 parse_opt();
@@ -148,8 +149,9 @@ namespace minipkg2::cmdline {
 
         // Handle global options.
         if (option::global_is_set("-h")) {
-            //op_help();
-            return 0;
+            if (op)
+                args.emplace(args.begin(), op->name);
+            return operation::get_op("help")(args);
         }
 
         if (option::global_is_set("--version")) {
@@ -158,26 +160,33 @@ namespace minipkg2::cmdline {
         }
 
         if (option::global_is_set("-q")) {
-            // verbosity = Verbosity::QUIET;
+            // TODO: verbosity = Verbosity::QUIET;
         } else if (option::global_is_set("-vv")) {
-            // verbosity = Verbosity::EXTRA_VERBOSE;
+            // TODO: verbosity = Verbosity::EXTRA_VERBOSE;
         } else if (option::global_is_set("-v")) {
-            // verbosity = Verbosity::VERBOSE;
+            // TODO: verbosity = Verbosity::VERBOSE;
         }
 
         if (auto& opt = option::get_global("--root"); opt.selected) {
-            // minipkg2::set_root(opt.value);
+            minipkg2::set_root(opt.value);
         }
 
         if (auto& opt = option::get_global("--host"); opt.selected) {
-            // host = opt.value;
+            host = opt.value;
         }
 
-        if (auto& opt = option::get_global("--jobs"); opt.selected) {
+        if (auto& opt = option::get_global("-j"); opt.selected) {
             std::size_t endp = std::string::npos;
-            const int jobs = std::stoi(opt.value, &endp);
+            int jobs;
+
+            try {
+                jobs = std::stoi(opt.value, &endp);
+            } catch (...) {
+                goto jobs_failed;
+            }
 
             if (endp < opt.value.size()) {
+            jobs_failed:;
                 throw parse_error("Failed to parse --jobs="s + opt.value);
             }
 

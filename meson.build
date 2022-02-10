@@ -10,6 +10,7 @@ project(
 
 sources = [
   'src/cmdline.cpp',
+  'src/git.cpp',
   'src/main.cpp',
   'src/minipkg2.cpp',
   'src/op_help.cpp',

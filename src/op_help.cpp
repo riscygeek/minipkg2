@@ -20,7 +20,7 @@ namespace minipkg2::cmdline::operations {
             std::cout << "  " << opt.name;
             switch (opt.type) {
             case option::ALIAS:
-                std::cout << std::string(static_cast<std::size_t>(30 - len), ' ') << "Alias for " << opt.value << ".\n";
+                std::cout << std::string(30 - len, ' ') << "Alias for " << opt.value << ".\n";
                 break;
             case option::ARG:
                 std::cout << " <ARG>" << std::string(24 - len, ' ') << opt.description << '\n';
@@ -31,25 +31,26 @@ namespace minipkg2::cmdline::operations {
             }
         };
 
-        std::cout << "Micro-Linux Package Manager 2\n";
-
         if (args.size() == 0) {
-            std::cout << "\nUsage:\n  minipkg2 [...] <operation> [...]\n\nOperations:\n";
+            std::cout << "Micro-Linux Package Manager 2\n\nUsage:\n  minipkg2 [...] <operation> [...]\n\nOperations:\n";
             for (const auto* op : operation::operations) {
-                std::cout << "  " << op->name << op->usage << '\n';
+                std::cout << "  " << op->name << op->usage
+                          << std::string(30 - op->name.length() - op->usage.length(), ' ')
+                          << op->description << '\n';
             }
             std::cout << "\nGlobal options:\n";
             for (const auto& opt : option::global)
                 print_opt(opt);
         } else {
-            const auto* op2 = operation::get_op(args[0]);
+            const auto& op2 = operation::get_op(args[0]);
 
-            std::cout << "\nUsage:\n  minipkg2 " << op2->name << op2->usage
-                      << "\n\nDescription:\n  " << op2->description << '\n';
+            std::cout << "Micro-Linux Package Manager 2\n\nUsage:\n  minipkg2 "
+                      << op2.name << op2.usage
+                      << "\n\nDescription:\n  " << op2.description << '\n';
 
-            if (op2->options.size() != 0) {
+            if (op2.options.size() != 0) {
                 std::cout << "\nOptions:\n";
-                for (const auto& opt : op2->options)
+                for (const auto& opt : op2.options)
                     print_opt(opt);
             }
         }

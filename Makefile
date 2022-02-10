@@ -1,9 +1,9 @@
-VERSION = 0.3.1
+VERSION = 0.4
 
 
 # Compiler definitions.
-CC 		?= gcc
-CFLAGS 	+= -std=gnu11 -Wall -Wextra -Og -g -Iinclude
+CXX			?= g++
+CXXFLAGS	?= -std=gnu++17 -Wall -Wextra -Og -g -Iinclude
 
 # Install directories.
 prefix		?= /usr/local
@@ -24,17 +24,17 @@ CPPFLAGS += -DCONFIG_LIBDIR=\"$(libdir)\"
 CPPFLAGS += -DCONFIG_SYSCONFDIR=\"$(sysconfdir)\"
 CPPFLAGS += -DBUILD_SYS=\"make\"
 
-sources = $(wildcard src/*.c)
-objects = $(patsubst src/%.c,obj/%.o,$(sources))
+sources = $(wildcard src/*.cpp)
+objects = $(patsubst src/%.cpp,obj/%.o,$(sources))
 
 all: minipkg2
 
 minipkg2: $(objects)
-	$(CC) -o $@ $(objects) $(LDFLAGS) $(LIBS)
+	$(CXX) -o $@ $(objects) $(LDFLAGS) $(LIBS)
 
-obj/%.o: src/%.c include Makefile
+obj/%.o: src/%.cpp include Makefile
 	@mkdir -p obj
-	$(CC) -c -o $@ $< $(CPPFLAGS) $(CFLAGS)
+	$(CXX) -c -o $@ $< $(CPPFLAGS) $(CXXFLAGS)
 
 install:
 	install -vDm755 minipkg2			$(DESTDIR)$(prefix)/$(bindir)/minipkg2

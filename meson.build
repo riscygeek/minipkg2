@@ -9,6 +9,7 @@ project(
   )
 
 sources = [
+  'src/main.cpp',
 ]
 
 cpp_args = []

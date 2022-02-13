@@ -14,6 +14,7 @@ sources = [
   'src/main.cpp',
   'src/minipkg2.cpp',
   'src/op_help.cpp',
+  'src/op_repo.cpp',
   'src/utils.cpp',
 ]
 

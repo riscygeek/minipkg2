@@ -24,6 +24,7 @@ namespace minipkg2::cmdline {
     };
     std::vector<operation*> operation::operations = {
         operations::help,
+        operations::repo,
     };
 
     // Utility Functions
@@ -35,6 +36,9 @@ namespace minipkg2::cmdline {
             }
         }
         throw std::invalid_argument("Option not found: '"s + std::string{name} + '\'');
+    }
+    bool operation::is_set(std::string_view option) {
+        return get_option(option).selected;
     }
     bool option::global_is_set(std::string_view name) {
         option& opt = option::resolve(nullptr, get_global(name));
@@ -168,7 +172,7 @@ namespace minipkg2::cmdline {
         }
 
         if (auto& opt = option::get_global("--root"); opt.selected) {
-            minipkg2::set_root(opt.value);
+            set_root(opt.value);
         }
 
         if (auto& opt = option::get_global("--host"); opt.selected) {

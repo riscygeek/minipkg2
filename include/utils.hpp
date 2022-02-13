@@ -10,6 +10,7 @@ namespace minipkg2 {
 
     bool starts_with(std::string_view str, std::string_view prefix);
     bool ends_with(std::string_view str, std::string_view suffix);
+    bool rm_rf(const std::string& path);
 }
 
 #endif /* FILE_MINIPKG2_UTILS_HPP */

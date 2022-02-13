@@ -12,6 +12,7 @@ sources = [
   'src/cmdline.cpp',
   'src/git.cpp',
   'src/main.cpp',
+  'src/miniconf.cpp',
   'src/minipkg2.cpp',
   'src/op_help.cpp',
   'src/op_repo.cpp',

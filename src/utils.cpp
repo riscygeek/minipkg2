@@ -67,4 +67,12 @@ namespace minipkg2 {
         }
         return success & rm(path);
     }
+
+    std::string fix_path(const std::string& path) {
+        if (path[0] == '/') {
+            return path;
+        } else {
+            return CONFIG_PREFIX "/" + path;
+        }
+    }
 }

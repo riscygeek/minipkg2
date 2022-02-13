@@ -2,6 +2,7 @@
 #define FILE_MINIPKG2_MINIPKG2_HPP
 #include <string_view>
 #include <string>
+#include "miniconf.hpp"
 
 #ifndef VERSION
 #error "VERSION is not defined"
@@ -19,9 +20,6 @@
 #error "CONFIG_LIBDIR is not defined"
 #endif
 
-#define CONFIG_FILE     CONFIG_PREFIX "/" CONFIG_SYSCONFDIR "/minipkg2.conf"
-#define ENV_FILE        CONFIG_PREFIX "/" CONFIG_LIBDIR     "/minipkg2/env.bash"
-
 #define CONFIG_LOG_DIR  CONFIG_PREFIX "/var/log"
 #define CONFIG_LOG_FILE CONFIG_LOG_DIR "/minipkg2.log"
 
@@ -35,9 +33,11 @@ namespace minipkg2 {
     extern std::string host;
     extern std::size_t jobs;
     extern std::string self;
+    extern std::string env_file;
+    extern miniconf::miniconf config;
 
     void set_root(std::string_view);
-    void init_self();
+    bool init_self();
     void print_version();
 }
 

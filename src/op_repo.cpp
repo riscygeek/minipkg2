@@ -5,15 +5,6 @@
 #include "utils.hpp"
 #include "git.hpp"
 
-/*
-        const type type;
-        const std::string_view name;
-        const std::string_view description;
-        std::string value;
-        bool selected;
-*/
-
-
 namespace minipkg2::cmdline::operations {
     struct repo_operation : operation {
         repo_operation()
@@ -39,7 +30,7 @@ namespace minipkg2::cmdline::operations {
             return 1;
         }
 
-        if (const auto& opt = get_option("--init"); opt) {
+        if (const auto& opt = get_option("--init")) {
             rm_rf(repodir);
             if (!git::clone(opt.value, repodir, get_option("--branch").value)) {
                 std::cerr << "Failed to initialize repo.\n";
@@ -61,7 +52,7 @@ namespace minipkg2::cmdline::operations {
             return 0;
         }
 
-        if (const auto& opt = get_option("--branch"); opt) {
+        if (const auto& opt = get_option("--branch")) {
             auto branch = git::branch(repodir);
             if (branch != opt.value) {
                 if (!git::checkout(repodir, opt.value)) {

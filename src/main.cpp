@@ -1,10 +1,11 @@
 #include <iostream>
 #include "minipkg2.hpp"
+#include "miniconf.hpp"
 #include "cmdline.hpp"
 
 int main(int argc, char* argv[]) {
-
-    minipkg2::set_root("/");
+    if (!minipkg2::init_self())
+        return 1;
 
     try {
         return minipkg2::cmdline::parse(argc, argv);

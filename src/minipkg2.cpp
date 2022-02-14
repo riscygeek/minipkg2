@@ -1,6 +1,7 @@
 #include <iostream>
 #include "minipkg2.hpp"
 #include "utils.hpp"
+#include "print.hpp"
 
 #if HAS_LIBCURL
 # define LIBCURL_TF "true"
@@ -31,14 +32,14 @@ namespace minipkg2 {
         const std::string path = fix_path(CONFIG_SYSCONFDIR "/minipkg2.conf");
         std::ifstream file(path);
         if (!file) {
-            std::cerr << "Failed to open config file '" << path << "'.\n";
+            std::cerr << star<Color::WARN> << "Config file '" << path << "' doesn't exist.\n";
             return true;
         }
 
         auto result = miniconf::parse(file);
 
         if (auto* errmsg = std::get_if<std::string>(&result)) {
-            std::cerr << "Failed to load config: " << *errmsg << '\n';
+            std::cerr << star<Color::ERROR> << "Failed to load config: " << *errmsg << '\n';
             return false;
         }
 
@@ -51,7 +52,7 @@ namespace minipkg2 {
         try {
             self = xreadlink("/proc/self/exe");
         } catch (const std::runtime_error& e) {
-            std::cerr << e.what() << '\n';
+            std::cerr << star<Color::ERROR> << e.what() << '\n';
             return false;
         }
 

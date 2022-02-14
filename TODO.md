@@ -8,7 +8,7 @@
 - [ ] install
 - [ ] install-binpkg
 - [ ] info
-- [ ] repo
+- [x] repo
 - [ ] remove
 - [ ] purge
 - [ ] download

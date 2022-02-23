@@ -17,7 +17,6 @@ namespace minipkg2 {
     std::string host{};
     std::size_t jobs{};
     std::string self{};
-    std::string env_file = fix_path(CONFIG_LIBDIR "/minipkg2/env.bash");
     miniconf::miniconf config{};
 
     void set_root(std::string_view root) {
@@ -29,17 +28,16 @@ namespace minipkg2 {
 
 
     static bool load_config() {
-        const std::string path = fix_path(CONFIG_SYSCONFDIR "/minipkg2.conf");
-        std::ifstream file(path);
+        std::ifstream file(config_filename);
         if (!file) {
-            std::cerr << star<Color::WARN> << "Config file '" << path << "' doesn't exist.\n";
+            std::cerr << star<color::WARN> << "Config file '" << config_filename << "' doesn't exist.\n";
             return true;
         }
 
         auto result = miniconf::parse(file);
 
         if (auto* errmsg = std::get_if<std::string>(&result)) {
-            std::cerr << star<Color::ERROR> << "Failed to load config: " << *errmsg << '\n';
+            std::cerr << star<color::ERROR> << "Failed to load config: " << *errmsg << '\n';
             return false;
         }
 
@@ -52,7 +50,7 @@ namespace minipkg2 {
         try {
             self = xreadlink("/proc/self/exe");
         } catch (const std::runtime_error& e) {
-            std::cerr << star<Color::ERROR> << e.what() << '\n';
+            std::cerr << star<color::ERROR> << e.what() << '\n';
             return false;
         }
 

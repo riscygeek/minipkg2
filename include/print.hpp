@@ -3,7 +3,7 @@
 #include <iostream>
 
 namespace minipkg2 {
-    enum class Color : unsigned {
+    enum class color : unsigned {
         DEBUG   = 93,
         LOG     = 32,
         INFO    = 34,
@@ -12,7 +12,7 @@ namespace minipkg2 {
     };
 
 
-    template<Color color>
+    template<color color>
     inline std::ostream& star(std::ostream& stream) {
         return stream << "\033[" << static_cast<unsigned>(color) << "m * \033[0m";
     }

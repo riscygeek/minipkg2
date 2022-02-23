@@ -23,7 +23,9 @@ namespace minipkg2::cmdline {
         { option::ALIAS, "--jobs",      {},                                                         "-j",   false },
     };
     std::vector<operation*> operation::operations = {
+        operations::config,
         operations::help,
+        operations::list,
         operations::repo,
     };
 

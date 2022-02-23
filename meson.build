@@ -14,12 +14,15 @@ sources = [
   'src/main.cpp',
   'src/miniconf.cpp',
   'src/minipkg2.cpp',
+  'src/op_config.cpp',
   'src/op_help.cpp',
+  'src/op_list.cpp',
   'src/op_repo.cpp',
+  'src/package.cpp',
   'src/utils.cpp',
 ]
 
-cpp_args = []
+cpp_args  = []
 cpp_args += '-DVERSION="' + meson.project_version() + '"'
 cpp_args += '-DCONFIG_PREFIX="' + get_option('prefix') + '"'
 cpp_args += '-DCONFIG_SYSCONFDIR="' + get_option('sysconfdir') + '"'
@@ -32,13 +35,17 @@ if libcurl.found()
   cpp_args += '-DHAS_LIBCURL=1'
 endif
 
+fmt_proj  = subproject('fmt')
+fmt_dep   = fmt_proj.get_variable('fmt_dep')
+
 executable('minipkg2',
   sources: sources,
-  dependencies: [libcurl],
+  dependencies: [libcurl, fmt_dep],
   include_directories: 'include',
   cpp_args: cpp_args,
   install: true
 )
 
-#install_data('util/env.bash', install_dir: get_option('libdir') / 'minipkg2')
-#install_data('util/minipkg2.conf', install_dir: get_option('sysconfdir'))
+install_data('util/env.bash',       install_dir: get_option('libdir') / 'minipkg2')
+install_data('util/parse.bash',     install_dir: get_option('libdir') / 'minipkg2')
+install_data('util/minipkg2.conf',  install_dir: get_option('sysconfdir'))

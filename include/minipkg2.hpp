@@ -25,6 +25,8 @@
 
 #define CONFIG_SHELL    "bash"
 
+#define fix_path(prefix, subdir, suffix) (subdir[0] == '/' ? (subdir suffix) : (prefix "/" subdir suffix))
+
 namespace minipkg2 {
     extern std::string rootdir;
     extern std::string pkgdir;
@@ -33,8 +35,11 @@ namespace minipkg2 {
     extern std::string host;
     extern std::size_t jobs;
     extern std::string self;
-    extern std::string env_file;
     extern miniconf::miniconf config;
+
+    constexpr auto config_filename  = fix_path(CONFIG_PREFIX, CONFIG_SYSCONFDIR, "/minipkg2.conf");
+    constexpr auto env_filename     = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/env.bash");
+    constexpr auto parse_filename   = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/parse.bash");
 
     void set_root(std::string_view);
     bool init_self();

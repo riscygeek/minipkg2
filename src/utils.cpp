@@ -67,12 +67,14 @@ namespace minipkg2 {
         }
         return success & rm(path);
     }
-
-    std::string fix_path(const std::string& path) {
-        if (path[0] == '/') {
-            return path;
-        } else {
-            return CONFIG_PREFIX "/" + path;
+    std::string freadline(FILE* file) {
+        std::string line{};
+        while (true) {
+            const int ch = std::fgetc(file);
+            if (ch == EOF || ch == '\n')
+                break;
+            line.push_back(ch);
         }
+        return line;
     }
 }

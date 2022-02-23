@@ -2,4 +2,6 @@
 /build/*
 /obj/*
 /tmp/*
+/subprojects/fmt-*
+/subprojects/packagecache
 *.tar*

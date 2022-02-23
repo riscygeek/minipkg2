@@ -2,6 +2,7 @@
 
 
 ## General
+- [ ] Switch to C++20 once GCC supports std::format()
 
 ## Operations
 - [x] help

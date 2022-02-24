@@ -1,5 +1,5 @@
-#include <unistd.h>
 #include <iostream>
+#include <unistd.h>
 #include "minipkg2.hpp"
 #include "miniconf.hpp"
 #include "cmdline.hpp"
@@ -25,7 +25,7 @@ namespace minipkg2::cmdline::operations {
         const bool opt_dump = is_set("--dump");
 
         if (!opt_dump) {
-            std::cerr << star<color::ERROR> << "Expected '--dump' option.\n";
+            printerr(color::ERROR, "Expected '--dump' option.");
             return 1;
         }
 

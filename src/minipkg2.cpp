@@ -1,4 +1,3 @@
-#include <iostream>
 #include "minipkg2.hpp"
 #include "utils.hpp"
 #include "print.hpp"
@@ -30,14 +29,14 @@ namespace minipkg2 {
     static bool load_config() {
         std::ifstream file(config_filename);
         if (!file) {
-            std::cerr << star<color::WARN> << "Config file '" << config_filename << "' doesn't exist.\n";
+            printerr(color::WARN, "Config file '{}' doesn't exist.", config_filename);
             return true;
         }
 
         auto result = miniconf::parse(file);
 
         if (auto* errmsg = std::get_if<std::string>(&result)) {
-            std::cerr << star<color::ERROR> << "Failed to load config: " << *errmsg << '\n';
+            printerr(color::ERROR, "Failed to load config '{}': {}", config_filename, *errmsg);
             return false;
         }
 
@@ -50,7 +49,7 @@ namespace minipkg2 {
         try {
             self = xreadlink("/proc/self/exe");
         } catch (const std::runtime_error& e) {
-            std::cerr << star<color::ERROR> << e.what() << '\n';
+            printerr(color::ERROR, "{}", e.what());
             return false;
         }
 
@@ -59,17 +58,17 @@ namespace minipkg2 {
         return load_config();
     }
     void print_version(void) {
-        std::cout << "Micro-Linux Package Manager\n\n"
-                     "Version: " VERSION "\n"
-                     "\nBuild:\n"
-                     "  system:     " BUILD_SYS "\n"
-                     "  prefix:     " CONFIG_PREFIX "\n"
-                     "  libdir:     " CONFIG_PREFIX "/" CONFIG_LIBDIR "\n"
-                     "  sysconfdir: " CONFIG_PREFIX "/" CONFIG_SYSCONFDIR "\n"
-                     "  date:       " __DATE__ "\n"
-                     "  time:       " __TIME__ "\n"
-                     "\nFeatures:\n"
-                     "  libcurl:    " LIBCURL_TF "\n"
-                     "\nWritten by Benjamin Stürz <benni@stuerz.xyz>.\n";
+        fmt::print("Micro-Linux Package Manager\n\n"
+                   "Version: " VERSION "\n"
+                   "\nBuild:\n"
+                   "  system:     " BUILD_SYS "\n"
+                   "  prefix:     " CONFIG_PREFIX "\n"
+                   "  libdir:     " CONFIG_PREFIX "/" CONFIG_LIBDIR "\n"
+                   "  sysconfdir: " CONFIG_PREFIX "/" CONFIG_SYSCONFDIR "\n"
+                   "  date:       " __DATE__ "\n"
+                   "  time:       " __TIME__ "\n"
+                   "\nFeatures:\n"
+                   "  libcurl:    " LIBCURL_TF "\n"
+                   "\nWritten by Benjamin Stürz <benni@stuerz.xyz>.\n");
     }
 }

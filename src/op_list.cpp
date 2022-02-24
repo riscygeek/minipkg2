@@ -28,22 +28,22 @@ namespace minipkg2::cmdline::operations {
         const bool opt_upgradable   = is_set("--upgradable");
 
         if (opt_repo && opt_local) {
-            std::cerr << star<color::ERROR> << "Either --repo or --local must be selected.\n";
+            printerr(color::ERROR, "Either --repo or --local must be selected.");
             return 1;
         }
 
         if (opt_files && opt_repo) {
-            std::cerr << star<color::ERROR> << "Options --files and --repo are incompatible.\n";
+            printerr(color::ERROR, "Options --files and --repo are incompatible.");
             return 1;
         }
 
         if (opt_upgradable && (opt_files || opt_repo)) {
-            std::cerr << star<color::ERROR> << "Option --upgradable is incompatible with --repo and --files.";
+            printerr(color::ERROR, "Options --upgradable is incompatible with --repo and --files.");
             return 1;
         }
 
         if (opt_files && args.size() == 0) {
-            std::cerr << star<color::ERROR> << "Option --files expects 1 or more arguments.\n";
+            printerr(color::ERROR, "Option --files expects 1 or more arguments.");
             return 1;
         }
 
@@ -56,12 +56,12 @@ namespace minipkg2::cmdline::operations {
         }
 
         if (opt_files) {
-            std::cerr << star<color::ERROR> << "Unsupported option: --files.\n";
+            printerr(color::ERROR, "Unsupported option: --files");
         } else if (opt_upgradable) {
-            std::cerr << star<color::ERROR> << "Unsupported option: --upgradable.\n";
+            printerr(color::ERROR, "Unsupported option: --upgradable");
         } else {
             for (const auto& pkg : pkgs) {
-                std::cout << pkg.name << ' ' << pkg.version << '\n';
+                fmt::print("{} {}\n", pkg.name, pkg.version);
             }
         }
 

@@ -1,5 +1,4 @@
 #include <unistd.h>
-#include <iostream>
 #include "minipkg2.hpp"
 #include "cmdline.hpp"
 #include "utils.hpp"
@@ -27,27 +26,27 @@ namespace minipkg2::cmdline::operations {
     int repo_operation::operator()(const std::vector<std::string>&) {
         std::string version = git::version();
         if (version.empty()) {
-            std::cerr << star<color::ERROR> << "Runtime dependency 'git' is not installed.\n";
+            printerr(color::ERROR, "Runtime dependency 'git' is not installed.");
             return 1;
         }
 
         if (const auto& opt = get_option("--init")) {
             rm_rf(repodir);
             if (!git::clone(opt.value, repodir, get_option("--branch").value)) {
-                std::cerr << star<color::ERROR> << "Failed to initialize repo.\n";
+                printerr(color::ERROR, "Failed to initialize repo.");
                 return 1;
             }
             return 0;
         }
 
         if (::access(repodir.c_str(), F_OK) != 0) {
-            std::cerr << star<color::WARN> << "Repo is not initialized!\n";
+            printerr(color::WARN, "Repo is not initialized!");
             return 1;
         }
 
         if (is_set("--sync")) {
             if (!git::pull(repodir)) {
-                std::cerr << star<color::ERROR> << "Failed to sync repo.\n";
+                printerr(color::ERROR, "Failed to sync repo.");
                 return 1;
             }
             return 0;
@@ -57,17 +56,16 @@ namespace minipkg2::cmdline::operations {
             auto branch = git::branch(repodir);
             if (branch != opt.value) {
                 if (!git::checkout(repodir, opt.value)) {
-                    std::cerr << star<color::ERROR> << "Failed to change to branch '" << opt.value << "'\n";
+                    printerr(color::ERROR, "Failed to change to branch '{}'.", opt.value);
                     return 1;
                 }
             } else {
-                std::cerr << star<color::WARN> << "Already on branch '" << branch << "'\n";
+                printerr(color::WARN, "Already on branch '{}'.", branch);
             }
             return 0;
         }
 
-        std::cout << star<color::INFO> << "Repo is on branch '" << git::branch(repodir) << "'\n";
-
+        printerr(color::INFO, "Repo is on branch '{}'.", git::branch(repodir));
         return 0;
     }
 }

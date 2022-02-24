@@ -1,9 +1,10 @@
 #ifndef FILE_MINIPKG2_PRINT_HPP
 #define FILE_MINIPKG2_PRINT_HPP
-#include <iostream>
+#include <fmt/core.h>
 
 namespace minipkg2 {
     enum class color : unsigned {
+        NONE    = 0,
         DEBUG   = 93,
         LOG     = 32,
         INFO    = 34,
@@ -12,9 +13,9 @@ namespace minipkg2 {
     };
 
 
-    template<color color>
-    inline std::ostream& star(std::ostream& stream) {
-        return stream << "\033[" << static_cast<unsigned>(color) << "m * \033[0m";
+    template<class... Args>
+    inline void printerr(color c, Args&&... args) {
+        fmt::print(stderr, "\033[{}m * \033[0m{}\n", static_cast<unsigned>(c), fmt::format(args...));
     }
 }
 

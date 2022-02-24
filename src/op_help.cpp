@@ -1,5 +1,5 @@
-#include <fmt/core.h>
 #include "cmdline.hpp"
+#include "print.hpp"
 
 namespace minipkg2::cmdline::operations {
     struct help_operation : operation {

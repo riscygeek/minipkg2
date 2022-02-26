@@ -19,10 +19,6 @@ for pkg in "${depends[@]}" "${bdepends[@]}"; do
    echo "$pkg"
 done
 echo --
-for pkg in "${depends[@]}" "${bdepends[@]}"; do
-   echo "$pkg"
-done
-echo --
 for pkg in "${depends[@]}" "${rdepends[@]}"; do
    echo "$pkg"
 done

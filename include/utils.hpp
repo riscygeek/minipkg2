@@ -13,6 +13,8 @@ namespace minipkg2 {
     bool starts_with(std::string_view str, std::string_view prefix);
     bool ends_with(std::string_view str, std::string_view suffix);
     bool rm_rf(const std::string& path);
+    bool download(const std::string& url, const std::string& dest, bool overwrite);
+    bool mkparentdirs(std::string dir, mode_t mode);
 }
 
 #endif /* FILE_MINIPKG2_UTILS_HPP */

@@ -65,6 +65,7 @@ namespace minipkg2::cmdline {
     namespace operations {
         extern operation* config;
         extern operation* help;
+        extern operation* info;
         extern operation* list;
         extern operation* repo;
     }

@@ -77,4 +77,16 @@ namespace minipkg2 {
         }
         return line;
     }
+    bool mkparentdirs(std::string dir, mode_t mode) {
+        std::size_t pos = 0;
+        while ((pos = dir.find('/', pos)) != std::string::npos) {
+            dir[pos] = '\0';
+            const int ec = ::mkdir(dir.c_str(), mode);
+            if (ec != 0 && errno != EEXIST)
+                return false;
+            dir[pos] = '/';
+            ++pos;
+        }
+        return true;
+    }
 }

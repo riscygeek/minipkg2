@@ -110,6 +110,20 @@ namespace minipkg2 {
             return pkg;
         }
     }
+    package package::parse(source from, std::string_view name) {
+        std::string path;
+        switch (from) {
+        case source::LOCAL:
+            path = fmt::format("{}/{}/package.info", pkgdir, name);
+            break;
+        case source::REPO:
+            path = fmt::format("{}/{}/package.build", repodir, name);
+            break;
+        default:
+            throw std::runtime_error("Invalid package source");
+        }
+        return parse(path);
+    }
     static std::vector<package> parse_all(const std::string& dirname, std::string_view filename, package::source from) {
         std::vector<package> pkgs{};
         ::DIR* dir = ::opendir(dirname.c_str());
@@ -138,25 +152,4 @@ namespace minipkg2 {
     std::vector<package> package::parse_repo() {
         return parse_all(repodir, "package.build"sv, source::REPO);
     }
-}
-
-std::ostream& operator<<(std::ostream& stream, const minipkg2::package& pkg) {
-    const auto print_line = [&](std::string_view name, std::size_t n, const std::string* strs) {
-        stream << name << std::string(30 - name.length(), ' ');
-        for (std::size_t i = 0; i < n; ++i) {
-            stream << strs[i];
-        }
-        stream << '\n';
-    };
-    print_line("Name",                  1,                      &pkg.name);
-    print_line("Version",               1,                      &pkg.version);
-    print_line("URL",                   1,                      &pkg.url);
-    print_line("Description",           1,                      &pkg.description);
-    print_line("Sources",               pkg.sources.size(),     pkg.sources.data());
-    print_line("Build Dependencies",    pkg.bdepends.size(),    pkg.bdepends.data());
-    print_line("Runtime Dependencies",  pkg.rdepends.size(),    pkg.rdepends.data());
-    print_line("Provides",              pkg.provides.size(),    pkg.provides.data());
-    print_line("Conflicts",             pkg.conflicts.size(),   pkg.conflicts.data());
-    print_line("Features",              pkg.features.size(),    pkg.features.data());
-    return stream;
 }

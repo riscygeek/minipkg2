@@ -1,6 +1,6 @@
 #ifndef FILE_MINIPKG2_PACKAGE_HPP
 #define FILE_MINIPKG2_PACKAGE_HPP
-#include <ostream>
+#include <string_view>
 #include <string>
 #include <vector>
 
@@ -30,9 +30,9 @@ namespace minipkg2 {
 
 
         static package parse(const std::string& filename);
+        static package parse(source from, std::string_view name);
         static std::vector<package> parse_local();
         static std::vector<package> parse_repo();
-        friend std::ostream& operator<<(std::ostream&, const package&);
     };
 }
 

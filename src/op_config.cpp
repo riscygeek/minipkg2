@@ -32,7 +32,6 @@ namespace minipkg2::cmdline::operations {
 
         minipkg2::miniconf::dump(std::cout, minipkg2::config);
 
-
         return 0;
     }
 }

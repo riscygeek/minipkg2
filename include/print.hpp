@@ -15,7 +15,7 @@ namespace minipkg2 {
 
     template<class... Args>
     inline void printerr(color c, Args&&... args) {
-        fmt::print(stderr, "\033[{}m * \033[0m{}\n", static_cast<unsigned>(c), fmt::format(args...));
+        fmt::print("\033[{}m * \033[0m{}\n", static_cast<unsigned>(c), fmt::format(args...));
     }
 }
 

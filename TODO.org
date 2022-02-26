@@ -1,8 +1,9 @@
 # TODO List for minipkg2
 
 * General
-- [ ] Switch to C++20 once GCC supports std::format()
-- [ ] Replace iostreams with libfmt
+** [ ] Switch to C++20 once GCC supports std::format()
+** [X] Replace iostreams with libfmt
+** [ ] Rewrite the README
 
 * Operations
 ** [X] help
@@ -13,9 +14,9 @@
 *** [X] --repo
 *** [ ] --files
 *** [ ] --upgradable
-** [ ] info
-*** [ ] --local
-*** [ ] --repo
+** [X] info
+*** [X] --local
+*** [X] --repo
 ** [ ] install
 ** [ ] install-binpkg
 ** [ ] remove

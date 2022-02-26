@@ -27,6 +27,11 @@ namespace minipkg2::cmdline::operations {
             return 1;
         }
 
+        if (args.size() == 0) {
+            printerr(color::ERROR, "At least 1 argument expected.");
+            return 1;
+        }
+
         std::vector<package> pkgs;
         for (const auto& name : args) {
             package pkg;

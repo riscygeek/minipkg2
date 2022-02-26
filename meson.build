@@ -38,12 +38,11 @@ if libcurl.found()
   cpp_args += '-DHAS_LIBCURL=1'
 endif
 
-fmt_proj  = subproject('fmt')
-fmt_dep   = fmt_proj.get_variable('fmt_dep')
+libfmt = dependency('fmt', fallback: ['fmt', 'fmt_dep'])
 
 executable('minipkg2',
   sources: sources,
-  dependencies: [libcurl, fmt_dep],
+  dependencies: [libcurl, libfmt],
   include_directories: 'include',
   cpp_args: cpp_args,
   install: true

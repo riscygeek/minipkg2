@@ -104,3 +104,28 @@ The `package.info` format is currently the same as the `package.build` format.
 With the exception that only the `pkgname`, `pkgver`, `url`, `description` and `depends` fields are required.
 Optionally `provides` and `conflicts` can be specified.
 As of now minipkg2 just uses the `package.build` of a package.
+
+## Example cross-file for meson
+
+```
+[constants]
+arch = 'arm-buildroot-linux-gnueabi'
+toolchain = '/opt/cross' + arch
+common_flags = ['--sysroot=' + toolchain / arch / 'sysroot']
+
+[binaries]
+exe_wrapper = 'qemu-arm'
+cpp = arch + '-g++'
+strip = arch + '-strip'
+
+[properties]
+needs_exe_wrapper = true
+sys_root = toolchain / arch / 'sysroot'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'armv7h'
+endian = 'little'
+```
+

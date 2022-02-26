@@ -24,6 +24,7 @@ namespace minipkg2::cmdline {
     };
     std::vector<operation*> operation::operations = {
         operations::config,
+        operations::download,
         operations::help,
         operations::info,
         operations::list,

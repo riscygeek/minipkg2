@@ -7,6 +7,7 @@
 #include <climits>
 #include <cstdio>
 #include "utils.hpp"
+#include "print.hpp"
 
 namespace minipkg2 {
     std::string xreadlink(const std::string& filename) {
@@ -78,7 +79,7 @@ namespace minipkg2 {
         return line;
     }
     bool mkparentdirs(std::string dir, mode_t mode) {
-        std::size_t pos = 0;
+        std::size_t pos = 1;
         while ((pos = dir.find('/', pos)) != std::string::npos) {
             dir[pos] = '\0';
             const int ec = ::mkdir(dir.c_str(), mode);
@@ -88,5 +89,24 @@ namespace minipkg2 {
             ++pos;
         }
         return true;
+    }
+    bool yesno(std::string_view question, bool defval) {
+        print(color::INFO, "{} [{}] ", question, defval ? "Y/n" : "y/N");
+        const char ch = fgetc(stdin);
+        if (ch == '\n')
+            return defval;
+        char tmp;
+        while ((tmp = fgetc(stdin)) != EOF && tmp != '\n');
+
+        switch (ch) {
+        case 'y':
+        case 'Y':
+            return true;
+        case 'n':
+        case 'N':
+            return false;
+        default:
+            return yesno(question, defval);
+        }
     }
 }

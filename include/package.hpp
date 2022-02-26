@@ -1,5 +1,6 @@
 #ifndef FILE_MINIPKG2_PACKAGE_HPP
 #define FILE_MINIPKG2_PACKAGE_HPP
+#include <fmt/format.h>
 #include <string_view>
 #include <string>
 #include <vector>
@@ -27,7 +28,7 @@ namespace minipkg2 {
         std::vector<std::string> features;
 
         bool is_installed() const;
-
+        bool download() const;
 
         static package parse(const std::string& filename);
         static package parse(source from, std::string_view name);
@@ -35,5 +36,17 @@ namespace minipkg2 {
         static std::vector<package> parse_repo();
     };
 }
+
+template<>
+struct fmt::formatter<minipkg2::package> {
+    template<typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+    template<typename FormatContext>
+    auto format(const minipkg2::package& pkg, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "{}:{}", pkg.name, pkg.version);
+    }
+};
 
 #endif /* FILE_MINIPKG2_PACKAGE_HPP */

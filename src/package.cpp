@@ -8,6 +8,8 @@
 #include "minipkg2.hpp"
 #include "package.hpp"
 #include "utils.hpp"
+#include "print.hpp"
+#include "git.hpp"
 
 #define SHELL_SCRIPT_HEADER                              \
    "[[ -f " ENV_FILE " ]] && source \"" ENV_FILE "\"\n"  \
@@ -137,11 +139,25 @@ namespace minipkg2 {
             const auto path = fmt::format("{}/{}", dirname, ent->d_name);
 
             struct ::stat st;
-            if (stat(path.c_str(), &st) != 0 || (st.st_mode & S_IFMT) != S_IFDIR)
+            if (::lstat(path.c_str(), &st) == 0)
                 continue;
 
-            pkgs.push_back(package::parse(fmt::format("{}/{}", path, filename)));
-            pkgs.back().from = from;
+            std::string provider{};
+            if (S_ISLNK(st.st_mode)) {
+                provider = xreadlink(path);
+            }
+
+            if (::stat(path.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) {
+                if (!provider.empty()) {
+                    printerr(color::WARN, "Invalid provider '{}' for package '{}'.", provider, ent->d_name);
+                }
+                continue;
+            }
+
+            auto pkg = package::parse(fmt::format("{}/{}", path, filename));
+            pkg.provided_by = provider;
+            pkg.from = from;
+            pkgs.push_back(std::move(pkg));
         }
         ::closedir(dir);
         return pkgs;
@@ -151,5 +167,30 @@ namespace minipkg2 {
     }
     std::vector<package> package::parse_repo() {
         return parse_all(repodir, "package.build"sv, source::REPO);
+    }
+
+    bool package::download() const {
+        bool success = true;
+        for (const auto& src : sources) {
+            const auto end = src.rfind('/');
+            if (end == std::string::npos) {
+                printerr(color::ERROR, "{}: Invalid URL '{}'", name, src);
+                success = false;
+                continue;
+            }
+            auto dest = fmt::format("{}/{}-{}/src/{}", builddir, name, version, src.substr(end + 1));
+
+            if (starts_with(src, "git://")) {
+                // Remove trailing '.git'
+                if (ends_with(dest, ".git")) {
+                    dest = dest.substr(0, dest.size() - 4);
+                }
+
+                success &= git::sync(src, dest);
+            } else {
+                success &= minipkg2::download(src, dest);
+            }
+        }
+        return success;
     }
 }

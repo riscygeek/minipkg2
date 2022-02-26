@@ -17,6 +17,7 @@ sources = [
   'src/miniconf.cpp',
   'src/minipkg2.cpp',
   'src/op_config.cpp',
+  'src/op_download.cpp',
   'src/op_help.cpp',
   'src/op_info.cpp',
   'src/op_list.cpp',

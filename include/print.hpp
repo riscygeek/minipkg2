@@ -17,6 +17,10 @@ namespace minipkg2 {
     inline void printerr(color c, Args&&... args) {
         fmt::print("\033[{}m * \033[0m{}\n", static_cast<unsigned>(c), fmt::format(args...));
     }
+    template<class... Args>
+    inline void print(color c, Args&&... args) {
+        fmt::print("\033[{}m * \033[0m{}", static_cast<unsigned>(c), fmt::format(args...));
+    }
 }
 
 #endif /* FILE_MINIPKG2_PRINT_HPP */

@@ -10,6 +10,7 @@ namespace minipkg2::cmdline::operations {
     operation* help = &op_help;
 
     int help_operation::operator()(const std::vector<std::string>& args) {
+        static constexpr unsigned help_len = 40;
         if (args.size() > 1) {
             fmt::print("Usage: minipkg2 help [operation]\n");
             return 1;
@@ -18,13 +19,13 @@ namespace minipkg2::cmdline::operations {
         const auto print_opt = [](const option& opt) {
             switch (opt.type) {
             case option::ALIAS:
-                fmt::print("  {:30}Alias for {}.\n", opt.name, opt.value);
+                fmt::print("  {:{}}Alias for {}.\n", opt.name, help_len, opt.value);
                 break;
             case option::ARG:
-                fmt::print("  {} <ARG>{:{}}{}\n", opt.name, "", 24 - opt.name.size(), opt.description);
+                fmt::print("  {} <ARG>{:{}}{}\n", opt.name, "", help_len - 6 - opt.name.size(), opt.description);
                 break;
             case option::BASIC:
-                fmt::print("  {:30}{}\n", opt.name, opt.description);
+                fmt::print("  {:{}}{}\n", opt.name, help_len, opt.description);
                 break;
             }
         };
@@ -32,7 +33,7 @@ namespace minipkg2::cmdline::operations {
         if (args.size() == 0) {
             fmt::print("Micro-Linux Package Manager 2\n\nUsage:\n  minipkg2 [...] <operation> [...]\n\nOperations:\n");
             for (const auto* op : operation::operations) {
-                fmt::print("  {}{}{:{}}{}\n", op->name, op->usage, "", 30 - op->name.length() - op->usage.length(), op->description);
+                fmt::print("  {}{}{:{}}{}\n", op->name, op->usage, "", help_len - op->name.length() - op->usage.length(), op->description);
             }
             fmt::print("\nGlobal options:\n");
             for (const auto& opt : option::global)

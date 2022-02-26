@@ -29,11 +29,16 @@ namespace minipkg2 {
 
         bool is_installed() const;
         bool download() const;
+        bool is_provided() const noexcept { return !provided_by.empty(); }
+        bool operator<(const package& other) const noexcept { return name < other.name; }
 
         static package parse(const std::string& filename);
         static package parse(source from, std::string_view name);
         static std::vector<package> parse_local();
         static std::vector<package> parse_repo();
+        static std::vector<package> resolve(const std::vector<std::string>& names, bool resolve_deps = false, bool skip_installed = false);
+        static bool is_installed(std::string_view name);
+        static std::string make_pkglist(const std::vector<package>& pkgs, bool include_version = false);
     };
 }
 
@@ -41,12 +46,29 @@ template<>
 struct fmt::formatter<minipkg2::package> {
     template<typename ParseContext>
     constexpr auto parse(ParseContext& ctx) {
-        return ctx.begin();
+        auto it = ctx.begin();
+        for (; it != ctx.end() && *it != '}'; ++it) {
+            switch (*it) {
+            case 'v':
+                print_version = true;
+                break;
+            default:
+                throw format_error("bad format specifier");
+            }
+        }
+        return it;
     }
     template<typename FormatContext>
     auto format(const minipkg2::package& pkg, FormatContext& ctx) {
-        return fmt::format_to(ctx.out(), "{}:{}", pkg.name, pkg.version);
+        if (print_version) {
+            return format_to(ctx.out(), "{}:{}", pkg.name, pkg.version);
+        } else {
+            return format_to(ctx.out(), "{}", pkg.name);
+        }
     }
+private:
+    bool print_version = false;
 };
+
 
 #endif /* FILE_MINIPKG2_PACKAGE_HPP */

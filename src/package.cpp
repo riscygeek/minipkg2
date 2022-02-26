@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <fmt/core.h>
+#include <functional>
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -99,7 +100,6 @@ namespace minipkg2 {
             pkg.version     = freadline(file);
             pkg.url         = freadline(file);
             pkg.description = freadline(file);
-            pkg.provided_by = {};
             pkg.sources     = read_lines(file);
             pkg.bdepends    = read_lines(file);
             pkg.rdepends    = read_lines(file);
@@ -108,6 +108,11 @@ namespace minipkg2 {
             pkg.features    = read_lines(file);
 
             ::fclose(file);
+
+            struct stat st;
+            if (::lstat(filename.c_str(), &st) != 0 && S_ISLNK(st.st_mode)) {
+                pkg.provided_by = xreadlink(filename);
+            }
 
             return pkg;
         }
@@ -139,23 +144,10 @@ namespace minipkg2 {
             const auto path = fmt::format("{}/{}", dirname, ent->d_name);
 
             struct ::stat st;
-            if (::lstat(path.c_str(), &st) == 0)
+            if (::stat(path.c_str(), &st) != 0 || !S_ISDIR(st.st_mode))
                 continue;
-
-            std::string provider{};
-            if (S_ISLNK(st.st_mode)) {
-                provider = xreadlink(path);
-            }
-
-            if (::stat(path.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) {
-                if (!provider.empty()) {
-                    printerr(color::WARN, "Invalid provider '{}' for package '{}'.", provider, ent->d_name);
-                }
-                continue;
-            }
 
             auto pkg = package::parse(fmt::format("{}/{}", path, filename));
-            pkg.provided_by = provider;
             pkg.from = from;
             pkgs.push_back(std::move(pkg));
         }
@@ -192,5 +184,53 @@ namespace minipkg2 {
             }
         }
         return success;
+    }
+    std::vector<package> package::resolve(const std::vector<std::string>& rnames, bool resolve_deps, bool skip_installed) {
+        std::vector<package> pkgs{};
+
+        const auto has = [&pkgs, &skip_installed](std::string_view name) {
+            if (skip_installed && is_installed(name))
+                return true;
+            for (const auto& pkg : pkgs) {
+                if (name == pkg.name)
+                    return true;
+            }
+            return false;
+        };
+
+        const std::function<void(const std::vector<std::string>&)> do_resolve = [&](const std::vector<std::string>& names) -> void {
+            for (const auto& name : names) {
+                if (has(name))
+                    continue;
+
+                auto pkg = parse(source::REPO, name);
+                pkg.from = source::REPO;
+                if (resolve_deps) {
+                    do_resolve(pkg.bdepends);
+                    pkgs.push_back(pkg);
+                    do_resolve(pkg.rdepends);
+                } else {
+                    pkgs.push_back(std::move(pkg));
+                }
+            }
+        };
+
+        do_resolve(rnames);
+
+        return pkgs;
+    }
+    std::string package::make_pkglist(const std::vector<package>& pkgs, bool include_version) {
+        std::string str{};
+        for (const auto& pkg : pkgs) {
+            str += ' ';
+            str += fmt::format(include_version ? "{:v}": "{}", pkg);
+        }
+        return str;
+    }
+    bool package::is_installed(std::string_view name) {
+        const auto path = fmt::format("{}/{}", pkgdir, name);
+        struct ::stat st;
+        // TODO: Should stat() or lstat() be used here???
+        return ::stat(path.c_str(), &st) == 0;
     }
 }

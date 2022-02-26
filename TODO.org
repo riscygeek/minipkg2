@@ -21,7 +21,9 @@
 ** [ ] install-binpkg
 ** [ ] remove
 ** [ ] purge
-** [ ] download
+** [X] download
+*** [X] -y, --yes
+*** [X] --deps
 ** [ ] clean
 ** [ ] build
 ** [ ] check

@@ -3,6 +3,11 @@
 #include <cstdio>
 #include "minipkg2.hpp"
 #include "cmdline.hpp"
+#include "print.hpp"
+
+namespace minipkg2 {
+    verbosity_level verbosity = verbosity_level::NORMAL;
+}
 
 namespace minipkg2::cmdline {
     using namespace std::literals;
@@ -15,7 +20,6 @@ namespace minipkg2::cmdline {
         { option::ALIAS, "--help",      {},                                                         "-h",   false },
         { option::BASIC, "--version",   "Print information about the version of this program.",     {},     false },
         { option::BASIC, "-v",          "Verbose output.",                                          {},     false },
-        { option::BASIC, "-vv",         "Even more verbose output.",                                {},     false },
         { option::ALIAS, "--verbose",   {},                                                         "-v",   false },
         { option::BASIC, "-q",          "Suppress output.",                                         {},     false },
         { option::ALIAS, "--quiet",     {},                                                         "-q",   false },
@@ -27,6 +31,7 @@ namespace minipkg2::cmdline {
         operations::download,
         operations::help,
         operations::info,
+        operations::install,
         operations::list,
         operations::repo,
     };
@@ -168,11 +173,9 @@ namespace minipkg2::cmdline {
         }
 
         if (option::global_is_set("-q")) {
-            // TODO: verbosity = Verbosity::QUIET;
-        } else if (option::global_is_set("-vv")) {
-            // TODO: verbosity = Verbosity::EXTRA_VERBOSE;
+            verbosity = verbosity_level::QUIET;
         } else if (option::global_is_set("-v")) {
-            // TODO: verbosity = Verbosity::VERBOSE;
+            verbosity = verbosity_level::VERBOSE;
         }
 
         if (auto& opt = option::get_global("--root"); opt.selected) {

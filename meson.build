@@ -20,6 +20,7 @@ sources = [
   'src/op_download.cpp',
   'src/op_help.cpp',
   'src/op_info.cpp',
+  'src/op_install.cpp',
   'src/op_list.cpp',
   'src/op_repo.cpp',
   'src/package.cpp',
@@ -51,4 +52,5 @@ executable('minipkg2',
 
 install_data('util/env.bash',       install_dir: get_option('libdir') / 'minipkg2')
 install_data('util/parse.bash',     install_dir: get_option('libdir') / 'minipkg2')
+install_data('util/build.bash',     install_dir: get_option('libdir') / 'minipkg2')
 install_data('util/minipkg2.conf',  install_dir: get_option('sysconfdir'))

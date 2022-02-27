@@ -67,6 +67,7 @@ namespace minipkg2::cmdline {
         extern operation* download;
         extern operation* help;
         extern operation* info;
+        extern operation* install;
         extern operation* list;
         extern operation* repo;
     }

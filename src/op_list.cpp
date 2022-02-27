@@ -47,13 +47,7 @@ namespace minipkg2::cmdline::operations {
             return 1;
         }
 
-        std::vector<package> pkgs;
-
-        if (opt_repo) {
-            pkgs = package::parse_repo();
-        } else {
-            pkgs = package::parse_local();
-        }
+        const auto& pkgs = opt_repo ? package::parse_repo() : package::parse_local();
 
         if (opt_files) {
             printerr(color::ERROR, "Unsupported option: --files");

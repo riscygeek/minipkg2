@@ -1,20 +1,29 @@
+#ifdef __linux__
+#include <sys/sendfile.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <stdexcept>
 #include <unistd.h>
 #include <dirent.h>
 #include <cstring>
 #include <climits>
+#include <fcntl.h>
 #include <cstdio>
 #include "utils.hpp"
 #include "print.hpp"
 
+extern "C" char** environ;
+
 namespace minipkg2 {
     std::string xreadlink(const std::string& filename) {
         char buf[PATH_MAX + 1];
-        if (::readlink(filename.c_str(), buf, PATH_MAX) < 0)
-            throw std::runtime_error("Failed to readlink(" + filename + ')');
-
+        const ssize_t n = ::readlink(filename.c_str(), buf, PATH_MAX);
+        if (n < 0)
+            raise("Failed to readlink({})", filename);
+        buf[n] = '\0';
         return buf;
     }
     std::pair<int, std::string> xpread(const std::string& cmd) {
@@ -108,5 +117,102 @@ namespace minipkg2 {
         default:
             return yesno(question, defval);
         }
+    }
+    bool mkdir_p(const std::string& path, mode_t mode) {
+        return mkparentdirs(path, mode) && (mkdir(path.c_str(), mode) == 0 || errno == EEXIST);
+    }
+    void xpipe(int pipefd[2]) {
+        if (::pipe(pipefd) != 0)
+            raise("Failed to create pipe.");
+    }
+    void xclose(int fd) {
+        if (::close(fd) != 0)
+            raise("Failed to close file descriptor {}.", fd);
+    }
+    char* xstrdup(std::string_view str) {
+        char* new_str = new char[str.size() + 1];
+        str.copy(new_str, std::string::npos);
+        new_str[str.size()] = '\0';
+        return new_str;
+    }
+    std::vector<char*> copy_environ() {
+        std::vector<char*> env{};
+        for (auto var = environ; *var != nullptr; ++var) {
+            env.push_back(xstrdup(*var));
+        }
+        return env;
+    }
+    void add_environ(std::vector<char*>& env, const std::string& name, const std::string& value) {
+        for (char* var : env) {
+            char* eq = std::strchr(var, '=');
+            if (name == std::string_view{var, static_cast<std::size_t>(eq - var)})
+                return;
+        }
+
+        const std::size_t num = name.size() + value.size() + 2;
+        char* var = new char[num];
+        std::snprintf(var, num, "%s=%s", name.c_str(), value.c_str());
+        env.push_back(var);
+    }
+    void free_environ(std::vector<char*>& env) {
+        for (char* var : env) {
+            delete[] var;
+        }
+        env.clear();
+    }
+    int xwait(pid_t pid) {
+        int wstatus;
+        if (::waitpid(pid, &wstatus, 0) != pid)
+            raise("Failed to wait for process {}.", pid);
+        if (!WIFEXITED(wstatus))
+            raise("Process {} did not terminate.", pid);
+        return WEXITSTATUS(wstatus);
+    }
+    void cat(FILE* out, const std::string& filename) {
+        FILE* in = std::fopen(filename.c_str(), "r");
+        if (!in)
+            raise("Cannot open file '{}'.", filename);
+
+        char buffer[100];
+        while (std::fgets(buffer, sizeof buffer, in) != nullptr)
+            std::fputs(buffer, out);
+
+        std::fclose(in);
+    }
+    bool cp(const std::string& src, const std::string& dest) {
+        const int out_fd = ::creat(dest.c_str(), 0644);
+        if (out_fd < 0)
+            return false;
+        const int in_fd = ::open(src.c_str(), O_RDONLY);
+        if (in_fd < 0) {
+            xclose(out_fd);
+            return false;
+        }
+        const auto close_all = [=] {
+            xclose(out_fd);
+            xclose(in_fd);
+        };
+        struct stat st_in;
+        if (::fstat(in_fd, &st_in) != 0) {
+            close_all();
+            return false;
+        }
+#ifdef __linux__
+        size_t count = static_cast<std::size_t>(st_in.st_size);
+        off_t off{};
+        while (count != 0) {
+            const auto n = sendfile(out_fd, in_fd, &off, count);
+            if (n < 0) {
+                close_all();
+                return false;
+            }
+            count -= n;
+        }
+#else
+#error "cp() is only implemented on Linux."
+#endif
+
+        close_all();
+        return true;
     }
 }

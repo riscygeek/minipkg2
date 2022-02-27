@@ -23,7 +23,7 @@ for pkg in "${depends[@]}" "${rdepends[@]}"; do
    echo "$pkg"
 done
 echo --
-for pkg in "${provides[@]}"; do
+for pkg in "${provides[@]}" "${conflicts[@]}"; do
    echo "$pkg"
 done
 echo --

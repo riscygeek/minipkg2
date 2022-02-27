@@ -23,7 +23,7 @@
 #define CONFIG_LOG_DIR  CONFIG_PREFIX "/var/log"
 #define CONFIG_LOG_FILE CONFIG_LOG_DIR "/minipkg2.log"
 
-#define CONFIG_SHELL    "bash"
+#define CONFIG_SHELL    "/bin/bash"
 
 #define fix_path(prefix, subdir, suffix) (subdir[0] == '/' ? (subdir suffix) : (prefix "/" subdir suffix))
 
@@ -40,6 +40,7 @@ namespace minipkg2 {
     constexpr auto config_filename  = fix_path(CONFIG_PREFIX, CONFIG_SYSCONFDIR, "/minipkg2.conf");
     constexpr auto env_filename     = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/env.bash");
     constexpr auto parse_filename   = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/parse.bash");
+    constexpr auto build_filename   = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/build.bash");
 
     void set_root(std::string_view);
     bool init_self();

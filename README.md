@@ -15,7 +15,10 @@ This project supports 2 installation methods: traditional make, meson.
 
 ### Dependencies
 - libcurl (optional, required to download packages)
+- libfmt (required, included)
 - git (runtime, optional, required for managing the repo)
+- tar (runtime, required, must support extracting compressed packages)
+- fakeroot (runtime, required)
 
 ### Meson (recommended)
 ```

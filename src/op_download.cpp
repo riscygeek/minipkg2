@@ -45,14 +45,6 @@ namespace minipkg2::cmdline::operations {
 
         printerr(color::LOG, "Downloading sources...");
 
-        bool success = true;
-        for (std::size_t i = 0; i < pkgs.size(); ++i) {
-            const auto& pkg = pkgs[i];
-            printerr(color::LOG, "({}/{}) Downloading {:v}", i+1, pkgs.size(), pkg);
-
-            success &= pkg.download();
-        }
-
-        return !success;
+        return !package::download(pkgs);
     }
 }

@@ -3,9 +3,11 @@
 #include <sys/wait.h>
 #include <fmt/core.h>
 #include <functional>
+#include <assert.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <spawn.h>
 #include "minipkg2.hpp"
 #include "package.hpp"
 #include "utils.hpp"
@@ -28,94 +30,75 @@ namespace minipkg2 {
             throw std::runtime_error(fmt::format("Cannot access '{}'.", filename));
 
         int pipefd[2];
+        xpipe(pipefd);
 
-        if (::pipe(pipefd) != 0) {
-            throw std::runtime_error("Failed to create a pipe.");
+        ::posix_spawn_file_actions_t actions;
+        ::posix_spawn_file_actions_init(&actions);
+        ::posix_spawn_file_actions_addopen(&actions, STDIN_FILENO, "/dev/null", O_RDONLY, 0);
+        ::posix_spawn_file_actions_addclose(&actions, pipefd[0]);
+        ::posix_spawn_file_actions_adddup2(&actions, pipefd[1], STDOUT_FILENO);
+
+        std::vector<char*> args{};
+        args.push_back(xstrdup("bash"));
+        args.push_back(xstrdup(parse_filename));
+        args.push_back(xstrdup(filename));
+        args.push_back(nullptr);
+
+        std::vector<char*> env = copy_environ();
+        add_environ(env, "ROOT",        rootdir);
+        add_environ(env, "ENV_FILE",    env_filename);
+        add_environ(env, "MINIPKG2",    self);
+        env.push_back(nullptr);
+
+        ::pid_t pid;
+        if (::posix_spawnp(&pid, "bash", &actions, nullptr, args.data(), env.data()) != 0)
+            raise("Failed to posix_spawn() the shell.");
+
+        if (const int ec = xwait(pid); ec != 0)
+            raise("{}: Process {} terminated with exit code {}.", filename, pid, ec);
+
+        // Cleanup.
+        xclose(pipefd[1]);
+        free_environ(args);
+        free_environ(env);
+        ::posix_spawn_file_actions_destroy(&actions);
+
+        FILE* file = ::fdopen(pipefd[0], "r");
+        if (!file)
+            raise("Failed to fdopen() pipe.");
+
+        const auto read_lines = [](FILE* file) {
+            std::vector<std::string> lines{};
+            std::string line;
+            while (!std::feof(file) && (line = freadline(file)) != "--"sv) {
+                lines.push_back(line);
+            }
+            return lines;
+        };
+
+        // Parse the output.
+        package pkg;
+        pkg.from        = package::source::OTHER;
+        pkg.filename    = filename;
+        pkg.name        = freadline(file);
+        pkg.version     = freadline(file);
+        pkg.url         = freadline(file);
+        pkg.description = freadline(file);
+        pkg.sources     = read_lines(file);
+        pkg.bdepends    = read_lines(file);
+        pkg.rdepends    = read_lines(file);
+        pkg.provides    = read_lines(file);
+        pkg.conflicts   = read_lines(file);
+        pkg.features    = read_lines(file);
+
+        ::fclose(file);
+
+        struct stat st;
+        if (::lstat(filename.c_str(), &st) != 0 && S_ISLNK(st.st_mode)) {
+            pkg.provided_by = xreadlink(filename);
         }
 
-        const ::pid_t pid = ::vfork();
-        if (pid < 0) {
-            throw std::runtime_error("Failed to vfork().");
-        } if (pid == 0) {
-            // Setup the environment.
-            ::setenv("ROOT",        rootdir.c_str(),    1);
-            ::setenv("ENV_FILE",    env_filename,       1);
-            ::setenv("MINIPKG2",    self.c_str(),       1);
-
-            // Close the read-end of the pipe.
-            ::close(pipefd[0]);
-
-            // Redirect stdin to /dev/null
-            ::close(STDIN_FILENO);
-            if (::open("/dev/null", O_RDONLY) != STDIN_FILENO)
-                ::_exit(100);
-
-            // Redirect stdout to minipkg2
-            ::close(STDOUT_FILENO);
-            if (::dup(pipefd[1]) != STDOUT_FILENO)
-                ::_exit(100);
-
-            ::execlp(CONFIG_SHELL, CONFIG_SHELL, parse_filename, filename.c_str(), nullptr);
-            ::_exit(100);
-        } else {
-            // Close write-end of the pipe.
-            ::close(pipefd[1]);
-
-            // Wait for the program to exit.
-            int wstatus;
-            if (::waitpid(pid, &wstatus, 0) != pid)
-                throw std::runtime_error(fmt::format("Failed to wait for process {}.", pid));
-
-            if (!WIFEXITED(wstatus))
-                throw std::runtime_error(fmt::format("Process {} did not exit.", pid));
-
-            if (const int ec = WEXITSTATUS(wstatus); ec != 0) {
-                std::string msg;
-                if (ec == 100) {
-                    msg = fmt::format("Process {} failed to redirect its IO.", pid);
-                } else {
-                    msg = fmt::format("Process {} terminated with exit code {}.", pid, ec);
-                }
-                throw std::runtime_error(msg);
-            }
-
-            FILE* file = ::fdopen(pipefd[0], "r");
-            if (!file)
-                throw std::runtime_error("Failed to fdopen() pipe.");
-
-            const auto read_lines = [](FILE* file) {
-                std::vector<std::string> lines{};
-                std::string line;
-                while (!std::feof(file) && (line = freadline(file)) != "--"sv) {
-                    lines.push_back(line);
-                }
-                return lines;
-            };
-
-            // Parse the output.
-            package pkg;
-            pkg.from        = package::source::OTHER;
-            pkg.filename    = filename;
-            pkg.name        = freadline(file);
-            pkg.version     = freadline(file);
-            pkg.url         = freadline(file);
-            pkg.description = freadline(file);
-            pkg.sources     = read_lines(file);
-            pkg.bdepends    = read_lines(file);
-            pkg.rdepends    = read_lines(file);
-            pkg.provides    = read_lines(file);
-            pkg.conflicts   = read_lines(file);
-            pkg.features    = read_lines(file);
-
-            ::fclose(file);
-
-            struct stat st;
-            if (::lstat(filename.c_str(), &st) != 0 && S_ISLNK(st.st_mode)) {
-                pkg.provided_by = xreadlink(filename);
-            }
-
-            return pkg;
-        }
+        return pkg;
     }
     package package::parse(source from, std::string_view name) {
         std::string path;
@@ -131,8 +114,8 @@ namespace minipkg2 {
         }
         return parse(path);
     }
-    static std::vector<package> parse_all(const std::string& dirname, std::string_view filename, package::source from) {
-        std::vector<package> pkgs{};
+    static std::set<package> parse_all(const std::string& dirname, std::string_view filename, package::source from) {
+        std::set<package> pkgs{};
         ::DIR* dir = ::opendir(dirname.c_str());
         if (!dir)
             throw std::runtime_error(fmt::format("Failed to open directory '{}'.", dirname));
@@ -149,16 +132,22 @@ namespace minipkg2 {
 
             auto pkg = package::parse(fmt::format("{}/{}", path, filename));
             pkg.from = from;
-            pkgs.push_back(std::move(pkg));
+            pkgs.insert(std::move(pkg));
         }
         ::closedir(dir);
         return pkgs;
     }
-    std::vector<package> package::parse_local() {
-        return parse_all(pkgdir, "package.info"sv, source::LOCAL);
+    const std::set<package>& package::parse_local() {
+        if (local_packages.empty()) {
+            local_packages = parse_all(pkgdir, "package.info"sv, source::LOCAL);
+        }
+        return local_packages;
     }
-    std::vector<package> package::parse_repo() {
-        return parse_all(repodir, "package.build"sv, source::REPO);
+    const std::set<package>& package::parse_repo() {
+        if (repo_packages.empty()) {
+            repo_packages = parse_all(repodir, "package.build"sv, source::REPO);
+        }
+        return repo_packages;
     }
 
     bool package::download() const {
@@ -185,37 +174,46 @@ namespace minipkg2 {
         }
         return success;
     }
-    std::vector<package> package::resolve(const std::vector<std::string>& rnames, bool resolve_deps, bool skip_installed) {
+    std::vector<package> package::resolve(const std::vector<std::string>& rnames, bool resolve_deps, skip_policy skip) {
         std::vector<package> pkgs{};
 
-        const auto has = [&pkgs, &skip_installed](std::string_view name) {
+        const auto has = [&pkgs](std::string_view name, bool skip_installed) {
             if (skip_installed && is_installed(name))
                 return true;
             for (const auto& pkg : pkgs) {
-                if (name == pkg.name)
+                if (pkg.is_provided(name))
                     return true;
             }
             return false;
         };
 
-        const std::function<void(const std::vector<std::string>&)> do_resolve = [&](const std::vector<std::string>& names) -> void {
-            for (const auto& name : names) {
-                if (has(name))
-                    continue;
+        std::function<void(const std::vector<std::string>&)> do_resolve;
 
-                auto pkg = parse(source::REPO, name);
-                pkg.from = source::REPO;
-                if (resolve_deps) {
-                    do_resolve(pkg.bdepends);
-                    pkgs.push_back(pkg);
-                    do_resolve(pkg.rdepends);
-                } else {
-                    pkgs.push_back(std::move(pkg));
-                }
+        const auto add = [&](std::string_view name) {
+            auto pkg = parse(source::REPO, name);
+            pkg.from = source::REPO;
+            if (resolve_deps) {
+                do_resolve(pkg.bdepends);
+                pkgs.push_back(pkg);
+                do_resolve(pkg.rdepends);
+            } else {
+                pkgs.push_back(std::move(pkg));
             }
         };
 
-        do_resolve(rnames);
+        do_resolve = [&](const std::vector<std::string>& names) -> void {
+            for (const auto& name : names) {
+                if (has(name, skip == skip_policy::DEEP))
+                    continue;
+                add(name);
+            }
+        };
+
+        for (const auto& name : rnames) {
+            if (has(name, skip != skip_policy::NEVER))
+                continue;
+            add(name);
+        }
 
         return pkgs;
     }
@@ -232,5 +230,164 @@ namespace minipkg2 {
         struct ::stat st;
         // TODO: Should stat() or lstat() be used here???
         return ::stat(path.c_str(), &st) == 0;
+    }
+    bool package::is_provided(std::string_view n) const {
+        return n == name || std::find(provides.begin(), provides.end(), n) != provides.end();
+    }
+    bool package::conflicts_with(std::string_view n) const {
+        return is_provided(n) && std::find(conflicts.begin(), conflicts.end(), n) != conflicts.end();
+    }
+    bool package::check_conflicts() const {
+        bool success = true;
+        for (const auto& c : conflicts) {
+            if (is_installed(c)) {
+                printerr(color::ERROR, "Package '{}' conflicts with '{}'", name, c);
+                success = false;
+            }
+        }
+        const auto& locals = parse_local();
+        for (const auto& pkg : locals) {
+            if (pkg.conflicts_with(name)) {
+                printerr(color::ERROR, "Package '{}' conflicts with '{}'", pkg.name, name);
+                success = false;
+            }
+        }
+        return success;
+    }
+    bool package::download(const std::vector<package>& pkgs) {
+        bool success = true;
+        for (std::size_t i = 0; i < pkgs.size(); ++i) {
+            const auto& pkg = pkgs[i];
+            printerr(color::LOG, "({}/{}) Downloading {:v}", i+1, pkgs.size(), pkg);
+
+            success &= pkg.download();
+        }
+        return success;
+    }
+    std::optional<bin_package> package::build(std::string_view binpkg, const std::string& filesdir) const {
+        const auto path_basedir     = fmt::format("{}/{}-{}", builddir, name, version);
+        const auto path_srcdir      = path_basedir + "/src";
+        const auto path_builddir    = path_basedir + "/build";
+        const auto path_pkgdir      = path_basedir + "/pkg";
+        const auto path_logfile     = path_basedir + "/log";
+        const auto path_metadir     = path_pkgdir  + "/.meta";
+
+        mkdir_p(path_builddir);
+        rm_rf(path_pkgdir);
+        mkdir_p(path_pkgdir);
+
+        int pipefd[2];
+        xpipe(pipefd);
+
+        ::posix_spawn_file_actions_t actions;
+        ::posix_spawn_file_actions_init(&actions);
+        ::posix_spawn_file_actions_addopen(&actions, STDIN_FILENO, "/dev/null", O_RDONLY, 0);
+        ::posix_spawn_file_actions_addclose(&actions, pipefd[0]);
+        ::posix_spawn_file_actions_adddup2(&actions, pipefd[1], STDOUT_FILENO);
+        ::posix_spawn_file_actions_adddup2(&actions, STDOUT_FILENO, STDERR_FILENO);
+
+        std::vector<char*> args{};
+        args.push_back(xstrdup("bash"));
+        args.push_back(xstrdup(build_filename));
+        args.push_back(xstrdup(filename));
+        args.push_back(nullptr);
+
+        std::vector<char*> env = copy_environ();
+        add_environ(env, "ROOT",        rootdir);
+        add_environ(env, "ENV_FILE",    env_filename);
+        add_environ(env, "MINIPKG2",    self);
+        add_environ(env, "HOST",        host);
+        add_environ(env, "JOBS",        fmt::format("{}", jobs));
+        add_environ(env, "pkgfile",     filename);
+        add_environ(env, "srcdir",      path_srcdir);
+        add_environ(env, "builddir",    path_builddir);
+        add_environ(env, "pkgdir",      path_pkgdir);
+        add_environ(env, "filesdir",    filesdir);
+
+        ::pid_t pid;
+        if (::posix_spawnp(&pid, "bash", &actions, nullptr, args.data(), env.data()) != 0)
+            raise("Failed to posix_spawn() the shell.");
+
+        // Cleanup.
+        xclose(pipefd[1]);
+        free_environ(args);
+        free_environ(env);
+        ::posix_spawn_file_actions_destroy(&actions);
+
+        FILE* log = ::fdopen(pipefd[0], "r");
+        assert(log != nullptr);
+
+        FILE* logfile = std::fopen(path_logfile.c_str(), "w");
+        if (!logfile) {
+            printerr(color::WARN, "Failed to open log file ({}) for package {}.", path_logfile, name);
+        }
+
+        char buffer[100];
+        while (std::fgets(buffer, sizeof(buffer) - 1, log) != nullptr) {
+            if (verbosity >= verbosity_level::VERBOSE)
+                std::fputs(buffer, stderr);
+            std::fputs(buffer, logfile);
+        }
+
+        std::fclose(logfile);
+        std::fclose(log);
+
+        if (const int ec = xwait(pid); ec != 0) {
+            if (verbosity < verbosity_level::VERBOSE)
+                cat(stderr, path_logfile);
+            printerr(color::ERROR, "Failed to build package '{:v}'. Log file: '{}'.", *this, path_logfile);
+            return {};
+        }
+
+        auto info = package_info::from(*this);
+
+        mkdir_p(path_metadir);
+        info.write_to(path_metadir + "/package.info");
+
+
+        const auto cmd = fmt::format("cd '{}' && fakeroot tar -caf '{}' .", path_pkgdir, binpkg);
+        if (std::system(cmd.c_str()) != 0) {
+            printerr(color::ERROR, "Can't create binary package.");
+            return {};
+        }
+        return bin_package{ std::string(binpkg), std::move(info) };
+    }
+    package_info package_info::from(const package& pkg) {
+        return package_info{ pkg.name, pkg.version, pkg.url, pkg.description, pkg.rdepends, pkg.provides, pkg.conflicts };
+    }
+    bool package_info::write_to(const std::string& filename) const {
+        std::FILE* file = std::fopen(filename.c_str(), "w");
+        if (!file)
+            return false;
+
+        const auto print_vec = [file](std::string_view name, const std::vector<std::string>& vec) {
+            if (vec.empty()) {
+                fmt::print(file, "{}=()\n", name);
+                return;
+            }
+            fmt::print(file, "{}=('{}'", name, vec.front());
+            for (auto it = vec.begin()+1; it != vec.end(); ++it) {
+                fmt::print(file, " '{}'", *it);
+            }
+            fmt::print(file, ")\n");
+        };
+
+        fmt::print(file, "# This file is generated by minipkg2.\n");
+        fmt::print(file, "name='{}'\n",          name);
+        fmt::print(file, "pkgver='{}'\n",        version);
+        fmt::print(file, "url='{}'\n",           url);
+        fmt::print(file, "description='{}'\n",   description);
+        print_vec("rdepends",   rdepends);
+        print_vec("provides",   provides);
+        print_vec("conflicts",  conflicts);
+        std::fclose(file);
+        return true;
+    }
+    package_info package_info::parse_file(const std::string& filename) {
+        // TODO: Write a parser.
+        return from(package::parse(filename));
+    }
+    package_info package_info::parse_local(const std::string& name) {
+        return from(package::parse(package::source::LOCAL, name));
     }
 }

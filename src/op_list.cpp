@@ -1,6 +1,9 @@
+#include <unistd.h>
+#include "minipkg2.hpp"
 #include "package.hpp"
 #include "cmdline.hpp"
 #include "print.hpp"
+#include "utils.hpp"
 
 namespace minipkg2::cmdline::operations {
     struct list_operation : operation {
@@ -53,11 +56,21 @@ namespace minipkg2::cmdline::operations {
                 fmt::print("{} {}\n", pkg.name, pkg.version);
             }
         } else {
+            if (opt_files) {
+                for (const auto& name : args) {
+                    const auto path = fmt::format("{}/{}/files", pkgdir, name);
+                    if (::access(path.c_str(), R_OK) != 0) {
+                        printerr(color::ERROR, "Invalid package: {}.", name);
+                        return 1;
+                    }
+                    cat(stdout, path);
+                }
+                return 0;
+            }
+
             const auto& pkgs = installed_package::parse_local();
 
-            if (opt_files) {
-                printerr(color::ERROR, "Unsupported option: --files");
-            } else if (opt_upgradable) {
+            if (opt_upgradable) {
                 printerr(color::ERROR, "Unsupported option: --upgradable");
             } else {
                 for (const auto& pkg : pkgs) {

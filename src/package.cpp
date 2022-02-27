@@ -493,7 +493,7 @@ namespace minipkg2 {
                 raise("Can't get list of files of '{}'.", path);
 
             std::vector<std::string> files{};
-            while (std::feof(file)) {
+            while (!std::feof(file)) {
                 const auto line = freadline(file);
                 if (line.empty())
                     break;

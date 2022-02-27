@@ -47,18 +47,24 @@ namespace minipkg2::cmdline::operations {
             return 1;
         }
 
-        const auto& pkgs = opt_repo ? package::parse_repo() : package::parse_local();
-
-        if (opt_files) {
-            printerr(color::ERROR, "Unsupported option: --files");
-        } else if (opt_upgradable) {
-            printerr(color::ERROR, "Unsupported option: --upgradable");
-        } else {
+        if (opt_repo) {
+            const auto& pkgs = source_package::parse_repo();
             for (const auto& pkg : pkgs) {
                 fmt::print("{} {}\n", pkg.name, pkg.version);
             }
-        }
+        } else {
+            const auto& pkgs = installed_package::parse_local();
 
+            if (opt_files) {
+                printerr(color::ERROR, "Unsupported option: --files");
+            } else if (opt_upgradable) {
+                printerr(color::ERROR, "Unsupported option: --upgradable");
+            } else {
+                for (const auto& pkg : pkgs) {
+                    fmt::print("{} {}\n", pkg.name, pkg.version);
+                }
+            }
+        }
         return 0;
     }
 }

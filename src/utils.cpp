@@ -51,10 +51,6 @@ namespace minipkg2 {
     bool ends_with(std::string_view str, std::string_view suffix) {
         return str.length() >= suffix.length() && str.substr(str.length() - suffix.length()) == suffix;
     }
-    bool rm(const std::string& path) {
-        // TODO: Add logging.
-        return std::remove(path.c_str()) == 0;
-    }
     bool rm_rf(const std::string& path) {
         struct stat st;
         if (::lstat(path.c_str(), &st) != 0)
@@ -214,5 +210,59 @@ namespace minipkg2 {
 
         close_all();
         return true;
+    }
+    std::string uts_to_str(std::time_t time) {
+        char buffer[100];
+        struct tm* tmp = localtime(&time);
+        if (strftime(buffer, sizeof buffer, "%c", tmp) == 0)
+            raise("Failed to format time.");
+        return buffer;
+    }
+    std::time_t str_to_uts(const std::string& str) {
+        return str.empty() ? 0 : static_cast<std::time_t>(std::stoull(str));
+    }
+    bool write_file(const std::string& filename, std::string_view contents) {
+        std::FILE* file = std::fopen(filename.c_str(), "w");
+        if (!file)
+            return false;
+
+        std::fwrite(contents.data(), 1, contents.size(), file);
+
+        std::fclose(file);
+        return true;
+    }
+    bool rm(const std::string& file) {
+        printerr(color::DEBUG, "rm -f '{}'", file);
+        const bool success = remove(file.c_str()) == 0;
+        if (!success && errno != ENOENT) {
+            printerr(color::WARN, "Failed to remove '{}': {}.", file, std::strerror(errno));
+            return false;
+        }
+        return true;
+    }
+    bool rm(const std::string& prefix, std::list<std::string>& files) {
+        while (!files.empty()) {
+            bool success = false;
+            for (auto it = files.begin(); it != files.end();) {
+                const auto saved = it++;
+
+                if (rm(prefix + *saved)) {
+                    success = true;
+                    files.erase(saved);
+                }
+            }
+            if (!success)
+                return false;
+        }
+        return true;
+    }
+    bool symlink_v(const std::string& dest, const std::string& file) {
+        const bool success = symlink(dest.c_str(), file.c_str()) == 0;
+        if (success) {
+            printerr(color::DEBUG, "'{}' -> '{}'", file, dest);
+        } else {
+            printerr(color::WARN, "Failed to create symbolic link '{}' to '{}'.", file, dest);
+        }
+        return success;
     }
 }

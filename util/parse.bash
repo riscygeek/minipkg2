@@ -35,4 +35,6 @@ for feature in "${features[@]}"; do
    echo "$feature"
 done
 echo --
+echo "$build_date"
+echo "$install_date"
 exit 0

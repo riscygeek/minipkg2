@@ -13,6 +13,7 @@ namespace minipkg2 {
     std::string pkgdir{};
     std::string builddir{};
     std::string repodir{};
+    std::string cachedir{};
     std::string host{};
     std::size_t jobs{};
     std::string self{};
@@ -23,6 +24,7 @@ namespace minipkg2 {
         pkgdir      = rootdir + "/var/db/minipkg2/packages";
         repodir     = rootdir + "/var/db/minipkg2/repo";
         builddir    = rootdir + "/var/tmp/minipkg2";
+        cachedir    = rootdir + "/var/cache/minipkg2";
     }
 
 

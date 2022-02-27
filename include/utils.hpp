@@ -8,11 +8,15 @@
 #include <string>
 #include <vector>
 #include <cstdio>
+#include <ctime>
+#include <list>
 
 namespace minipkg2 {
     std::string xreadlink(const std::string& filename);
     std::pair<int, std::string> xpread(const std::string& cmd);
     std::string freadline(FILE* file);
+    std::string uts_to_str(std::time_t);
+    std::time_t str_to_uts(const std::string&);
     char* xstrdup(std::string_view);
     int xwait(pid_t pid);
 
@@ -31,6 +35,10 @@ namespace minipkg2 {
     void remap(int old_fd, int new_fd);
     void cat(FILE* out, const std::string& filename);
     bool cp(const std::string& src, const std::string& dest);
+    bool write_file(const std::string& filename, std::string_view contents);
+    bool rm(const std::string& file);
+    bool rm(const std::string& prefix, std::list<std::string>& files);
+    bool symlink_v(const std::string& dest, const std::string& file);
 
     // Error checking versions of common functions.
     void xpipe(int pipefd[2]);

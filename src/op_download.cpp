@@ -31,10 +31,10 @@ namespace minipkg2::cmdline::operations {
             return 1;
         }
 
-        const auto pkgs = package::resolve(args, opt_deps);
+        const auto pkgs = resolve(args, opt_deps, resolve_skip_policy::NEVER);
 
         printerr(color::LOG, "");
-        printerr(color::LOG, "Packages ({}){}", pkgs.size(), package::make_pkglist(pkgs));
+        printerr(color::LOG, "Packages ({}){}", pkgs.size(), make_pkglist(pkgs));
         printerr(color::LOG, "");
 
         if (!opt_yes) {
@@ -45,6 +45,6 @@ namespace minipkg2::cmdline::operations {
 
         printerr(color::LOG, "Downloading sources...");
 
-        return !package::download(pkgs);
+        return !source_package::download(pkgs);
     }
 }

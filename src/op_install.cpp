@@ -34,18 +34,21 @@ namespace minipkg2::cmdline::operations {
         const bool opt_force    = is_set("--force");
 
         printerr(color::LOG, "Resolving packages...");
-        const auto skip_policy = opt_skip ? package::skip_policy::TOP : package::skip_policy::NEVER;
-        const auto pkgs = package::resolve(args, !opt_no_deps, skip_policy);
+        const auto skip_policy = opt_skip ? resolve_skip_policy::ALWAYS : resolve_skip_policy::DEPEND;
+        const auto pkgs = resolve(args, !opt_no_deps, skip_policy);
 
         if (!opt_force) {
+            bool success = true;
             printerr(color::LOG, "Checking for conflicts...");
             for (const auto& pkg : pkgs) {
-                pkg.check_conflicts();
+                success &= pkg.check_conflicts();
             }
+            if (!success)
+                return 1;
         }
 
         printerr(color::LOG, "");
-        printerr(color::LOG, "Packages ({}){}", pkgs.size(), package::make_pkglist(pkgs));
+        printerr(color::LOG, "Packages ({}){}", pkgs.size(), make_pkglist(pkgs));
         printerr(color::LOG, "");
 
         if (!opt_yes) {
@@ -55,7 +58,7 @@ namespace minipkg2::cmdline::operations {
         }
 
         printerr(color::LOG, "Downloading sources...");
-        if (!package::download(pkgs))
+        if (!source_package::download(pkgs))
             return 1;
 
         printerr(color::LOG, "");
@@ -63,7 +66,7 @@ namespace minipkg2::cmdline::operations {
 
         for (std::size_t i = 0; i < pkgs.size(); ++i) {
             const auto& pkg = pkgs[i];
-            printerr(color::LOG, "({}/{}) Building {}...", i+1, pkgs.size(), pkg);
+            printerr(color::LOG, "({}/{}) Building {:v}...", i+1, pkgs.size(), pkg);
             const auto path_binpkg = fmt::format("{0}/{1}-{2}/{1}:{2}.bmpkg.tar.gz", builddir, pkg.name, pkg.version);
             const auto filesdir = fmt::format("{}/{}/files", pkgdir, pkg.name);
 
@@ -72,7 +75,8 @@ namespace minipkg2::cmdline::operations {
                 return 1;
             }
             const auto binpkg = result.value();
-            printerr(color::LOG, "({}/{}) Installing {}...", i+1, pkgs.size(), binpkg.pkg);
+            printerr(color::LOG, "({}/{}) Installing {:v}...", i+1, pkgs.size(), binpkg.pkg);
+            binpkg.install();
         }
 
 

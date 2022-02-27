@@ -17,7 +17,8 @@
 ** [X] info
 *** [X] --local
 *** [X] --repo
-** [ ] install
+** [-] install
+*** [ ] --clean
 ** [ ] install-binpkg
 ** [ ] remove
 ** [ ] purge

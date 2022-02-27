@@ -32,45 +32,38 @@ namespace minipkg2::cmdline::operations {
             return 1;
         }
 
-        std::vector<package> pkgs;
         for (const auto& name : args) {
-            package pkg;
-            try {
-                if (opt_local) {
-                    pkg = package::parse(package::source::LOCAL, name);
-                } else if (opt_repo) {
-                    pkg = package::parse(package::source::REPO, name);
-                } else {
-                    try {
-                        pkg = package::parse(package::source::LOCAL, name);
-                    } catch (...) {
-                        pkg = package::parse(package::source::REPO, name);
-                    }
+            std::unique_ptr<package_base> pkg;
+
+            if (opt_local) {
+                auto result = installed_package::parse_local(name);
+                if (!result.has_value()) {
+                    printerr(color::ERROR, "Invalid package: {}", name);
+                    return 1;
                 }
-            } catch (const parse_error& e) {
-                printerr(color::ERROR, "Failed to find package {}: {}", name, e.what());
-                return 1;
-            } catch (const std::exception& e) {
-                printerr(color::ERROR, "Failed to parse package {}: {}", name, e.what());
-                return 2;
+                pkg = std::make_unique<installed_package>(std::move(result.value()));
+            } else if (opt_repo) {
+                auto result = source_package::parse_repo(name);
+                if (!result.has_value()) {
+                    printerr(color::ERROR, "Invalid package: {}", name);
+                    return 1;
+                }
+                pkg = std::make_unique<source_package>(std::move(result.value()));
+            } else {
+                auto result = installed_package::parse_local(name);
+                if (result.has_value()) {
+                    pkg = std::make_unique<installed_package>(std::move(result.value()));
+                } else {
+                    auto result2 = source_package::parse_repo(name);
+                    if (!result2.has_value()) {
+                        printerr(color::ERROR, "Invalid package: {}", name);
+                        return 1;
+                    }
+                    pkg = std::make_unique<source_package>(std::move(result2.value()));
+                }
             }
 
-            const auto print_line = [](std::string_view name, std::size_t n, const std::string* strs) {
-                fmt::print("{:30}: ", name);
-                for (std::size_t i = 0; i < n; ++i)
-                    fmt::print("{}", strs[i]);
-                fmt::print("\n");
-            };
-            print_line("Name",                  1,                      &pkg.name);
-            print_line("Version",               1,                      &pkg.version);
-            print_line("URL",                   1,                      &pkg.url);
-            print_line("Description",           1,                      &pkg.description);
-            print_line("Sources",               pkg.sources.size(),     pkg.sources.data());
-            print_line("Build Dependencies",    pkg.bdepends.size(),    pkg.bdepends.data());
-            print_line("Runtime Dependencies",  pkg.rdepends.size(),    pkg.rdepends.data());
-            print_line("Provides",              pkg.provides.size(),    pkg.provides.data());
-            print_line("Conflicts",             pkg.conflicts.size(),   pkg.conflicts.data());
-            print_line("Features",              pkg.features.size(),    pkg.features.data());
+            pkg->print();
         }
 
         return 0;

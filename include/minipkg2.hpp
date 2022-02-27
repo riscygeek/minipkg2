@@ -32,6 +32,7 @@ namespace minipkg2 {
     extern std::string pkgdir;
     extern std::string builddir;
     extern std::string repodir;
+    extern std::string cachedir;
     extern std::string host;
     extern std::size_t jobs;
     extern std::string self;

@@ -127,7 +127,7 @@ namespace minipkg2 {
 
         ::pid_t pid;
         if (::posix_spawnp(&pid, "bash", &actions, nullptr, args.data(), env.data()) != 0)
-            raise("Failed to posix_spawn() the shell.");
+            raise("{}: parse(): Failed to posix_spawn() the shell.", filename);
 
         // Cleanup.
         xclose(pipefd[1]);
@@ -423,10 +423,11 @@ namespace minipkg2 {
         add_environ(env, "builddir",    path_builddir);
         add_environ(env, "pkgdir",      path_pkgdir);
         add_environ(env, "filesdir",    filesdir);
+        env.push_back(nullptr);
 
         ::pid_t pid;
         if (::posix_spawnp(&pid, "bash", &actions, nullptr, args.data(), env.data()) != 0)
-            raise("Failed to posix_spawn() the shell.");
+            raise("{}: build(): Failed to posix_spawn() the shell.", name);
 
         // Cleanup.
         xclose(pipefd[1]);

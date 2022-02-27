@@ -12,13 +12,13 @@
 ** [-] list
 *** [X] --local
 *** [X] --repo
-*** [ ] --files
+*** [X] --files
 *** [ ] --upgradable
 ** [X] info
 *** [X] --local
 *** [X] --repo
-** [-] install
-*** [ ] --clean
+** [X] install
+*** [X] --clean
 ** [ ] install-binpkg
 ** [ ] remove
 ** [ ] purge
@@ -29,3 +29,7 @@
 ** [ ] build
 ** [ ] check
 ** [ ] search
+
+* Structure
+** [ ] source_package: Add package date for repo packages.
+- git log -n 1 --pretty=format:%ct -- FILE

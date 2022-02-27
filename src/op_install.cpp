@@ -47,6 +47,7 @@ namespace minipkg2::cmdline::operations {
                 return 1;
         }
 
+
         printerr(color::LOG, "");
         printerr(color::LOG, "Packages ({}){}", pkgs.size(), make_pkglist(pkgs));
         printerr(color::LOG, "");
@@ -55,6 +56,13 @@ namespace minipkg2::cmdline::operations {
             if (!yesno("Proceed with download?", true))
                 return 1;
             printerr(color::LOG, "");
+        }
+
+        if (opt_clean) {
+            printerr(color::LOG, "Cleaning up...");
+            for (const auto& pkg : pkgs) {
+                rm_rf(fmt::format("{}/{}-{}", builddir, pkg.name, pkg.version));
+            }
         }
 
         printerr(color::LOG, "Downloading sources...");

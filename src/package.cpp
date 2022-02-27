@@ -44,7 +44,7 @@ namespace minipkg2 {
     }
     void installed_package::print() const {
         binary_package_info::print();
-        const auto idate = uts_to_str(build_date);
+        const auto idate = uts_to_str(install_date);
         print_line("Install Date",          1,                  &idate);
     }
 

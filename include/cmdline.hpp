@@ -63,6 +63,7 @@ namespace minipkg2::cmdline {
 
     // XXX: Please also look into cmdline.cpp when adding new operations.
     namespace operations {
+        extern operation* clean;
         extern operation* config;
         extern operation* download;
         extern operation* help;

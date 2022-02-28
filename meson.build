@@ -16,6 +16,7 @@ sources = [
   'src/main.cpp',
   'src/miniconf.cpp',
   'src/minipkg2.cpp',
+  'src/op_clean.cpp',
   'src/op_config.cpp',
   'src/op_download.cpp',
   'src/op_help.cpp',

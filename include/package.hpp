@@ -84,6 +84,8 @@ namespace minipkg2 {
         binary_package_info pkg;
 
         bool install() const;
+
+        static std::optional<binary_package> load(std::string path);
     };
 
     struct installed_package : binary_package_info {

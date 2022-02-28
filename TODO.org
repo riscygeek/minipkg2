@@ -15,7 +15,7 @@
 *** [X] --repo
 *** [X] --files
 *** [ ] --upgradable
-** [X] info
+** [X] +info+ show
 *** [X] --local
 *** [X] --repo
 ** [-] install

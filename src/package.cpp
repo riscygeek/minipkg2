@@ -613,4 +613,8 @@ namespace minipkg2 {
         }
         return size;
     }
+    std::optional<binary_package> binary_package::load(std::string path) {
+        auto result = binary_package_info::parse_file(path);
+        return result.has_value() ? binary_package{ std::move(path), std::move(result.value()) } : std::optional<binary_package>{};
+    }
 }

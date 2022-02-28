@@ -31,11 +31,11 @@ namespace minipkg2::cmdline {
         operations::config,
         operations::download,
         operations::help,
-        operations::info,
         operations::install,
         operations::list,
         operations::purge,
         operations::repo,
+        operations::show,
     };
 
     // Utility Functions

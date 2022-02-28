@@ -3,10 +3,10 @@
 #include "print.hpp"
 
 namespace minipkg2::cmdline::operations {
-    struct info_operation : operation {
-        info_operation()
+    struct show_operation : operation {
+        show_operation()
             : operation{
-                "info",
+                "show",
                 " [options] <package>",
                 "Show information about a package.",
                 {
@@ -16,9 +16,9 @@ namespace minipkg2::cmdline::operations {
             } {}
         int operator()(const std::vector<std::string>& args) override;
     };
-    static info_operation op_info;
-    operation* info = &op_info;
-    int info_operation::operator()(const std::vector<std::string>& args) {
+    static show_operation op_show;
+    operation* show = &op_show;
+    int show_operation::operator()(const std::vector<std::string>& args) {
         const bool opt_local = is_set("--local");
         const bool opt_repo  = is_set("--repo");
 

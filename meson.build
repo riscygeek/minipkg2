@@ -20,11 +20,11 @@ sources = [
   'src/op_config.cpp',
   'src/op_download.cpp',
   'src/op_help.cpp',
-  'src/op_info.cpp',
   'src/op_install.cpp',
   'src/op_list.cpp',
   'src/op_purge.cpp',
   'src/op_repo.cpp',
+  'src/op_show.cpp',
   'src/package.cpp',
   'src/utils.cpp',
 ]

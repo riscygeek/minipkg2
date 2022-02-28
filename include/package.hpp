@@ -11,6 +11,7 @@
 #include <ctime>
 #include <list>
 #include <set>
+#include <map>
 
 namespace minipkg2 {
     struct package_base;
@@ -18,6 +19,7 @@ namespace minipkg2 {
     struct binary_package;
     struct binary_package_info;
     struct installed_package;
+    using conflictsdb = std::map<std::string, std::set<std::string>>;
 
     enum class resolve_skip_policy {
         NEVER,      // Never skip installed packages.
@@ -33,8 +35,8 @@ namespace minipkg2 {
         std::string description;
         std::string provided_by;
         std::vector<std::string> rdepends;
-        std::vector<std::string> provides;
-        std::vector<std::string> conflicts;
+        std::set<std::string> provides;
+        std::set<std::string> conflicts;
 
         virtual ~package_base() = default;
         virtual void print() const;
@@ -45,6 +47,10 @@ namespace minipkg2 {
         bool operator<(const package_base& other) const noexcept;
     };
 
+    struct install_transaction {
+        const source_package* pkg;
+        std::vector<installed_package> remove;
+    };
     struct source_package : package_base {
         std::vector<std::string> sources;
         std::vector<std::string> bdepends;
@@ -52,7 +58,6 @@ namespace minipkg2 {
 
         void print() const override;
         bool download() const;
-        bool check_conflicts() const;
         std::optional<binary_package> build(std::string_view path_binpkg, const std::string& filesdir) const;
 
         static bool                             download(const std::vector<source_package>&);
@@ -60,6 +65,7 @@ namespace minipkg2 {
         static std::optional<source_package>    parse_repo(std::string_view name);
         static std::set<source_package>         parse_repo();
         static std::vector<source_package>      resolve(const std::vector<std::string>& args, bool resolve_deps, resolve_skip_policy policy);
+        static std::vector<install_transaction> resolve_conflicts(const std::vector<source_package>& pkgs, bool strict = false);
     };
 
     struct binary_package_info : package_base {
@@ -115,6 +121,8 @@ namespace minipkg2 {
         static std::size_t                      estimate_size(const std::vector<std::string>& names);
     };
 
+    conflictsdb conflictsdb_read();
+    void conflictsdb_write(const conflictsdb& db);
 
     // INLINE FUNCTIONS
     template<class T>

@@ -14,7 +14,7 @@
 namespace minipkg2 {
     std::string xreadlink(const std::string& filename);
     std::pair<int, std::string> xpread(const std::string& cmd);
-    std::string freadline(FILE* file);
+    bool freadline(FILE* file, std::string& line);
     std::string uts_to_str(std::time_t);
     std::time_t str_to_uts(const std::string&);
     char* xstrdup(std::string_view);
@@ -25,8 +25,6 @@ namespace minipkg2 {
     void add_environ(std::vector<char*>& environ, const std::string& name, const std::string& value);
     void free_environ(std::vector<char*>& environ);
 
-    bool starts_with(std::string_view str, std::string_view prefix);
-    bool ends_with(std::string_view str, std::string_view suffix);
     bool rm_rf(const std::string& path);
     bool mkdir_p(const std::string& path, mode_t mode = 0755);
     bool download(const std::string& url, const std::string& dest, bool overwrite = false);
@@ -46,8 +44,22 @@ namespace minipkg2 {
     void xclose(int fd);
 
     template<class... Args>
+    [[noreturn]]
     inline void raise(Args&&... args) {
         throw std::runtime_error(fmt::format(args...));
+    }
+
+    // Functions for pre C++20
+    bool starts_with(std::string_view str, std::string_view prefix);
+    bool ends_with(std::string_view str, std::string_view suffix);
+    template<class Container, class T>
+    inline bool contains(const Container& container, const T& value) {
+        return std::find(begin(container), end(container), value) != end(container);
+    }
+
+    template<class Container, class Pred>
+    inline bool contains_if(const Container& container, const Pred& predicate) {
+        return std::find_if(begin(container), end(container), predicate) != end(container);
     }
 }
 

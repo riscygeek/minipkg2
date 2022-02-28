@@ -42,20 +42,24 @@ namespace minipkg2::cmdline::operations {
         const auto skip_policy = opt_skip ? resolve_skip_policy::ALWAYS : resolve_skip_policy::DEPEND;
         const auto pkgs = source_package::resolve(args, !opt_no_deps, skip_policy);
 
-        if (!opt_force) {
-            bool success = true;
-            printerr(color::LOG, "Checking for conflicts...");
-            for (const auto& pkg : pkgs) {
-                success &= pkg.check_conflicts();
-            }
-            if (!success)
-                return 1;
-        }
-
         if (pkgs.empty()) {
             printerr(color::LOG, "Nothing done.");
             return 0;
         }
+
+        std::vector<install_transaction> transactions{};
+        if (opt_force) {
+            for (const auto& pkg : pkgs) {
+                transactions.push_back(install_transaction{&pkg, {}});
+            }
+        } else {
+            printerr(color::LOG, "Checking for conflicts...");
+            transactions = source_package::resolve_conflicts(pkgs);
+            if (transactions.empty())
+                return 1;
+        }
+
+
 
         printerr(color::LOG, "");
         printerr(color::LOG, "Packages ({}){}", pkgs.size(), make_pkglist(pkgs));
@@ -81,9 +85,10 @@ namespace minipkg2::cmdline::operations {
         printerr(color::LOG, "");
         printerr(color::LOG, "Processing packages..");
 
-        for (std::size_t i = 0; i < pkgs.size(); ++i) {
-            const auto& pkg = pkgs[i];
-            printerr(color::LOG, "({}/{}) Building {:v}...", i+1, pkgs.size(), pkg);
+        for (std::size_t i = 0; i < transactions.size(); ++i) {
+            const auto& trans = transactions[i];
+            const auto& pkg = *trans.pkg;
+            printerr(color::LOG, "({}/{}) Building {:v}...", i+1, transactions.size(), pkg);
             const auto path_binpkg = fmt::format("{0}/{1}-{2}/{1}:{2}.bmpkg.tar.gz", builddir, pkg.name, pkg.version);
             const auto filesdir = fmt::format("{}/{}/files", pkgdir, pkg.name);
 
@@ -92,7 +97,14 @@ namespace minipkg2::cmdline::operations {
                 return 1;
             }
             const auto binpkg = result.value();
-            printerr(color::LOG, "({}/{}) Installing {:v}...", i+1, pkgs.size(), binpkg.pkg);
+
+            for (std::size_t i = 0; i < trans.remove.size(); ++i) {
+                const auto& rmpkg = trans.remove[i];
+                printerr(color::LOG, "({}/{}) Removing {:v}...", i+1, trans.remove.size(), rmpkg);
+                rmpkg.uninstall();
+            }
+
+            printerr(color::LOG, "({}/{}) Installing {:v}...", i+1, transactions.size(), binpkg.pkg);
             binpkg.install();
         }
 

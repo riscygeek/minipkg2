@@ -84,6 +84,21 @@ namespace minipkg2 {
         }
         return line;
     }
+    bool freadline(FILE* file, std::string& line) {
+        line.clear();
+        int ch = std::fgetc(file);
+
+        if (ch == EOF)
+            return false;
+
+        if (ch == '\n')
+            return true;
+
+        do {
+            line += static_cast<char>(ch);
+        } while ((ch = std::fgetc(file)) != EOF && ch != '\n');
+        return true;
+    }
     bool mkparentdirs(std::string dir, mode_t mode) {
         std::size_t pos = 1;
         while ((pos = dir.find('/', pos)) != std::string::npos) {

@@ -33,15 +33,16 @@ namespace minipkg2 {
     extern std::string builddir;
     extern std::string repodir;
     extern std::string cachedir;
+    extern std::string conflictsfile;
     extern std::string host;
     extern std::size_t jobs;
     extern std::string self;
     extern miniconf::miniconf config;
 
-    constexpr auto config_filename  = fix_path(CONFIG_PREFIX, CONFIG_SYSCONFDIR, "/minipkg2.conf");
-    constexpr auto env_filename     = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/env.bash");
-    constexpr auto parse_filename   = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/parse.bash");
-    constexpr auto build_filename   = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/build.bash");
+    constexpr auto config_filename      = fix_path(CONFIG_PREFIX, CONFIG_SYSCONFDIR, "/minipkg2.conf");
+    constexpr auto env_filename         = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/env.bash");
+    constexpr auto parse_filename       = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/parse.bash");
+    constexpr auto build_filename       = fix_path(CONFIG_PREFIX, CONFIG_LIBDIR, "/minipkg2/build.bash");
 
     void set_root(std::string_view);
     bool init_self();

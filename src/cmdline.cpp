@@ -34,6 +34,7 @@ namespace minipkg2::cmdline {
         operations::info,
         operations::install,
         operations::list,
+        operations::purge,
         operations::repo,
     };
 

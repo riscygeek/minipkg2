@@ -70,6 +70,7 @@ namespace minipkg2::cmdline {
         extern operation* info;
         extern operation* install;
         extern operation* list;
+        extern operation* purge;
         extern operation* repo;
     }
 

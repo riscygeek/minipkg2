@@ -26,12 +26,12 @@ namespace minipkg2::cmdline::operations {
         const bool opt_yes  = is_set("-y");
         const bool opt_deps = is_set("--deps");
 
-        if (args.size() == 0) {
+        if (args.empty()) {
             printerr(color::ERROR, "At least 1 argument expected.");
             return 1;
         }
 
-        const auto pkgs = resolve(args, opt_deps, resolve_skip_policy::NEVER);
+        const auto pkgs = source_package::resolve(args, opt_deps, resolve_skip_policy::NEVER);
 
         printerr(color::LOG, "");
         printerr(color::LOG, "Packages ({}){}", pkgs.size(), make_pkglist(pkgs));

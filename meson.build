@@ -23,6 +23,7 @@ sources = [
   'src/op_info.cpp',
   'src/op_install.cpp',
   'src/op_list.cpp',
+  'src/op_purge.cpp',
   'src/op_repo.cpp',
   'src/package.cpp',
   'src/utils.cpp',

@@ -4,6 +4,7 @@
 ** [ ] Switch to C++20 once GCC supports std::format()
 ** [X] Replace iostreams with libfmt
 ** [ ] Rewrite the README
+** [ ] Provided packages should have the name of the symlink.
 
 * Operations
 ** [X] help
@@ -17,15 +18,16 @@
 ** [X] info
 *** [X] --local
 *** [X] --repo
-** [X] install
+** [-] install
 *** [X] --clean
+*** [ ] Installing non-repo packages
 ** [ ] install-binpkg
 ** [ ] remove
-** [ ] purge
+** [X] purge
 ** [X] download
 *** [X] -y, --yes
 *** [X] --deps
-** [ ] clean
+** [X] clean
 ** [ ] build
 ** [ ] check
 ** [ ] search

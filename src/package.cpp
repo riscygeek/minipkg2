@@ -306,13 +306,13 @@ namespace minipkg2 {
         bool success = true;
         for (std::size_t i = 0; i < pkgs.size(); ++i) {
             const auto& pkg = pkgs[i];
-            printerr(color::LOG, "({}/{}) Downloading {:v}", i+1, pkgs.size(), pkg);
+            printerr(color::LOG, "({}/{}) Downloading {:v}...", i+1, pkgs.size(), pkg);
 
             success &= pkg.download();
         }
         return success;
     }
-    std::vector<source_package> resolve(const std::vector<std::string>& args, bool resolve_deps, resolve_skip_policy policy) {
+    std::vector<source_package> source_package::resolve(const std::vector<std::string>& args, bool resolve_deps, resolve_skip_policy policy) {
         std::vector<source_package> pkgs{};
 
         const auto has = [&pkgs](std::string_view name, bool skip_installed) {
@@ -357,6 +357,20 @@ namespace minipkg2 {
 
         return pkgs;
     }
+    std::vector<installed_package> installed_package::resolve(const std::vector<std::string>& args) {
+        std::vector<installed_package> pkgs{};
+
+        for (const auto& name : args) {
+            auto result = parse_local(name);
+            if (result.has_value()) {
+                pkgs.push_back(std::move(result.value()));
+            } else {
+                raise("Invalid package: {}", name);
+            }
+        }
+
+        return pkgs;
+    }
     bool installed_package::is_installed(std::string_view name) {
         const auto path = fmt::format("{}/{}/package.info", pkgdir, name);
         return ::access(path.c_str(), F_OK) == 0;
@@ -375,7 +389,7 @@ namespace minipkg2 {
             if (str.length() >= PATH_MAX) {
                 printerr(color::WARN, "Path '{}' is longer than PATH_MAX.", str);
             }
-            files.push_back(std::move(str));
+            files.push_back(std::move(str.substr(0, str.size()-1)));
         }
 
         std::fclose(file);
@@ -563,5 +577,40 @@ namespace minipkg2 {
         cp(path, fmt::format("{}/{}", binpkgsdir, path.substr(path.rfind('/') + 1)));
 
         return true;
+    }
+    bool installed_package::uninstall() const {
+        auto files = get_files();
+
+        bool success = true;
+        success &= rm(rootdir, files);
+
+        // Remove the package and it's provided symlinks.
+        for (const auto& p : provides) {
+            success &= rm(fmt::format("{}/{}", pkgdir, p));
+        }
+        success &= rm_rf(fmt::format("{}/{}", pkgdir, name));
+
+        return success;
+    }
+    std::size_t installed_package::estimate_size(std::string_view name) {
+        const auto files = get_files(name);
+        std::size_t size = 0;
+        printerr(color::DEBUG, "Estimating size of {}...", name);
+        for (const auto& f : files) {
+            const auto path = fmt::format("{}/{}", rootdir, f);
+            printerr(color::DEBUG, "{}", path);
+            struct ::stat st;
+            if (::lstat(path.c_str(), &st) != 0 || !S_ISREG(st.st_mode))
+                continue;
+            size += st.st_size;
+        }
+        return size;
+    }
+    std::size_t installed_package::estimate_size(const std::vector<std::string>& names) {
+        std::size_t size = 0;
+        for (const auto& name : names) {
+            size += estimate_size(name);
+        }
+        return size;
     }
 }

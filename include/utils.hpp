@@ -19,6 +19,7 @@ namespace minipkg2 {
     std::time_t str_to_uts(const std::string&);
     char* xstrdup(std::string_view);
     int xwait(pid_t pid);
+    std::string fmt_size(std::size_t);
 
     std::vector<char*> copy_environ();
     void add_environ(std::vector<char*>& environ, const std::string& name, const std::string& value);

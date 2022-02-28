@@ -18,6 +18,12 @@ namespace minipkg2 {
     struct binary_package_info;
     struct installed_package;
 
+    enum class resolve_skip_policy {
+        NEVER,      // Never skip installed packages.
+        DEPEND,     // Only skip installed dependencies.
+        ALWAYS,     // Always skip installed packages.
+    };
+
     struct package_base {
         std::string filename;
         std::string name;
@@ -52,6 +58,7 @@ namespace minipkg2 {
         static std::optional<source_package>    parse_file(const std::string& filename);
         static std::optional<source_package>    parse_repo(std::string_view name);
         static std::set<source_package>         parse_repo();
+        static std::vector<source_package>      resolve(const std::vector<std::string>& args, bool resolve_deps, resolve_skip_policy policy);
     };
 
     struct binary_package_info : package_base {
@@ -92,20 +99,18 @@ namespace minipkg2 {
 
         void print() const override;
         std::string to_file() const override;
+        bool uninstall() const;
+        std::list<std::string> get_files() const;
 
         static bool                             is_installed(std::string_view name);
         static std::optional<installed_package> parse_file(const std::string& filename);
         static std::optional<installed_package> parse_local(std::string_view name);
         static std::set<installed_package>      parse_local();
         static std::list<std::string>           get_files(std::string_view name);
+        static std::vector<installed_package>   resolve(const std::vector<std::string>& args);
+        static std::size_t                      estimate_size(std::string_view name);
+        static std::size_t                      estimate_size(const std::vector<std::string>& names);
     };
-
-    enum class resolve_skip_policy {
-        NEVER,      // Never skip installed packages.
-        DEPEND,     // Only skip installed dependencies.
-        ALWAYS,     // Always skip installed packages.
-    };
-    std::vector<source_package> resolve(const std::vector<std::string>& args, bool resolve_deps, resolve_skip_policy policy);
 
 
     // INLINE FUNCTIONS
@@ -129,6 +134,9 @@ namespace minipkg2 {
     }
     inline bool package_base::operator<(const package_base& other) const noexcept {
         return name < other.name;
+    }
+    inline std::list<std::string> installed_package::get_files() const {
+        return get_files(name);
     }
 }
 

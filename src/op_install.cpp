@@ -33,9 +33,14 @@ namespace minipkg2::cmdline::operations {
         const bool opt_skip     = is_set("-s");
         const bool opt_force    = is_set("--force");
 
+        if (args.empty()) {
+            printerr(color::ERROR, "At least 1 argument expected.");
+            return 1;
+        }
+
         printerr(color::LOG, "Resolving packages...");
         const auto skip_policy = opt_skip ? resolve_skip_policy::ALWAYS : resolve_skip_policy::DEPEND;
-        const auto pkgs = resolve(args, !opt_no_deps, skip_policy);
+        const auto pkgs = source_package::resolve(args, !opt_no_deps, skip_policy);
 
         if (!opt_force) {
             bool success = true;
@@ -47,6 +52,10 @@ namespace minipkg2::cmdline::operations {
                 return 1;
         }
 
+        if (pkgs.empty()) {
+            printerr(color::LOG, "Nothing done.");
+            return 0;
+        }
 
         printerr(color::LOG, "");
         printerr(color::LOG, "Packages ({}){}", pkgs.size(), make_pkglist(pkgs));

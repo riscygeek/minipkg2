@@ -12,6 +12,7 @@
 #include <climits>
 #include <fcntl.h>
 #include <cstdio>
+#include <array>
 #include "utils.hpp"
 #include "print.hpp"
 
@@ -234,7 +235,7 @@ namespace minipkg2 {
     bool rm(const std::string& file) {
         printerr(color::DEBUG, "rm -f '{}'", file);
         const bool success = remove(file.c_str()) == 0;
-        if (!success && errno != ENOENT) {
+        if (!success && errno != ENOENT && errno != ENOTEMPTY) {
             printerr(color::WARN, "Failed to remove '{}': {}.", file, std::strerror(errno));
             return false;
         }
@@ -264,5 +265,26 @@ namespace minipkg2 {
             printerr(color::WARN, "Failed to create symbolic link '{}' to '{}'.", file, dest);
         }
         return success;
+    }
+    std::string fmt_size(std::size_t sz) {
+        struct unit {
+            std::string_view name;
+            std::size_t base;
+        };
+        static constexpr std::array units{
+#if SIZE_MAX >= (1ull << 40)
+            unit{"TiB", (std::size_t)1 << 40},
+#endif
+            unit{"GiB", 1 << 30},
+            unit{"MiB", 1 << 20},
+            unit{"KiB", 1 << 10},
+        };
+
+        for (const auto& u : units) {
+            if (sz >= u.base) {
+                return fmt::format("{:.2}{}", static_cast<double>(sz) / u.base, u.name);
+            }
+        }
+        return fmt::format("{}B", sz);
     }
 }

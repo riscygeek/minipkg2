@@ -27,7 +27,7 @@ namespace minipkg2::cmdline::operations {
             return 1;
         }
 
-        if (args.size() == 0) {
+        if (args.empty()) {
             printerr(color::ERROR, "At least 1 argument expected.");
             return 1;
         }

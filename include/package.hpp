@@ -4,6 +4,7 @@
 #include <string_view>
 #include <algorithm>
 #include <optional>
+#include <numeric>
 #include <string>
 #include <vector>
 #include <memory>
@@ -139,6 +140,14 @@ namespace minipkg2 {
     }
     inline std::list<std::string> installed_package::get_files() const {
         return get_files(name);
+    }
+    inline std::size_t installed_package::estimate_size(const std::vector<std::string>& names) {
+        return std::accumulate(begin(names),
+                               end(names),
+                               std::size_t{0},
+                               [](const auto& sum, const auto& name) {
+                                   return sum + estimate_size(name);
+                               });
     }
 }
 

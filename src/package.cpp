@@ -316,13 +316,11 @@ namespace minipkg2 {
         std::vector<source_package> pkgs{};
 
         const auto has = [&pkgs](std::string_view name, bool skip_installed) {
-            if (skip_installed && installed_package::is_installed(name))
-                return true;
-            for (const auto& pkg : pkgs) {
-                if (pkg.is_provider_of(name))
-                    return true;
-            }
-            return false;
+            return (skip_installed && installed_package::is_installed(name))
+                || std::find_if(begin(pkgs), end(pkgs),
+                                [name](const auto& pkg) {
+                                    return pkg.is_provider_of(name);
+                                }) != end(pkgs);
         };
 
         std::function<void(const std::vector<std::string>&)> do_resolve;
@@ -371,11 +369,6 @@ namespace minipkg2 {
 
         return pkgs;
     }
-    bool installed_package::is_installed(std::string_view name) {
-        const auto path = fmt::format("{}/{}/package.info", pkgdir, name);
-        return ::access(path.c_str(), F_OK) == 0;
-    }
-
     std::list<std::string> installed_package::get_files(std::string_view name) {
         const auto path = fmt::format("{}/{}/files", pkgdir, name);
         std::FILE* file = std::fopen(path.c_str(), "r");
@@ -553,8 +546,7 @@ namespace minipkg2 {
 
         // Create symlinks to provided packages.
         for (const auto& name : pkg.provides) {
-            const auto link = fmt::format("{}/{}", pkgdir, name);
-            symlink_v(pkg.name, link);
+            symlink_v(pkg.name, fmt::format("{}/{}", pkgdir, name));
         }
 
         // Create the package.info file.
@@ -606,15 +598,12 @@ namespace minipkg2 {
         }
         return size;
     }
-    std::size_t installed_package::estimate_size(const std::vector<std::string>& names) {
-        std::size_t size = 0;
-        for (const auto& name : names) {
-            size += estimate_size(name);
-        }
-        return size;
-    }
     std::optional<binary_package> binary_package::load(std::string path) {
         auto result = binary_package_info::parse_file(path);
         return result.has_value() ? binary_package{ std::move(path), std::move(result.value()) } : std::optional<binary_package>{};
-    }
+   }
+   bool installed_package::is_installed(std::string_view name) {
+        const auto path = fmt::format("{}/{}/package.info", pkgdir, name);
+        return ::access(path.c_str(), F_OK) == 0;
+   }
 }

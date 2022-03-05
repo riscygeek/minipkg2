@@ -15,6 +15,12 @@
 #include "print.hpp"
 #include "git.hpp"
 
+#if HAS_FAKEROOT
+# define FAKEROOT "fakeroot"
+#else
+# define FAKEROOT ""
+#endif
+
 namespace minipkg2 {
     using namespace std::literals;
     template<class T>
@@ -538,7 +544,7 @@ namespace minipkg2 {
         mkdir_p(path_metadir);
         bashconfig::write_file(path_metadir + "/package.info", info.to_config());
 
-        const auto cmd = fmt::format("cd '{}' && fakeroot tar -caf '{}' .", path_pkgdir, path_binpkg);
+        const auto cmd = fmt::format("cd '{}' && {} tar -caf '{}' .", path_pkgdir, FAKEROOT, path_binpkg);
         if (std::system(cmd.c_str()) != 0) {
             printerr(color::ERROR, "Can't create binary package.");
             return {};

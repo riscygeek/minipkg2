@@ -1,0 +1,1 @@
+option('enable_fakeroot', type: 'boolean', value: true, description: 'Enable support for building binary packages with fakeroot.')

@@ -8,6 +8,12 @@
 # define LIBCURL_TF "false"
 #endif
 
+#if HAS_FAKEROOT
+# define FAKEROOT_TF "true"
+#else
+# define FAKEROOT_TF "false"
+#endif
+
 namespace minipkg2 {
     std::string rootdir{};
     std::string dbdir{};
@@ -73,6 +79,7 @@ namespace minipkg2 {
                    "  time:       " __TIME__ "\n"
                    "\nFeatures:\n"
                    "  libcurl:    " LIBCURL_TF "\n"
+                   "  fakeroot:   " FAKEROOT_TF "\n"
                    "\nWritten by Benjamin Stürz <benni@stuerz.xyz>.\n");
     }
 }

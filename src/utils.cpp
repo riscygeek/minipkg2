@@ -250,7 +250,7 @@ namespace minipkg2 {
     bool rm(const std::string& file) {
         printerr(color::DEBUG, "rm -f '{}'", file);
         const bool success = remove(file.c_str()) == 0;
-        if (!success && errno != ENOENT && errno != ENOTEMPTY) {
+        if (!success && errno != ENOENT && errno != ENOTEMPTY && errno != EBUSY) {
             printerr(color::WARN, "Failed to remove '{}': {}.", file, std::strerror(errno));
             return false;
         }

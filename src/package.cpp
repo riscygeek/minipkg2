@@ -671,6 +671,9 @@ namespace minipkg2 {
         }
         success &= rm_rf(fmt::format("{}/{}", pkgdir, name));
 
+        if (!success)
+            return false;
+
         // Remove package from conflicts.db
         quickdb::remove("conflicts", name);
 
@@ -683,7 +686,7 @@ namespace minipkg2 {
         quickdb::write("rdeps", db);
         quickdb::remove("rdeps", name);
 
-        return success;
+        return true;
     }
     std::size_t installed_package::estimate_size(std::string_view name) {
         const auto files = get_files(name);

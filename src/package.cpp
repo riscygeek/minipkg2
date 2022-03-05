@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <spawn.h>
 #include <cassert>
+#include <climits>
 #include <map>
 #include "minipkg2.hpp"
 #include "package.hpp"

@@ -45,13 +45,12 @@ namespace minipkg2::quickdb {
         const auto filename = fmt::format("{}/{}.db", dbdir, name);
         std::FILE* file = std::fopen(filename.c_str(), "w");
 
-        for (const auto& e : db) {
-            fmt::print(file, "{}:", e.first);
-            const auto& snd = e.second;
-            if (!snd.empty()) {
-                auto it = snd.begin();
+        for (const auto& [n, v] : db) {
+            fmt::print(file, "{}:", n);
+            if (!v.empty()) {
+                auto it = v.begin();
                 fmt::print(file, "{}", *it);
-                for (++it; it != snd.end(); ++it)
+                for (++it; it != v.end(); ++it)
                     fmt::print(file, ",{}", *it);
             }
             fmt::print(file, "\n");

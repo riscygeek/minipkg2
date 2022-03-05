@@ -3,8 +3,10 @@
 * General
 ** [ ] Switch to C++20 once GCC supports std::format()
 ** [X] Replace iostreams with libfmt
-** [ ] Rewrite the README
 ** [?] Provided packages should have the name of the symlink.
+** [ ] bash-completion
+** [ ] zsh-completion
+** [ ] man page
 
 * Operations
 ** [X] help
@@ -32,8 +34,10 @@
 ** [?] build
 ** [ ] check
 ** [ ] search
+** [ ] upgrade
 
 * Structure
 ** [ ] source_package: Add package date for repo packages.
 - git log -n 1 --pretty=format:%ct -- FILE
+** [ ] package_base: license=()
 ** [ ] installed_package: install_reason

@@ -87,8 +87,8 @@ namespace minipkg2::miniconf {
         return conf;
     }
     void dump(std::ostream& stream, const miniconf& conf) {
-        for (const auto& e : conf) {
-            stream << "config[" << e.first << "]='" << e.second << "'\n";
+        for (const auto& [k, v] : conf) {
+            stream << "config[" << k << "]='" << v << "'\n";
         }
     }
 }

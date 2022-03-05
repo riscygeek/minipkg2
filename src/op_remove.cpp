@@ -39,13 +39,15 @@ namespace minipkg2::cmdline::operations {
             auto db = quickdb::read("rdeps");
             bool success = true;
             for (const auto& pkg : pkgs) {
-                const auto check = [&db, &success](const std::string& name) {
+                const auto check = [&db, &success, &args](const std::string& name) {
                     auto it = db.find(name);
                     if (it != db.end() && !it->second.empty()) {
                         for (const auto& x : it->second) {
-                            printerr(color::ERROR, "Package '{}' depends on '{}'.", x, name);
+                            if (!contains(args, x)) {
+                                printerr(color::ERROR, "Package '{}' depends on '{}'.", x, name);
+                                success = false;
+                            }
                         }
-                        success = false;
                     }
                 };
                 check(pkg.name);

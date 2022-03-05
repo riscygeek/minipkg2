@@ -24,14 +24,16 @@ namespace minipkg2::quickdb {
             std::set<std::string> conflicts{};
 
             auto it = line.begin() + end_name + 1;
-            while (true) {
-                const auto start = it;
-                while (it != line.end() && *it != ',')
+            if (it != line.end()) {
+                while (true) {
+                    const auto start = it;
+                    while (it != line.end() && *it != ',')
+                        ++it;
+                    conflicts.emplace(start, it);
+                    if (it == line.end() || *it != ',')
+                        break;
                     ++it;
-                conflicts.emplace(start, it);
-                if (it == line.end() || *it != ',')
-                    break;
-                ++it;
+                }
             }
             db[name] = conflicts;
         }

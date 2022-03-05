@@ -94,8 +94,11 @@ This is realized by using symbolic links in the package directory.
 A list of packages that conflict with this package.
 *** sources
 A list of source files to download.
+
 Note: Unlike Arch Linux's PKGBUILD, sources are not extracted.
+
 Note 2: -git packages use the git:// protocol.
+
 ** Functions defined by the package.
 *** prepare()
 Extract sources and apply any patches.

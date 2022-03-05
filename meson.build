@@ -10,6 +10,7 @@ project(
 )
 
 sources = [
+  'src/bashconfig.cpp',
   'src/cmdline.cpp',
   'src/download.cpp',
   'src/git.cpp',

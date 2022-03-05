@@ -21,14 +21,14 @@
 ** [-] install
 *** [X] --clean
 *** [ ] Installing non-repo packages
-** [ ] install-binpkg
+** [?] install-binpkg
 ** [ ] remove
 ** [X] purge
 ** [X] download
 *** [X] -y, --yes
 *** [X] --deps
 ** [X] clean
-** [ ] build
+** [?] build
 ** [ ] check
 ** [ ] search
 

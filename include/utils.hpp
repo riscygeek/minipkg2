@@ -43,10 +43,10 @@ namespace minipkg2 {
     void xpipe(int pipefd[2]);
     void xclose(int fd);
 
-    template<class... Args>
+    template<class E = std::runtime_error, class... Args>
     [[noreturn]]
     inline void raise(Args&&... args) {
-        throw std::runtime_error(fmt::format(args...));
+        throw E(fmt::format(std::forward<Args>(args)...));
     }
 
     // Functions for pre C++20

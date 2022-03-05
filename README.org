@@ -1,0 +1,188 @@
+#+TITLE: Package Manager for [[https://github.com/riscygeek/micro-linux][Micro-Linux]]
+
+* Table of contents :TOC:
+- [[#description][Description]]
+- [[#dependencies][Dependencies]]
+- [[#installation][Installation]]
+- [[#filesystem-layout][Filesystem Layout]]
+  - [[#vardbminipkg2packagees][/var/db/minipkg2/packagees]]
+  - [[#vardbminipkg2repo][/var/db/minipkg2/repo]]
+  - [[#vartmpminipkg2][/var/tmp/minipkg2]]
+  - [[#usrlibminipkg2][/usr/lib/minipkg2]]
+- [[#packagebuild][package.build]]
+  - [[#variables-defined-by-the-package][Variables defined by the package.]]
+  - [[#functions-defined-by-the-package][Functions defined by the package.]]
+  - [[#variables-defined-by-minipkg2][Variables defined by minipkg2.]]
+  - [[#functions-defined-by-minipkg2][Functions defined by minipkg2.]]
+  - [[#example][Example]]
+- [[#packageinfo][package.info]]
+- [[#example-of-meson-cross-file-for-non-native-builds][Example of meson cross-file for non-native builds]]
+
+* Description
+minipkg2 is the package manager of my [[https://github.com/riscygeek/micro-linux][Micro-Linux]] source-based Linux distribution.
+The command-line interface was inspired by Debian's [[https://en.wikipedia.org/wiki/APT_(software)][apt]] and Arch Linux's [[https://wiki.archlinux.org/title/pacman][pacman]] package managers.
+This is the third attempt on writing a package manager for my Linux distribution.
+The [[https://github.com/riscygeek/micro-linux/tree/e5e44de4fb51311958726bf58a0148af3f2b28dc/minipkg][first version]] was written in bash, and after many hours of frustration I decided to rewrite it in C, but that didn't last long, because now I'm writing it in C++ again.
+[[https://github.com/riscygeek/micro-linux-repo][Link to the repository.]]
+
+* Dependencies
+- libcurl (optional, required to download packages)
+- libfmt (required, and included)
+- git (runtime, optional, required for managing the repo and downloading -git packages)
+- tar (runtime, required, must support compressing & extracting .gz archives)
+- fakeroot (runtime, required)
+
+* Installation
+This project uses the [[https://mesonbuild.com][meson]] build system.
+#+begin_src bash
+meson setup build [--prefix=...]
+meson compile -C build
+meson install -C build [--destdir=...]
+#+end_src
+
+* Filesystem Layout
+
+** /var/db/minipkg2/packagees
+Each installed package has its own directory here.
+In this directory there are the following files:
+- files: A list of installed files.
+- [[package.build][package.info]]
+
+** /var/db/minipkg2/repo
+Each repository package has its own directory here.
+In this directory there are the following files:
+- [[package.info][package.build]]
+- files (optional directory containing patches etc.)
+
+** /var/tmp/minipkg2
+This directory is used for building packages.
+
+** /usr/lib/minipkg2
+This directory is used internally by minipkg2 itself
+and should therefore never be modified.
+
+* package.build
+The package.build format is inspired by Arch Linux's [[https://wiki.archlinux.org/title/PKGBUILD][PKGBUILD]] format.
+
+** Variables defined by the package.
+*** pkgname
+The name of the package.
+*** pkgver
+The version of the package.
+*** url
+A URL to the project.
+*** description
+A short description of this package.
+*** features
+A list of build-time features this package supports.
+Must be zero or more of:
+**** sysroot
+This package can be built for a system outside of a chroot.
+**** cross-compile
+This package can be cross-compiled.
+Note: most of the times this flag should be used in conjuction with sysroot.
+*** depends
+A list of build-time and runtime dependencies.
+*** bdepends
+A list of build-time dependencies.
+*** rdepends
+A list of runtime dependencies.
+*** provides
+A list of packages this package provides.
+This is realized by using symbolic links in the package directory.
+*** conflicts
+A list of packages that conflict with this package.
+*** sources
+A list of source files to download.
+Note: Unlike Arch Linux's PKGBUILD, sources are not extracted.
+Note 2: -git packages use the git:// protocol.
+** Functions defined by the package.
+*** prepare()
+Extract sources and apply any patches.
+*** build()
+Build the package.
+*** package()
+Copy the result to the package directory.
+** Variables defined by minipkg2.
+*** JOBS
+How many parallel workers can be used in the build process.
+*** HOST
+The host triplet (only applies if supporting the cross-compile feature).
+*** S
+The directory where downloaded source files are stored.
+*** B
+The build directory.
+*** F
+The /var/db/minipkg2/repo/<pkgname>/files directory.
+*** D (only defined during package())
+The package directory.
+** Functions defined by minipkg2.
+*** pmake
+Parallel make.
+
+** Example
+#+begin_src bash
+# Declare some self-explaining package details.
+pkgname=hello-world
+pkgver=1.0
+url="https://github.com/riscygeek/hello-world"
+description="A small test package"
+features=(sysroot)
+
+depends=(libc)
+
+sources=(https://github.com/riscygeek/hello-world/archive/refs/tags/v${pkgver}.tar.gz)
+
+prepare() {
+   tar -xf "${S}/v${pkgver}.tar.gz"
+   cd "hello-world-${pkgver}"
+}
+
+build() {
+    pmake
+}
+
+package() {
+    # Install the hello-world package to the package directory.
+    # Note: Never install packages directly to the system.
+    make prefix=/usr DESTDIR="$D" install
+}
+#+end_src
+
+* package.info
+The package.info format is a stripped-down version of the package.build format.
+It's used both with binary packages and with installed packages.
+Values must be enclosed in single-quoted (')
+It defines the following fields:
+- pkgname
+- pkgver
+- url
+- description
+- rdepends
+- provides
+- conflicts
+- build_date (a POSIX timestamp)
+- install_date (only applies to installed packages, refer to build_date)
+
+* Example of meson cross-file for non-native builds
+#+begin_src conf
+[constants]
+arch = 'arm-buildroot-linux-gnueabi'
+toolchain = '/opt/cross' + arch
+common_flags = ['--sysroot=' + toolchain / arch / 'sysroot']
+
+[binaries]
+exe_wrapper = 'qemu-arm'
+cpp = arch + '-g++'
+strip = arch + '-strip'
+
+[properties]
+needs_exe_wrapper = true
+sys_root = toolchain / arch / 'sysroot'
+
+[host_machine]
+system = 'linux'
+cpu_family = 'arm'
+cpu = 'armv7h'
+endian = 'little'
+#+end_src

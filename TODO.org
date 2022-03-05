@@ -23,7 +23,7 @@
 *** [ ] Installing non-repo packages
 ** [?] install-binpkg
 ** [-] remove
-*** [ ] -r,--recursive : Remove unused dependencies. (Depends on install-reason)
+*** [ ] -r,--recursive : Remove unused dependencies. (Depends on installed_package::install_reason)
 ** [X] purge
 ** [X] download
 *** [X] -y, --yes

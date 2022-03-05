@@ -12,9 +12,10 @@ namespace minipkg2::cmdline::operations {
                 " [options] <package(s)>",
                 "Download package sources.",
                 {
-                    {option::BASIC, "-y",           "Don't ask for confirmation.",          {},     false },
-                    {option::ALIAS, "--yes",        {},                                     "-y",   false },
-                    {option::BASIC, "--deps",       "Also download the dependencis.",       {},     false },
+                    {option::BASIC, "-y",               "Don't ask for confirmation.",          {},     false },
+                    {option::ALIAS, "--yes",            {},                                     "-y",   false },
+                    {option::BASIC, "--deps",           "Also download the dependencis.",       {},     false },
+                    {option::BASIC, "--skip-installed", "Skip installed packages.",             {},     false },
                 }
             } {}
         int operator()(const std::vector<std::string>& args) override;
@@ -25,13 +26,19 @@ namespace minipkg2::cmdline::operations {
     int download_operation::operator()(const std::vector<std::string>& args) {
         const bool opt_yes  = is_set("-y");
         const bool opt_deps = is_set("--deps");
+        const bool opt_skip = is_set("--skip-installed");
 
         if (args.empty()) {
             printerr(color::ERROR, "At least 1 argument expected.");
             return 1;
         }
 
-        const auto pkgs = source_package::resolve(args, opt_deps, resolve_skip_policy::NEVER);
+        const auto pkgs = source_package::resolve(args, opt_deps, opt_skip ? resolve_skip_policy::ALWAYS : resolve_skip_policy::NEVER);
+
+        if (pkgs.empty()) {
+            printerr(color::LOG, "Nothing done.");
+            return 0;
+        }
 
         printerr(color::LOG, "");
         printerr(color::LOG, "Packages ({}){}", pkgs.size(), make_pkglist(pkgs));

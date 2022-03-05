@@ -35,6 +35,7 @@
 ** [ ] check
 ** [ ] search
 ** [ ] upgrade
+** [ ] graph
 
 * Structure
 ** [ ] source_package: Add package date for repo packages.

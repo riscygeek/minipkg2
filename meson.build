@@ -27,6 +27,7 @@ sources = [
   'src/op_repo.cpp',
   'src/op_show.cpp',
   'src/package.cpp',
+  'src/quickdb.cpp',
   'src/utils.cpp',
 ]
 

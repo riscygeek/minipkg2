@@ -9,6 +9,7 @@
 #include <map>
 #include "minipkg2.hpp"
 #include "package.hpp"
+#include "quickdb.hpp"
 #include "utils.hpp"
 #include "print.hpp"
 #include "git.hpp"
@@ -286,7 +287,7 @@ namespace minipkg2 {
         return do_parse<installed_package>(pkgdir, "package.info");
     }
     std::vector<install_transaction> source_package::resolve_conflicts(const std::vector<source_package>& pkgs, bool strict) {
-        const auto cdb = conflictsdb_read();
+        const auto cdb = quickdb::read("conflicts");
         std::vector<install_transaction> transactions{};
         bool success = true;
 
@@ -555,8 +556,10 @@ namespace minipkg2 {
         mkdir_p(pkg_pkgdir);
 
         std::list<std::string> old_files;
-        if (installed_package::is_installed(pkg.name))
+        auto old_pkg = installed_package::parse_local(pkg.name);
+        if (old_pkg.has_value()) {
             old_files = installed_package::get_files(pkg.name);
+        }
 
         const auto get_new_files = [this] {
             const auto cmd = fmt::format("tar -tf '{}' --exclude='.meta'", path);
@@ -606,6 +609,13 @@ namespace minipkg2 {
             rm(rootdir, old_files);
         }
 
+        // Remove old symlinks, if any.
+        if (old_pkg.has_value()) {
+            for (const auto& name : old_pkg.value().provides) {
+                rm(fmt::format("{}/{}", pkgdir, name));
+            }
+        }
+
         // Create symlinks to provided packages.
         for (const auto& name : pkg.provides) {
             symlink_v(pkg.name, fmt::format("{}/{}", pkgdir, name));
@@ -625,9 +635,15 @@ namespace minipkg2 {
             }
         }
 
-        auto cdb = conflictsdb_read();
-        cdb[pkg.name] = pkg.conflicts;
-        conflictsdb_write(cdb);
+        quickdb::set("conflicts", pkg.name, pkg.conflicts);
+
+        // Configure the reverse-dependencies.
+        auto db = quickdb::read("rdeps");
+        db[pkg.name] = {};
+        for (const auto& dep : pkg.rdepends) {
+            db[dep].insert(pkg.name);
+        }
+        quickdb::write("rdeps", db);
 
         // TODO: Copy the binpkg to /var/cache/minipkg2/binpkgs
         const auto binpkgsdir = cachedir + "/binpkgs";
@@ -649,9 +665,16 @@ namespace minipkg2 {
         success &= rm_rf(fmt::format("{}/{}", pkgdir, name));
 
         // Remove package from conflicts.db
-        auto cdb = conflictsdb_read();
-        cdb.erase(name);
-        conflictsdb_write(cdb);
+        quickdb::remove("conflicts", name);
+
+        // Remove package and references to it from rdeps.db
+        auto db = quickdb::read("rdeps");
+        db.erase(name);
+        for (auto& [_, rdeps] : db) {
+            rdeps.erase(name);
+        }
+        quickdb::write("rdeps", db);
+        quickdb::remove("rdeps", name);
 
         return success;
     }
@@ -676,51 +699,5 @@ namespace minipkg2 {
     bool installed_package::is_installed(std::string_view name) {
          const auto path = fmt::format("{}/{}/package.info", pkgdir, name);
          return ::access(path.c_str(), F_OK) == 0;
-    }
-    conflictsdb conflictsdb_read() {
-        std::FILE* file = std::fopen(conflictsfile.c_str(), "r");
-        if (!file)
-            return {};
-        conflictsdb db{};
-
-        std::string line;
-        while (freadline(file, line)) {
-            const auto end_name = line.find(':');
-            if (end_name == std::string::npos) {
-                printerr(color::WARN, "Invalid conflicts.db file.");
-                continue;
-            }
-            const auto name = line.substr(0, end_name);
-            std::set<std::string> conflicts{};
-
-            auto it = line.begin() + end_name + 1;
-            do {
-                const auto start = it;
-                while (it != line.end() && *it != ',')
-                    ++it;
-                conflicts.emplace(start, it);
-            } while (it != line.end() && *it == ',');
-            db[name] = conflicts;
-        }
-
-        std::fclose(file);
-        return db;
-    }
-    void conflictsdb_write(const conflictsdb& db) {
-        std::FILE* file = std::fopen(conflictsfile.c_str(), "w");
-
-        for (const auto& e : db) {
-            fmt::print(file, "{}:", e.first);
-            const auto& snd = e.second;
-            if (!snd.empty()) {
-                auto it = snd.begin();
-                fmt::print(file, "{}", *it);
-                for (++it; it != snd.end(); ++it)
-                    fmt::print(file, ",{}", *it);
-            }
-            fmt::print(file, "\n");
-        }
-
-        std::fclose(file);
     }
 }

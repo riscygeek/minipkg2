@@ -10,11 +10,11 @@
 
 namespace minipkg2 {
     std::string rootdir{};
+    std::string dbdir{};
     std::string pkgdir{};
     std::string builddir{};
     std::string repodir{};
     std::string cachedir{};
-    std::string conflictsfile{};
     std::string host{};
     std::size_t jobs{};
     std::string self{};
@@ -22,11 +22,11 @@ namespace minipkg2 {
 
     void set_root(std::string_view root) {
         rootdir         = root;
-        pkgdir          = rootdir + "/var/db/minipkg2/packages";
-        repodir         = rootdir + "/var/db/minipkg2/repo";
-        builddir        = rootdir + "/var/tmp/minipkg2";
-        cachedir        = rootdir + "/var/cache/minipkg2";
-        conflictsfile   = pkgdir + "/conflicts.db";
+        dbdir           = rootdir   + "/var/db/minipkg2";
+        pkgdir          = dbdir     + "/packages";
+        repodir         = dbdir     + "/repo";
+        builddir        = rootdir   + "/var/tmp/minipkg2";
+        cachedir        = rootdir   + "/var/cache/minipkg2";
     }
 
 

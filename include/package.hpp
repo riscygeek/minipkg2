@@ -20,7 +20,6 @@ namespace minipkg2 {
     struct binary_package;
     struct binary_package_info;
     struct installed_package;
-    using conflictsdb = std::map<std::string, std::set<std::string>>;
 
     enum class resolve_skip_policy {
         NEVER,      // Never skip installed packages.
@@ -121,9 +120,6 @@ namespace minipkg2 {
         static std::size_t                      estimate_size(std::string_view name);
         static std::size_t                      estimate_size(const std::vector<std::string>& names);
     };
-
-    conflictsdb conflictsdb_read();
-    void conflictsdb_write(const conflictsdb& db);
 
     // INLINE FUNCTIONS
     template<class T>

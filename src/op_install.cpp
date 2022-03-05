@@ -90,7 +90,7 @@ namespace minipkg2::cmdline::operations {
             const auto& pkg = *trans.pkg;
             printerr(color::LOG, "({}/{}) Building {:v}...", i+1, transactions.size(), pkg);
             const auto path_binpkg = fmt::format("{0}/{1}-{2}/{1}:{2}.bmpkg.tar.gz", builddir, pkg.name, pkg.version);
-            const auto filesdir = fmt::format("{}/{}/files", pkgdir, pkg.name);
+            const auto filesdir = fmt::format("{}/{}/files", repodir, pkg.name);
 
             const auto result = pkg.build(path_binpkg, filesdir);
             if (!result.has_value()) {

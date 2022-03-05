@@ -19,6 +19,7 @@ namespace minipkg2::bashconfig {
 
     config read(std::FILE* file);
     void write(std::FILE* file, const config& conf);
+    bool write_file(const std::string& filename, const config& conf);
 }
 
 #endif /* FILE_MINIPKG2_BASHCONFIG_HPP */

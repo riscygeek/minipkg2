@@ -12,6 +12,7 @@
 #include <list>
 #include <set>
 #include <map>
+#include "bashconfig.hpp"
 
 namespace minipkg2 {
     struct package_base;
@@ -81,7 +82,7 @@ namespace minipkg2 {
 
 
         void print() const override;
-        virtual std::string to_file() const;
+        virtual bashconfig::config to_config() const;
 
         static std::optional<binary_package_info> parse_file(const std::string& filename);
     };
@@ -107,7 +108,7 @@ namespace minipkg2 {
         ~installed_package() override = default;
 
         void print() const override;
-        std::string to_file() const override;
+        bashconfig::config to_config() const override;
         bool uninstall() const;
         std::list<std::string> get_files() const;
 

@@ -146,4 +146,12 @@ namespace minipkg2::bashconfig {
             }
         }
     }
+    bool write_file(const std::string& filename, const config& conf) {
+        std::FILE* file = std::fopen(filename.c_str(), "w");
+        if (!file)
+            return false;
+        write(file, conf);
+        std::fclose(file);
+        return true;
+    }
 }

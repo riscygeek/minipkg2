@@ -113,6 +113,7 @@ namespace minipkg2 {
     }
     bool yesno(std::string_view question, bool defval) {
         print(color::INFO, "{} [{}] ", question, defval ? "Y/n" : "y/N");
+        std::fflush(stdout);
         const char ch = fgetc(stdin);
         if (ch == '\n')
             return defval;

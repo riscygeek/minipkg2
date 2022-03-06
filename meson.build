@@ -1,7 +1,7 @@
 project(
   'minipkg2',
   'cpp',
-  version: '0.4.6',
+  version: '0.4.7',
   default_options: [
     'cpp_std=gnu++17',
     'warning_level=3',

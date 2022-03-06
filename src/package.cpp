@@ -544,7 +544,21 @@ namespace minipkg2 {
         mkdir_p(path_metadir);
         bashconfig::write_file(path_metadir + "/package.info", info.to_config());
 
-        const auto cmd = fmt::format("cd '{}' && {} tar -caf '{}' .", path_pkgdir, FAKEROOT, path_binpkg);
+        // Find all files
+        std::string files_list = ".meta";
+        ::DIR* dir = ::opendir(path_pkgdir.c_str());
+        assert(dir != nullptr);
+        struct ::dirent* ent;
+
+        while ((ent = ::readdir(dir)) != nullptr) {
+            if (ent->d_name[0] == '.')
+                continue;
+            files_list += fmt::format(" '{}'", ent->d_name);
+        }
+
+        ::closedir(dir);
+
+        const auto cmd = fmt::format("{} tar -C '{}' -caf '{}' {}", FAKEROOT, path_pkgdir, path_binpkg, files_list);
         if (std::system(cmd.c_str()) != 0) {
             printerr(color::ERROR, "Can't create binary package.");
             return {};
@@ -635,7 +649,7 @@ namespace minipkg2 {
         // Run the post-install script, if available.
         cmd = fmt::format("tar -tf '{}' .meta/post-install.sh >/dev/null 2>/dev/null", path);
         if (std::system(cmd.c_str()) == 0) {
-            cmd = fmt::format("tar -xf '{}' .meta/post-install -O | bash", path);
+            cmd = fmt::format("tar -xf '{}' .meta/post-install.sh -O | bash", path);
             if (std::system(cmd.c_str()) != 0) {
                 printerr(color::WARN, "{}: Post-install script failed.", pkg.name);
                 return false;

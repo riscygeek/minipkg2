@@ -44,13 +44,14 @@ namespace minipkg2 {
         ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,  1);
 
         const ::CURLcode result = curl_easy_perform(curl);
+        std::fclose(file);
         if (result != CURLE_OK) {
             printerr(color::ERROR, "Failed to download '{}': {}", url, ::curl_easy_strerror(result));
+            rm(dest);
+            return false;
         }
 
-        std::fclose(file);
-
-        return result == CURLE_OK;
+        return true;
 #else
         (void)url;
         printerr(color::ERROR, "Downloading files is not supported because minipkg2 was not built with curl support. Please rebuild minipkg2.");
